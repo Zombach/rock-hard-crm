@@ -7,21 +7,23 @@ using System.Linq;
 
 namespace CRM.DAL.Repositories
 {
-    public class LeadRepository : BaseRepository
+    public class LeadRepository : BaseRepository, ILeadRepository
     {
         private const string _insertLeadProcedure = "dbo.Lead_Insert";
         private const string _updateLeadProcedure = "dbo.Lead_Update";
         private const string _getLeadByIdProcedure = "dbo.Lead_SelectById";
         private const string _deleteLeadByIdProcedure = "dbo.Lead_Delete";
+        private const string _getLeadByEmailProcedure = "dbo.Lead_SelectByEmail";
+        private const string _getAllLeadsProcedure = "dbo.Lead_SelectAll";
         public LeadRepository() { }
 
-        public int AddLead (LeadDto dto)
+        public int AddLead(LeadDto dto)
         {
             return _connection.QuerySingle<int>(
                 _insertLeadProcedure,
                 new
                 {
-                    dto.FirstName ,
+                    dto.FirstName,
                     dto.LastName,
                     dto.Patronymic,
                     dto.Email,
@@ -52,6 +54,33 @@ namespace CRM.DAL.Repositories
                 commandType: CommandType.StoredProcedure
             );
         }
+        public List<LeadDto> GetAllLeads()
+        {
+            var LeadDictionary = new Dictionary<int, LeadDto>();
+            return _connection
+                .Query<LeadDto, AccountDto, CityDto, Role, LeadDto>(
+                _getAllLeadsProcedure,
+                (lead, account, city, role) =>
+                {
+                    LeadDto leadDto;
+                    if (LeadDictionary.TryGetValue(lead.Id, out leadDto))
+                    {
+                        lead = leadDto;
+                    }
+                    else
+                    {
+                        LeadDictionary.Add(lead.Id, lead);
+                        lead.Accounts = new List<AccountDto>();
+                    }
+                    lead.Role = role;
+                    lead.City = city;
+                    lead.Accounts.Add(account);
+                    return lead;
+                },
+                commandType: CommandType.StoredProcedure)
+                .Distinct()
+                .ToList();
+        }
 
         public LeadDto GetLeadById(int id)
         {
@@ -72,6 +101,29 @@ namespace CRM.DAL.Repositories
                     return result;
                 },
                 new { id },
+                commandType: CommandType.StoredProcedure)
+                .FirstOrDefault();
+        }
+
+        public LeadDto GetLeadByEmail(string email)
+        {
+            LeadDto result = default;
+            return _connection
+                .Query<LeadDto, AccountDto, CityDto, Role, LeadDto>(
+                _getLeadByEmailProcedure,
+                (lead, account, city, role) =>
+                {
+                    if (result == null)
+                    {
+                        result = lead;
+                        result.City = city;
+                        result.Role = role;
+                        result.Accounts = new List<AccountDto>();
+                    }
+                    result.Accounts.Add(account);
+                    return result;
+                },
+                new { email },
                 commandType: CommandType.StoredProcedure)
                 .FirstOrDefault();
         }
