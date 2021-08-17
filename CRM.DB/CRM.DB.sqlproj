@@ -73,5 +73,7 @@
     <Build Include="StoredProcedures\Lead\Lead_SelectById.sql" />
     <Build Include="StoredProcedures\Account\Account_insert.sql" />
     <Build Include="StoredProcedures\Account\Account_Delete.sql" />
+    <Build Include="StoredProcedures\Lead\Lead_SelectByEmail.sql" />
+    <Build Include="StoredProcedures\Lead\Lead_SelectAll.sql" />
   </ItemGroup>
 </Project>
