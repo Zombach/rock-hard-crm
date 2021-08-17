@@ -1,5 +1,5 @@
-﻿CREATE PROCEDURE dbo.Lead_SelectById
-	@Id int
+﻿CREATE PROCEDURE dbo.Lead_SelectByEmail
+	@Email nvarchar(50)
 AS
 BEGIN
 	SELECT 
@@ -10,6 +10,7 @@ BEGIN
 		l.RegistrationDate,
 		l.Email,
 		l.PhoneNumber,
+		l.Password,
 		l.IsDeleted,
 		a.Id,
 		a.Currency,
@@ -20,5 +21,5 @@ BEGIN
 	FROM dbo.[Lead] l
 	left join dbo.Account a on a.LeadId = l.Id
 	inner join dbo.City c on c.Id = l.CityId
-	WHERE l.Id = @Id 
+	WHERE l.Email = @Email 
 END
