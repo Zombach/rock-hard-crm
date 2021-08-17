@@ -2,7 +2,6 @@
 using CRM.API.Models;
 using CRM.Business.Services;
 using CRM.DAL.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel;
@@ -22,8 +21,8 @@ namespace CRM.API.Controllers
             _leadService = leadService;
         }
 
-        // api/addLead
-        [HttpPost("addLead")]
+        // api/lead
+        [HttpPost]
         [Description("Add new lead")]
         [ProducesResponseType(typeof(LeadOutputModel), StatusCodes.Status201Created)]
         public ActionResult<LeadOutputModel> AddLead([FromBody] LeadInputModel model)
@@ -33,14 +32,14 @@ namespace CRM.API.Controllers
             return StatusCode(201, addedLead);
         }
 
-        // api/lead/userId
-        [HttpPut("{leadId}")]
+        // api/lead/id
+        [HttpPut("{id}")]
         [Description("Update lead")]
         [ProducesResponseType(typeof(LeadOutputModel), StatusCodes.Status200OK)]
-        public LeadOutputModel UpdateUserById(int leadId, [FromBody] LeadUpdateInputModel model)
+        public LeadOutputModel UpdateUserById(int id, [FromBody] LeadUpdateInputModel model)
         {
             var dto = _mapper.Map<LeadDto>(model);
-            dto = _leadService.UpdateLead(leadId, dto);
+            dto = _leadService.UpdateLead(id, dto);
             return _mapper.Map<LeadOutputModel>(dto);
         }
     }

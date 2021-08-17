@@ -49,7 +49,7 @@ namespace CRM.DAL.Repositories
                     dto.Patronymic,
                     dto.Email,
                     dto.PhoneNumber,
-                    cityId=dto.City.Id
+                    cityId = dto.City.Id
                 },
                 commandType: CommandType.StoredProcedure
             );

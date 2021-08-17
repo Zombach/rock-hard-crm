@@ -1,6 +1,4 @@
-﻿using CRM.DAL.Enums;
-
-namespace CRM.API.Models
+﻿namespace CRM.API.Models
 {
     public class LeadUpdateInputModel
     {
