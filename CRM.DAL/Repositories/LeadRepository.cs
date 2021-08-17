@@ -15,6 +15,7 @@ namespace CRM.DAL.Repositories
         private const string _deleteLeadByIdProcedure = "dbo.Lead_Delete";
         private const string _getLeadByEmailProcedure = "dbo.Lead_SelectByEmail";
         private const string _getAllLeadsProcedure = "dbo.Lead_SelectAll";
+
         public LeadRepository() { }
 
         public int AddLead(LeadDto dto)
@@ -42,34 +43,33 @@ namespace CRM.DAL.Repositories
                 _updateLeadProcedure,
                 new
                 {
+                    dto.Id,
                     dto.FirstName,
                     dto.LastName,
                     dto.Patronymic,
-                    dto.RegistrationDate,
                     dto.Email,
                     dto.PhoneNumber,
-                    dto.Password,
-                    dto.Role
+                    cityId=dto.City.Id
                 },
                 commandType: CommandType.StoredProcedure
             );
         }
+
         public List<LeadDto> GetAllLeads()
         {
-            var LeadDictionary = new Dictionary<int, LeadDto>();
+            var leadDictionary = new Dictionary<int, LeadDto>();
             return _connection
                 .Query<LeadDto, AccountDto, CityDto, Role, LeadDto>(
                 _getAllLeadsProcedure,
                 (lead, account, city, role) =>
                 {
-                    LeadDto leadDto;
-                    if (LeadDictionary.TryGetValue(lead.Id, out leadDto))
+                    if (leadDictionary.TryGetValue(lead.Id, out var leadDto))
                     {
                         lead = leadDto;
                     }
                     else
                     {
-                        LeadDictionary.Add(lead.Id, lead);
+                        leadDictionary.Add(lead.Id, lead);
                         lead.Accounts = new List<AccountDto>();
                     }
                     lead.Role = role;

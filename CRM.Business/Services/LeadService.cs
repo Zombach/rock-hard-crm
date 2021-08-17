@@ -6,7 +6,7 @@ namespace CRM.Business.Services
 {
     public class LeadService : ILeadService
     {
-        private ILeadRepository _leadRepository;
+        private readonly ILeadRepository _leadRepository;
 
         public LeadService(ILeadRepository leadRepository)
         {

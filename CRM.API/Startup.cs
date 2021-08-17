@@ -1,3 +1,5 @@
+using CRM.Business.Services;
+using CRM.DAL.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -20,6 +22,12 @@ namespace CRM.API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddAutoMapper(typeof(Startup));
+
+            services.AddScoped<IAccountRepository, AccountRepository>();
+            services.AddScoped<ILeadRepository, LeadRepository>();
+
+            services.AddScoped<ILeadService, LeadService>();
+
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {

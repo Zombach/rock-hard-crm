@@ -9,7 +9,6 @@ using System.ComponentModel;
 
 namespace CRM.API.Controllers
 {
-    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class LeadController : Controller
@@ -37,13 +36,12 @@ namespace CRM.API.Controllers
         // api/lead/userId
         [HttpPut("{leadId}")]
         [Description("Update lead")]
-        [ProducesResponseType(typeof(LeadInputModel), StatusCodes.Status200OK)]
-        public ActionResult<LeadOutputModel> UpdateUserById(int leadId, [FromBody] LeadInputModel model)
+        [ProducesResponseType(typeof(LeadOutputModel), StatusCodes.Status200OK)]
+        public LeadOutputModel UpdateUserById(int leadId, [FromBody] LeadUpdateInputModel model)
         {
             var dto = _mapper.Map<LeadDto>(model);
             dto = _leadService.UpdateLead(leadId, dto);
-            var outPut = _mapper.Map<LeadOutputModel>(dto);
-            return StatusCode(201, outPut);
+            return _mapper.Map<LeadOutputModel>(dto);
         }
     }
 }
