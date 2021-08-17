@@ -7,10 +7,9 @@
     [Email]            NVARCHAR (50)  NOT NULL UNIQUE,
     [PhoneNumber]      NVARCHAR (12)  NOT NULL,
     [Password]         NVARCHAR (200) NOT NULL,
-    [IsDeleted]        BIT            DEFAULT ('0') NOT NULL,
     [Role]             INT            NOT NULL,
     [CityId]           INT            NOT NULL,
+    [IsDeleted]        BIT            DEFAULT ('0') NOT NULL,
     CONSTRAINT [PK_LEAD] PRIMARY KEY CLUSTERED ([Id] ASC),
     CONSTRAINT [Lead_fk0] FOREIGN KEY ([CityId]) REFERENCES [dbo].[City] ([Id]) ON UPDATE NO ACTION
 );
-

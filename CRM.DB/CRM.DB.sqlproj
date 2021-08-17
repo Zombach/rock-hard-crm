@@ -59,10 +59,19 @@
   <ItemGroup>
     <Folder Include="Properties" />
     <Folder Include="Tables" />
+    <Folder Include="StoredProcedures" />
+    <Folder Include="StoredProcedures\Lead" />
+    <Folder Include="StoredProcedures\Account" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Tables\Account.sql" />
     <Build Include="Tables\City.sql" />
     <Build Include="Tables\Lead.sql" />
+    <Build Include="StoredProcedures\Lead\Lead_Insert.sql" />
+    <Build Include="StoredProcedures\Lead\Lead_Delete.sql" />
+    <Build Include="StoredProcedures\Lead\Lead_Update.sql" />
+    <Build Include="StoredProcedures\Lead\Lead_SelectById.sql" />
+    <Build Include="StoredProcedures\Account\Account_insert.sql" />
+    <Build Include="StoredProcedures\Account\Account_Delete.sql" />
   </ItemGroup>
 </Project>

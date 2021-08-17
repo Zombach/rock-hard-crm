@@ -3,9 +3,6 @@
     [LeadId]    INT           NOT NULL,
     [Currency]  INT           NOT NULL,
     [CreatedOn] DATETIME2 (7) NOT NULL,
-    [Closed] DATETIME2 (7)    NULL, 
-    [IsDeleted] BIT           NOT NULL DEFAULT 0, 
     CONSTRAINT [PK_ACCOUNT] PRIMARY KEY CLUSTERED ([Id] ASC),
     CONSTRAINT [Account_fk0] FOREIGN KEY ([LeadId]) REFERENCES [dbo].[Lead] ([Id]) ON UPDATE NO ACTION
 );
-
