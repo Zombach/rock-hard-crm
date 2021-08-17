@@ -23,25 +23,31 @@ namespace CRM.Business.Services
         {
             dto.Id = id;
             _leadRepository.UpdateLead(dto);
-            return _leadRepository.GetLeadById(id);
+            var lead = _leadRepository.GetLeadById(id);
+            return lead;
         }
 
-        public List<LeadDto> GetAllLeads() => _leadRepository.GetAllLeads();
+        public List<LeadDto> GetAllLeads()
+        {
+            var list = _leadRepository.GetAllLeads();
+            return list;
+        }
 
         public LeadDto GetLeadById(int id)
         {
-            return _leadRepository.GetLeadById(id);
+            var lead = _leadRepository.GetLeadById(id);
+            return lead;
         }
 
         public LeadDto GetLeadById(string email)
         {
-            return _leadRepository.GetLeadByEmail(email);
+            var lead = _leadRepository.GetLeadByEmail(email);
+            return lead;
         }
 
         public void DeleteLeadById(int id)
         {
             _leadRepository.DeleteLeadById(id);
         }
-
     }
 }
