@@ -24,7 +24,7 @@ namespace CRM.API.Controllers
         }
 
         // api/addLead
-        [HttpPost("/addLead")]
+        [HttpPost("addLead")]
         [Description("Add new lead")]
         [ProducesResponseType(typeof(LeadOutputModel), StatusCodes.Status201Created)]
         public ActionResult<LeadOutputModel> AddLead([FromBody] LeadInputModel model)
