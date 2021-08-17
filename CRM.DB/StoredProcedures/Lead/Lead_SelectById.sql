@@ -11,8 +11,12 @@ BEGIN
 		l.Email,
 		l.PhoneNumber,
 		l.IsDeleted,
+		a.Id,
+		a.Currency,
+		a.CreatedOn,
 		l.CityId	as Id,
 		l.Role		as Id
 	FROM dbo.[Lead] l
+	left join dbo.Account a on a.LeadId = l.Id
 	WHERE l.Id = @Id 
 END
