@@ -4,8 +4,7 @@
 	@LastName		nvarchar(50),
 	@Patronymic		nvarchar(50),
 	@Email			nvarchar(50),
-	@PhoneNumber	nvarchar(12),
-	@CityId			int
+	@PhoneNumber	nvarchar(12)
 AS
 BEGIN
 	UPDATE dbo.[Lead]
@@ -14,7 +13,6 @@ BEGIN
 		LastName		= @LastName,
 		Patronymic		= @Patronymic,
 		Email			= @Email,
-		PhoneNumber		= @PhoneNumber,
-		CityId			= @CityId
+		PhoneNumber		= @PhoneNumber
     WHERE Id = @Id
 END

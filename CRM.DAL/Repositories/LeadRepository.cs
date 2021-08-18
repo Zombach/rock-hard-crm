@@ -16,11 +16,9 @@ namespace CRM.DAL.Repositories
         private const string _getLeadByEmailProcedure = "dbo.Lead_SelectByEmail";
         private const string _getAllLeadsProcedure = "dbo.Lead_SelectAll";
 
-        public LeadRepository() { }
-
         public int AddLead(LeadDto dto)
         {
-            return _connection.QuerySingle<int>(
+            return _connection.QuerySingleOrDefault<int>(
                 _insertLeadProcedure,
                 new
                 {
@@ -49,7 +47,6 @@ namespace CRM.DAL.Repositories
                     dto.Patronymic,
                     dto.Email,
                     dto.PhoneNumber,
-                    cityId = dto.City.Id
                 },
                 commandType: CommandType.StoredProcedure
             );
@@ -59,26 +56,17 @@ namespace CRM.DAL.Repositories
         {
             var leadDictionary = new Dictionary<int, LeadDto>();
             return _connection
-                .Query<LeadDto, AccountDto, CityDto, Role, LeadDto>(
+                .Query<LeadDto, CityDto, Role, LeadDto>(
                 _getAllLeadsProcedure,
-                (lead, account, city, role) =>
+                (lead, city, role) =>
                 {
-                    if (leadDictionary.TryGetValue(lead.Id, out var leadDto))
-                    {
-                        lead = leadDto;
-                    }
-                    else
-                    {
-                        leadDictionary.Add(lead.Id, lead);
-                        lead.Accounts = new List<AccountDto>();
-                    }
                     lead.Role = role;
                     lead.City = city;
-                    lead.Accounts.Add(account);
                     return lead;
                 },
+                //splitOn: "id",
                 commandType: CommandType.StoredProcedure)
-                .Distinct()
+                //.Distinct<LeadDto>()
                 .ToList();
         }
 
@@ -101,6 +89,7 @@ namespace CRM.DAL.Repositories
                     return result;
                 },
                 new { id },
+                splitOn: "id",
                 commandType: CommandType.StoredProcedure)
                 .FirstOrDefault();
         }

@@ -4,6 +4,7 @@
     {
         USD = 1,
         EUR,
-        RUB
+        RUB,
+        JPY
     }
 }
