@@ -106,5 +106,16 @@ namespace CRM.API.Controllers
             _leadService.DeleteAccount(id);
             return NoContent();
         }
+        
+        // api/lead/city/'name'
+        [HttpGet("city/{cityName}")]
+        [Description("Return leads by name of city")]
+        [ProducesResponseType(typeof(List<LeadInfoOutputModel>), StatusCodes.Status200OK)]
+        public List<LeadInfoOutputModel> GetLeadsByCity(string cityName)
+        {
+            var listLeadDtos = _leadService.GetLeadsByCity(cityName);
+            var output = _mapper.Map<List<LeadInfoOutputModel>>(listLeadDtos);
+            return output;
+        }
     }
 }

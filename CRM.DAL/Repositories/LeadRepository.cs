@@ -15,6 +15,7 @@ namespace CRM.DAL.Repositories
         private const string _deleteLeadByIdProcedure = "dbo.Lead_Delete";
         private const string _getLeadByEmailProcedure = "dbo.Lead_SelectByEmail";
         private const string _getAllLeadsProcedure = "dbo.Lead_SelectAll";
+        private const string _getLeadsByCityProcedure = "dbo.Lead_SelectByCity";
 
         public int AddLead(LeadDto dto)
         {
@@ -122,6 +123,79 @@ namespace CRM.DAL.Repositories
                 _deleteLeadByIdProcedure,
                 new { id },
                 commandType: CommandType.StoredProcedure);
+        }
+
+
+        public List<LeadDto> GetLeadsByCity(string cityName)
+        {
+            //LeadDto result = default;
+            //return _connection
+            //    .Query<LeadDto, AccountDto, CityDto, Role, LeadDto>(
+            //    _getLeadByIdProcedure,
+            //    (lead, account, city, role) =>
+            //    {
+            //        if (result == null)
+            //        {
+            //            result = lead;
+            //            result.City = city;
+            //            result.Role = role;
+            //            result.Accounts = new List<AccountDto>();
+            //        }
+            //        result.Accounts.Add(account);
+            //        return result;
+            //    },
+            //    new { cityName },
+            //    splitOn: "id",
+            //    commandType: CommandType.StoredProcedure)
+            //    .FirstOrDefault();
+
+            //LeadDto result = default;
+            //return _connection
+            //    .Query<LeadDto, AccountDto, Role, LeadDto>(
+            //    _getLeadsByCityProcedure,
+            //    (lead, account, role) =>
+            //    {
+            //        if (result == null)
+            //        {
+            //            result = lead;
+            //            result.Role = role;
+            //            result.Accounts = new List<AccountDto>();
+            //        }
+            //        result.Accounts.Add(account);
+            //        return result;
+            //    },
+            //    new { cityName },
+            //    commandType: CommandType.StoredProcedure)
+            //    .ToList();
+
+
+            var LeadDictionary = new Dictionary<int, LeadDto>();
+
+            return _connection
+                .Query<LeadDto, AccountDto, Role, LeadDto>(
+                _getLeadsByCityProcedure,
+                (lead, account, role) =>
+                {
+                    LeadDto leadEntry;
+
+                    if (!LeadDictionary.TryGetValue(lead.Id, out leadEntry))
+                    {
+                        leadEntry = lead;
+                        leadEntry.Role = role;
+                        leadEntry.Accounts = new List<AccountDto>();
+                        LeadDictionary.Add(lead.Id, leadEntry);
+                    }
+
+                    leadEntry.Accounts.Add(account);
+
+                    return leadEntry;
+                },
+                new { cityName },
+                splitOn: "Id",
+                commandType: CommandType.StoredProcedure)
+                .Distinct<LeadDto>()
+                .ToList<LeadDto>();
+
         }
     }
 }

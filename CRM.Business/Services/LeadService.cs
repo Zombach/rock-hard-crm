@@ -62,5 +62,11 @@ namespace CRM.Business.Services
         {
             _accountRepository.DeleteAccount(id);
         }
+
+        public List<LeadDto> GetLeadsByCity(string cityName)
+        {
+            var listDtos = _leadRepository.GetLeadsByCity(cityName);
+            return listDtos;
+        }
     }
 }
