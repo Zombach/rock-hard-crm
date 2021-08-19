@@ -55,7 +55,6 @@ namespace CRM.Business.Services
         public int AddAccount(AccountDto dto)
         {
             var accountId = _accountRepository.AddAccount(dto);
-            //var accountDto = _accountRepository.GetAccountById(accountId);
             return accountId;
         }
 

@@ -64,9 +64,7 @@ namespace CRM.DAL.Repositories
                     lead.City = city;
                     return lead;
                 },
-                //splitOn: "id",
                 commandType: CommandType.StoredProcedure)
-                //.Distinct<LeadDto>()
                 .ToList();
         }
 
