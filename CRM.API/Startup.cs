@@ -25,8 +25,10 @@ namespace CRM.API
 
             services.AddScoped<IAccountRepository, AccountRepository>();
             services.AddScoped<ILeadRepository, LeadRepository>();
+            services.AddScoped<ICityRepository, CityRepository>();
 
             services.AddScoped<ILeadService, LeadService>();
+            services.AddScoped<ICityService, CityService>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
