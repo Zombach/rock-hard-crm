@@ -7,10 +7,12 @@ namespace CRM.Business.Services
     public class LeadService : ILeadService
     {
         private readonly ILeadRepository _leadRepository;
+        private readonly IAccountRepository _accountRepository;
 
-        public LeadService(ILeadRepository leadRepository)
+        public LeadService(ILeadRepository leadRepository, IAccountRepository accountRepository)
         {
             _leadRepository = leadRepository;
+            _accountRepository = accountRepository;
         }
 
         public LeadDto AddLead(LeadDto dto)
@@ -39,7 +41,7 @@ namespace CRM.Business.Services
             return lead;
         }
 
-        public LeadDto GetLeadById(string email)
+        public LeadDto GetLeadByEmail(string email)
         {
             var lead = _leadRepository.GetLeadByEmail(email);
             return lead;
@@ -48,6 +50,17 @@ namespace CRM.Business.Services
         public void DeleteLeadById(int id)
         {
             _leadRepository.DeleteLeadById(id);
+        }
+
+        public int AddAccount(AccountDto dto)
+        {
+            var accountId = _accountRepository.AddAccount(dto);
+            return accountId;
+        }
+
+        public void DeleteAccount(int id)
+        {
+            _accountRepository.DeleteAccount(id);
         }
     }
 }
