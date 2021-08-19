@@ -6,7 +6,7 @@ namespace CRM.API.Configuration
 {
     public class MapperProfile : Profile
     {
-        private const string _dateFormat = "dd.MM.yyyy";
+        private const string _dateFormat = "dd.MM.yyyy HH:mm:ss.fffffff";
         public MapperProfile()
         {
             CreateMappingToDto();

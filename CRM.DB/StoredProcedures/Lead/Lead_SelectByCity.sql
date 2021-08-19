@@ -10,15 +10,13 @@ BEGIN
 		l.RegistrationDate,
 		l.Email,
 		l.PhoneNumber,
-		l.IsDeleted,
 		a.Id,
+		a.LeadId,
 		a.Currency,
 		a.CreatedOn,
-		c.Id,
-		c.Name,	
 		l.Role as Id
 	FROM dbo.[Lead] l
 	left join dbo.Account a on a.LeadId = l.Id
 	inner join dbo.City c on c.Id = l.CityId
-	WHERE c.[Name] = @CityName
+	WHERE c.[Name] = @CityName AND l.IsDeleted = 0
 END
