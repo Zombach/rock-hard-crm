@@ -78,6 +78,5 @@
     <Build Include="StoredProcedures\Account\Account_SelectById.sql" />
     <Build Include="StoredProcedures\Lead\Lead_Insert.sql" />
     <Build Include="StoredProcedures\City\City_SelectAll.sql" />
-    <Build Include="StoredProcedures\Lead\Lead_SelectByCity.sql" />
   </ItemGroup>
 </Project>

@@ -13,6 +13,5 @@ namespace CRM.Business.Services
         LeadDto UpdateLead(int id, LeadDto dto);
         int AddAccount(AccountDto dto);
         void DeleteAccount(int id);
-        List<LeadDto> GetLeadsByCity(string cityName);
     }
 }

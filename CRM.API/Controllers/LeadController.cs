@@ -33,7 +33,7 @@ namespace CRM.API.Controllers
             return StatusCode(201, addedLead);
         }
 
-        // api/lead/id
+        // api/lead/3
         [HttpPut("{id}")]
         [Description("Update lead")]
         [ProducesResponseType(typeof(LeadOutputModel), StatusCodes.Status200OK)]
@@ -66,8 +66,8 @@ namespace CRM.API.Controllers
             return outPut;
         }
 
-        // api/lead/get-lead-by-email
-        [HttpGet("get-lead-by-email")]
+        // api/lead/lead-by-email
+        [HttpGet("lead-by-email")]
         [Description("Return lead by email")]
         [ProducesResponseType(typeof(LeadOutputModel), StatusCodes.Status200OK)]
         public LeadOutputModel GetLeadByEmail(string email)
@@ -86,8 +86,8 @@ namespace CRM.API.Controllers
             return NoContent();
         }
 
-        // api/lead/account/create
-        [HttpPost("account/create")]
+        // api/lead/account
+        [HttpPost("account")]
         [Description("Create lead account")]
         [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
         public ActionResult<int> AddAccount([FromBody] AccountInputModel inputModel)
@@ -107,15 +107,5 @@ namespace CRM.API.Controllers
             return NoContent();
         }
         
-        // api/lead/city/'name'
-        [HttpGet("city/{cityName}")]
-        [Description("Return leads by name of city")]
-        [ProducesResponseType(typeof(List<LeadInfoOutputModel>), StatusCodes.Status200OK)]
-        public List<LeadInfoOutputModel> GetLeadsByCity(string cityName)
-        {
-            var listLeadDtos = _leadService.GetLeadsByCity(cityName);
-            var output = _mapper.Map<List<LeadInfoOutputModel>>(listLeadDtos);
-            return output;
-        }
     }
 }
