@@ -3,6 +3,8 @@ using CRM.DAL.Models;
 using Dapper;
 using System.Data;
 using System.Linq;
+using CRM.Core;
+using Microsoft.Extensions.Options;
 
 namespace CRM.DAL.Repositories
 {
@@ -11,6 +13,8 @@ namespace CRM.DAL.Repositories
         private const string _addAccountProcedure = "dbo.Account_Insert";
         private const string _deleteAccountProcedure = "dbo.Account_Delete";
         private const string _selectByIdAccountProcedure = "dbo.Account_SelectById";
+
+        public AccountRepository(IOptions<DatabaseSettings> options) : base(options) { }
 
         public int AddAccount(AccountDto dto)
         {
