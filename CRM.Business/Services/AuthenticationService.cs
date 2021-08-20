@@ -20,7 +20,7 @@ namespace CRM.Business.Services
 
         public string SignIn(LeadDto dto)
         {
-            var identity = GetClaimsIdentity(dto.Email, dto.Password);
+            var identity = GetIdentity(dto.Email, dto.Password);
             if (identity == default)
             {
                 return default;
@@ -38,19 +38,16 @@ namespace CRM.Business.Services
 
             return encodedJwt;
         }
-        private ClaimsIdentity GetClaimsIdentity(string email, string password)
+        private ClaimsIdentity GetIdentity(string email, string password)
         {
             var lead = _leadRepository.GetLeadByEmail(email);
 
             var claims = new List<Claim>();
-            if (lead != default)
+            if (lead != default && BCrypt.Net.BCrypt.EnhancedVerify(password, lead.Password))
             {
-                if (BCrypt.Net.BCrypt.EnhancedVerify(password, lead.Password, BCrypt.Net.HashType.SHA384))
-                {
                     claims.Add(new Claim(JwtRegisteredClaimNames.NameId, lead.Id.ToString()));
                     claims.Add(new Claim(ClaimsIdentity.DefaultNameClaimType, lead.Email));
                     claims.Add(new Claim(ClaimsIdentity.DefaultRoleClaimType, lead.Role.ToString()));
-                };
 
                 ClaimsIdentity claimsIdentity =
                     new ClaimsIdentity(claims, "Token", ClaimsIdentity.DefaultNameClaimType,

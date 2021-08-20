@@ -24,17 +24,6 @@ namespace CRM.API.Controllers
             _leadService = leadService;
         }
 
-        // api/lead
-        [HttpPost]
-        [Description("Add new lead")]
-        [ProducesResponseType(typeof(LeadOutputModel), StatusCodes.Status201Created)]
-        public ActionResult<LeadOutputModel> AddLead([FromBody] LeadInputModel model)
-        {
-            var dto = _mapper.Map<LeadDto>(model);
-            var addedLead = _mapper.Map<LeadOutputModel>(_leadService.AddLead(dto));
-            return StatusCode(201, addedLead);
-        }
-
         // api/lead/id
         [HttpPut("{id}")]
         [Description("Update lead")]
