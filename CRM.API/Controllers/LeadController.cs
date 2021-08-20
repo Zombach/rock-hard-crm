@@ -6,10 +6,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.ComponentModel;
+using CRM.API.Common;
+using CRM.DAL.Enums;
 
 namespace CRM.API.Controllers
 {
     [ApiController]
+    [AuthorizeRoles(Role.Admin)]
     [Route("api/[controller]")]
     public class LeadController : Controller
     {
@@ -37,7 +40,7 @@ namespace CRM.API.Controllers
         [HttpPut("{id}")]
         [Description("Update lead")]
         [ProducesResponseType(typeof(LeadOutputModel), StatusCodes.Status200OK)]
-        public LeadOutputModel UpdateUserById(int id, [FromBody] LeadUpdateInputModel model)
+        public LeadOutputModel UpdateUser(int id, [FromBody] LeadUpdateInputModel model)
         {
             var dto = _mapper.Map<LeadDto>(model);
             dto = _leadService.UpdateLead(id, dto);
@@ -57,7 +60,7 @@ namespace CRM.API.Controllers
 
         // api/lead/3
         [HttpGet("{id}")]
-        [Description("Return lead by id")]
+        [Description("Get lead by id")]
         [ProducesResponseType(typeof(LeadOutputModel), StatusCodes.Status200OK)]
         public LeadOutputModel GetLeadById(int leadId)
         {
@@ -68,7 +71,7 @@ namespace CRM.API.Controllers
 
         // api/lead/get-lead-by-email
         [HttpGet("get-lead-by-email")]
-        [Description("Return lead by email")]
+        [Description("Get lead by email")]
         [ProducesResponseType(typeof(LeadOutputModel), StatusCodes.Status200OK)]
         public LeadOutputModel GetLeadByEmail(string email)
         {
@@ -78,11 +81,11 @@ namespace CRM.API.Controllers
 
         // api/lead/3
         [HttpDelete("{id}")]
-        [Description("Delete lead by id")]
+        [Description("Delete lead")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public ActionResult DeleteLeadById(int id)
+        public ActionResult DeleteLead(int id)
         {
-            _leadService.DeleteLeadById(id);
+            _leadService.DeleteLead(id);
             return NoContent();
         }
 
@@ -99,9 +102,9 @@ namespace CRM.API.Controllers
 
         // api/lead/account/3
         [HttpDelete("account/{id}")]
-        [Description("Delete lead account by id")]
+        [Description("Delete lead account")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult DeleteAccountById(int id)
+        public ActionResult DeleteAccount(int id)
         {
             _leadService.DeleteAccount(id);
             return NoContent();

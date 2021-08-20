@@ -6,7 +6,7 @@ namespace CRM.Business.Services
     public interface ILeadService
     {
         LeadDto AddLead(LeadDto dto);
-        void DeleteLeadById(int id);
+        void DeleteLead(int id);
         List<LeadDto> GetAllLeads();
         LeadDto GetLeadById(int id);
         LeadDto GetLeadByEmail(string email);
