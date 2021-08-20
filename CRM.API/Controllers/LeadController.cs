@@ -1,7 +1,10 @@
 ﻿using AutoMapper;
 using CRM.API.Models;
 using CRM.Business.Services;
+using CRM.DAL.Enums;
 using CRM.DAL.Models;
+using DevEdu.API.Common;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -9,6 +12,7 @@ using System.ComponentModel;
 
 namespace CRM.API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class LeadController : Controller
@@ -45,6 +49,7 @@ namespace CRM.API.Controllers
         }
 
         // api/lead
+        [AuthorizeRoles(Role.Admin)]
         [HttpGet]
         [Description("Get all Leads")]
         [ProducesResponseType(typeof(List<LeadOutputModel>), StatusCodes.Status200OK)]

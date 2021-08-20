@@ -17,6 +17,7 @@ namespace CRM.API.Configuration
         {
             CreateMap<CityInputModel, CityDto>();
             CreateMap<AccountInputModel, AccountDto>();
+            CreateMap<LeadSignInModel, LeadDto>();
             CreateMap<LeadInputModel, LeadDto>();
             CreateMap<LeadUpdateInputModel, LeadDto>();
         }
