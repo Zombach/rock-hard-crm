@@ -2,6 +2,7 @@
 using CRM.API.Models;
 using CRM.Business.Services;
 using CRM.DAL.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ using System.ComponentModel;
 
 namespace CRM.API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class LeadController : Controller

@@ -1,10 +1,13 @@
+using CRM.Business.Options;
 using CRM.Business.Services;
 using CRM.DAL.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 namespace CRM.API
@@ -27,6 +30,27 @@ namespace CRM.API
             services.AddScoped<ILeadRepository, LeadRepository>();
 
             services.AddScoped<ILeadService, LeadService>();
+            services.AddScoped<IAuthenticationService, AuthenticationService>();
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                    .AddJwtBearer(options =>
+                    {
+                        options.RequireHttpsMetadata = true;
+                        options.TokenValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuer = true,
+                            ValidIssuer = AuthOptions.Issuer,
+
+                            ValidateAudience = true,
+                            ValidAudience = AuthOptions.Audience,
+
+                            ValidateLifetime = true,
+
+                            IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
+                            ValidateIssuerSigningKey = true
+                        };
+                    });
+            services.AddControllersWithViews();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -45,16 +69,22 @@ namespace CRM.API
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "CRM.API v1"));
             }
 
-            app.UseHttpsRedirection();
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
+
+            app.UseHttpsRedirection();
+
+            app.UseRouting();
         }
     }
 }

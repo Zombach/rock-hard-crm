@@ -1,4 +1,5 @@
-﻿using CRM.DAL.Models;
+﻿using CRM.Business.Options;
+using CRM.DAL.Models;
 using CRM.DAL.Repositories;
 using System.Collections.Generic;
 
@@ -17,6 +18,7 @@ namespace CRM.Business.Services
 
         public LeadDto AddLead(LeadDto dto)
         {
+            dto.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password, AuthOptions.WorkFactor, true);
             dto.Id = _leadRepository.AddLead(dto);
             return dto;
         }
