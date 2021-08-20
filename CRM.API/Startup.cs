@@ -1,3 +1,4 @@
+using CRM.API.Extensions;
 using CRM.Business.Options;
 using CRM.Business.Services;
 using CRM.DAL.Repositories;
@@ -31,6 +32,9 @@ namespace CRM.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddAppConfiguration(Configuration);
+            services.AddScoped<IAuthOptions, AuthOptions>();
+            services.AddBearerAuthentication();
             services.AddAutoMapper(typeof(Startup));
 
             services.AddScoped<IAccountRepository, AccountRepository>();
@@ -39,24 +43,6 @@ namespace CRM.API
             services.AddScoped<ILeadService, LeadService>();
             services.AddScoped<IAuthenticationService, AuthenticationService>();
 
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                    .AddJwtBearer(options =>
-                    {
-                        options.RequireHttpsMetadata = true;
-                        options.TokenValidationParameters = new TokenValidationParameters
-                        {
-                            ValidateIssuer = true,
-                            ValidIssuer = AuthOptions.Issuer,
-
-                            ValidateAudience = true,
-                            ValidAudience = AuthOptions.Audience,
-
-                            ValidateLifetime = true,
-
-                            IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
-                            ValidateIssuerSigningKey = true
-                        };
-                    });
             services.AddControllersWithViews();
 
             services.AddControllers();

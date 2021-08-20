@@ -12,10 +12,12 @@ namespace CRM.Business.Services
     public class AuthenticationService : IAuthenticationService
     {
         private readonly ILeadRepository _leadRepository;
+        private readonly IAuthOptions _options;
 
-        public AuthenticationService(ILeadRepository leadRepository)
+        public AuthenticationService(ILeadRepository leadRepository, IAuthOptions authOptions)
         {
             _leadRepository = leadRepository;
+            _options = authOptions;
         }
 
         public string SignIn(LeadDto dto)
@@ -27,17 +29,18 @@ namespace CRM.Business.Services
             }
 
             var jwt = new JwtSecurityToken(
-                issuer: AuthOptions.Issuer,
-                audience: AuthOptions.Audience,
+                issuer: _options.Issuer,
+                audience: _options.Audience,
                 notBefore: DateTime.UtcNow,
                 claims: identity.Claims,
-                expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(AuthOptions.Lifetime)),
-                signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(),
+                expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(_options.Lifetime)),
+                signingCredentials: new SigningCredentials(_options.GetSymmetricSecurityKey(),
                     SecurityAlgorithms.HmacSha256));
             var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
 
             return encodedJwt;
         }
+
         private ClaimsIdentity GetIdentity(string email, string password)
         {
             var lead = _leadRepository.GetLeadByEmail(email);
@@ -50,7 +53,7 @@ namespace CRM.Business.Services
                     claims.Add(new Claim(ClaimsIdentity.DefaultRoleClaimType, lead.Role.ToString()));
 
                 ClaimsIdentity claimsIdentity =
-                    new ClaimsIdentity(claims, "Token", ClaimsIdentity.DefaultNameClaimType,
+                    new(claims, "Token", ClaimsIdentity.DefaultNameClaimType,
                         ClaimsIdentity.DefaultRoleClaimType);
                 return claimsIdentity;
             }
