@@ -9,14 +9,21 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using NSwag.Generation.Processors.Security;
+using CRM.Core;
 
 namespace CRM.API
 {
     public class Startup
     {
+        private const string _pathToEnvironment = "ASPNETCORE_ENVIRONMENT";
+
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
+            var currentEnvironment = configuration.GetValue<string>(_pathToEnvironment);
+            var builder = new ConfigurationBuilder().AddJsonFile($"appsettings.{currentEnvironment}.json");
+
+            Configuration = builder.Build();
+            Configuration.SetEnvironmentVariableForConfiguration();
         }
 
         public IConfiguration Configuration { get; }
