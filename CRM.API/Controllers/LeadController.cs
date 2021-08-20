@@ -41,7 +41,8 @@ namespace CRM.API.Controllers
         {
             var dto = _mapper.Map<LeadDto>(model);
             dto = _leadService.UpdateLead(id, dto);
-            return _mapper.Map<LeadOutputModel>(dto);
+            var outPut = _mapper.Map<LeadOutputModel>(dto);
+            return outPut;
         }
 
         // api/lead
@@ -57,7 +58,7 @@ namespace CRM.API.Controllers
 
         // api/lead/3
         [HttpGet("{id}")]
-        [Description("Return lead by id")]
+        [Description("Get lead by id")]
         [ProducesResponseType(typeof(LeadOutputModel), StatusCodes.Status200OK)]
         public LeadOutputModel GetLeadById(int leadId)
         {
@@ -68,21 +69,22 @@ namespace CRM.API.Controllers
 
         // api/lead/get-lead-by-email
         [HttpGet("get-lead-by-email")]
-        [Description("Return lead by email")]
+        [Description("Get lead by email")]
         [ProducesResponseType(typeof(LeadOutputModel), StatusCodes.Status200OK)]
         public LeadOutputModel GetLeadByEmail(string email)
         {
-            var outPut = _leadService.GetLeadByEmail(email);
-            return _mapper.Map<LeadOutputModel>(outPut);
+            var dto = _leadService.GetLeadByEmail(email);
+            var outPut = _mapper.Map<LeadOutputModel>(dto);
+            return outPut;
         }
 
         // api/lead/3
         [HttpDelete("{id}")]
-        [Description("Delete lead by id")]
+        [Description("Delete lead")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public ActionResult DeleteLeadById(int id)
         {
-            _leadService.DeleteLeadById(id);
+            _leadService.DeleteLead(id);
             return NoContent();
         }
 
@@ -99,8 +101,8 @@ namespace CRM.API.Controllers
 
         // api/lead/account/3
         [HttpDelete("account/{id}")]
-        [Description("Delete lead account by id")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [Description("Delete lead account")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         public ActionResult DeleteAccountById(int id)
         {
             _leadService.DeleteAccount(id);

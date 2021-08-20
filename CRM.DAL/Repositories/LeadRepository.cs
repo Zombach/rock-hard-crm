@@ -115,7 +115,7 @@ namespace CRM.DAL.Repositories
                 .FirstOrDefault();
         }
 
-        public int DeleteLeadById(int id)
+        public int DeleteLead(int id)
         {
             return _connection
                 .Execute(

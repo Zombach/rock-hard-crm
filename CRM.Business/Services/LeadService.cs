@@ -47,9 +47,9 @@ namespace CRM.Business.Services
             return lead;
         }
 
-        public void DeleteLeadById(int id)
+        public void DeleteLead(int id)
         {
-            _leadRepository.DeleteLeadById(id);
+            _leadRepository.DeleteLead(id);
         }
 
         public int AddAccount(AccountDto dto)
