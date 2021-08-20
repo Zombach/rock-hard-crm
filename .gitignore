@@ -350,3 +350,5 @@ MigrationBackup/
 .ionide/
 
 CRM.Business/Properties/launchSettings.json
+
+CRM.API/Properties/launchSettings.json
