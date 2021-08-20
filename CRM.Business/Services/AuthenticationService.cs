@@ -29,8 +29,8 @@ namespace CRM.Business.Services
             }
 
             var jwt = new JwtSecurityToken(
-                issuer: _options.Issuer,
-                audience: _options.Audience,
+                _options.Issuer,
+                _options.Audience,
                 notBefore: DateTime.UtcNow,
                 claims: identity.Claims,
                 expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(_options.Lifetime)),
