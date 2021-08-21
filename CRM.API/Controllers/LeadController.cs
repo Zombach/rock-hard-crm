@@ -49,6 +49,18 @@ namespace CRM.API.Controllers
             return listOutPut;
         }
 
+        // api/lead/filter
+        [AuthorizeRoles(Role.Admin)]
+        [HttpGet("filter")]
+        [Description("Get all Leads")]
+        [ProducesResponseType(typeof(List<LeadFilterModel>), StatusCodes.Status200OK)]
+        public List<LeadOutputModel> GetAllLeads([FromBody] LeadFilterModel leadFilter)
+        {
+            var listDto = _leadService.GetAllLeads(); // поменять
+            var listOutPut = _mapper.Map<List<LeadOutputModel>>(listDto);
+            return listOutPut;
+        }
+
         // api/lead/3
         [HttpGet("{id}")]
         [Description("Return lead by id")]
@@ -100,5 +112,6 @@ namespace CRM.API.Controllers
             _leadService.DeleteAccount(id);
             return NoContent();
         }
+
     }
 }
