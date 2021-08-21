@@ -1,6 +1,9 @@
 ﻿using AutoMapper;
 using CRM.API.Models;
+using CRM.Business;
 using CRM.DAL.Models;
+using System;
+using System.Globalization;
 
 namespace CRM.API.Configuration
 {
@@ -21,7 +24,10 @@ namespace CRM.API.Configuration
             CreateMap<LeadInputModel, LeadDto>();
             //.ForMember(dest => dest.City, opt => opt.MapFrom(src => new CityDto { Id = src.CityId }));
             CreateMap<LeadUpdateInputModel, LeadDto>();
-                //.ForMember(dest => dest.City, opt => opt.MapFrom(src => new CityDto { Id = src.CityId }));
+            //.ForMember(dest => dest.City, opt => opt.MapFrom(src => new CityDto { Id = src.CityId }));
+            CreateMap<LeadFilterInputModel, LeadFilterModel>()
+                .ForMember(dest => dest.BirthDateFrom, opt => opt.MapFrom(src => DateTime.ParseExact(src.BirthDateFrom, _dateFormat, CultureInfo.InvariantCulture)))
+                .ForMember(dest => dest.BirthDateTo, opt => opt.MapFrom(src => DateTime.ParseExact(src.BirthDateTo, _dateFormat, CultureInfo.InvariantCulture)));
         }
 
         private void CreateMappingFromDto()

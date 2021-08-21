@@ -1,6 +1,6 @@
 ﻿using CRM.DAL.Enums;
 
-namespace CRM.API.Models.InputModels
+namespace CRM.API.Models
 {
     public class LeadFilterInputModel
     {
