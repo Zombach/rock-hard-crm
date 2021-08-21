@@ -83,11 +83,27 @@ namespace CRM.Business.Services
             }
             if(!(filters.Role is null))
             {
-                //List<LeadDto> tmp;
-                //filters.Role.ForEach(role => tmp.Add(leads.Where(l => l.Role == role).ToList()));
-                //leads = filters.Role.ForEach(role => leads.Where(l => l.Role == role).ToList());
-                //leads = leads.Where(l => l.Role == filters.Role).ToList();
+                foreach (var role in filters.Role)
+                {
+                    leads = leads.Where(l => l.Role == role).ToList();
+                }
             }
+            if (!(filters.City is null))
+            {
+                foreach (var city in filters.City)
+                {
+                    leads = leads.Where(l => l.City == city).ToList();
+                }
+            }
+            if(!(filters.BirthDateFrom is null))
+            {
+                leads = leads.Where(l => l.BirthDate.CompareTo(filters.BirthDateFrom) < 0).ToList();
+            }
+            if (!(filters.BirthDateTo is null))
+            {
+                leads = leads.Where(l => l.BirthDate.CompareTo(filters.BirthDateTo) > 0).ToList();
+            }
+            return leads;
         }
     }
 }
