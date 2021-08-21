@@ -81,27 +81,31 @@ namespace CRM.Business.Services
             {
                 leads = leads.Where(l => l.Patronymic.StartsWith(filters.Patronymic)).ToList();
             }
-            if(!(filters.Roles is null))
+            if(!(filters.Roles is null || filters.Roles.Count == 0))
             {
+                var filtered = new List<LeadDto>();
                 foreach (var role in filters.Roles)
                 {
-                    leads = leads.Where(l => l.Role == role).ToList();
+                    filtered.AddRange(leads.Where(l => l.Role.Equals(role)).ToList());
                 }
+                leads = filtered;
             }
-            if (!(filters.Cities is null))
+            if (!(filters.Cities is null || filters.Cities.Count == 0))
             {
+                var filtered = new List<LeadDto>();
                 foreach (var city in filters.Cities)
                 {
-                    leads = leads.Where(l => l.City == city).ToList();
+                    filtered.AddRange(leads.Where(l => l.City.Equals(city)).ToList());
                 }
+                leads = filtered;
             }
             if(!(filters.BirthDateFrom is null))
             {
-                leads = leads.Where(l => l.BirthDate.CompareTo(filters.BirthDateFrom) < 0).ToList();
+                leads = leads.Where(l => l.BirthDate.CompareTo(filters.BirthDateFrom) > 0).ToList();
             }
             if (!(filters.BirthDateTo is null))
             {
-                leads = leads.Where(l => l.BirthDate.CompareTo(filters.BirthDateTo) > 0).ToList();
+                leads = leads.Where(l => l.BirthDate.CompareTo(filters.BirthDateTo) < 0).ToList();
             }
             return leads;
         }
