@@ -7,6 +7,7 @@ BEGIN
 		l.LastName,
 		l.Patronymic,
 		l.Email,
+		l.BirthDate,
 		c.id,
 		c.Name,
 		l.Role as Id

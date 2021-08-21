@@ -32,6 +32,7 @@ namespace CRM.DAL.Repositories
                     dto.Email,
                     dto.PhoneNumber,
                     dto.Password,
+                    dto.BirthDate,
                     role = (int)dto.Role,
                     cityId = dto.City.Id
                 },

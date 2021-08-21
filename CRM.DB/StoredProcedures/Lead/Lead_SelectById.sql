@@ -10,6 +10,7 @@ BEGIN
 		l.RegistrationDate,
 		l.Email,
 		l.PhoneNumber,
+		l.BirthDate,
 		l.IsDeleted,
 		a.Id,
 		a.Currency,

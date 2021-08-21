@@ -12,5 +12,6 @@ namespace CRM.API.Models
         public string Password { get; set; }
         public Role Role { get; set; }
         public CityInputModel City { get; set; }
+        public string BirthDate { get; set; }
     }
 }
