@@ -81,16 +81,16 @@ namespace CRM.Business.Services
             {
                 leads = leads.Where(l => l.Patronymic.StartsWith(filters.Patronymic)).ToList();
             }
-            if(!(filters.Role is null))
+            if(!(filters.Roles is null))
             {
-                foreach (var role in filters.Role)
+                foreach (var role in filters.Roles)
                 {
                     leads = leads.Where(l => l.Role == role).ToList();
                 }
             }
-            if (!(filters.City is null))
+            if (!(filters.Cities is null))
             {
-                foreach (var city in filters.City)
+                foreach (var city in filters.Cities)
                 {
                     leads = leads.Where(l => l.City == city).ToList();
                 }

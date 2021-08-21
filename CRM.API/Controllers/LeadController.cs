@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using CRM.API.Models;
+using CRM.Business;
 using CRM.Business.Services;
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
@@ -12,7 +13,7 @@ using System.ComponentModel;
 
 namespace CRM.API.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class LeadController : Controller
@@ -38,7 +39,7 @@ namespace CRM.API.Controllers
         }
 
         // api/lead
-        [AuthorizeRoles(Role.Admin)]
+        //[AuthorizeRoles(Role.Admin)]
         [HttpGet]
         [Description("Get all Leads")]
         [ProducesResponseType(typeof(List<LeadOutputModel>), StatusCodes.Status200OK)]
@@ -50,13 +51,14 @@ namespace CRM.API.Controllers
         }
 
         // api/lead/filter
-        [AuthorizeRoles(Role.Admin)]
-        [HttpGet("filter")]
-        [Description("Get all Leads")]
-        [ProducesResponseType(typeof(List<LeadFilterModel>), StatusCodes.Status200OK)]
-        public List<LeadOutputModel> GetAllLeads([FromBody] LeadFilterModel leadFilter)
+        //[AuthorizeRoles(Role.Admin)]
+        [HttpPost("/filter")]
+        [Description("Get all Leads by filters")]
+        [ProducesResponseType(typeof(List<LeadOutputModel>), StatusCodes.Status200OK)]
+        public List<LeadOutputModel> GetAllLeadsByFilters([FromBody] LeadFilterInputModel leadFilter)
         {
-            var listDto = _leadService.GetAllLeads(); // поменять
+            var filterModel = _mapper.Map<LeadFilterModel>(leadFilter);
+            var listDto = _leadService.GetLeadsByFilters(filterModel); 
             var listOutPut = _mapper.Map<List<LeadOutputModel>>(listDto);
             return listOutPut;
         }
