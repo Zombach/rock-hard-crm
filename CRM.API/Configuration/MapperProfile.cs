@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using CRM.API.Models;
+using CRM.Business.Models;
 using CRM.DAL.Models;
 
 namespace CRM.API.Configuration
@@ -11,6 +12,8 @@ namespace CRM.API.Configuration
         {
             CreateMappingToDto();
             CreateMappingFromDto();
+            CreateMappingToModel();
+            CreateMappingFromModel();
         }
 
         private void CreateMappingToDto()
@@ -31,6 +34,16 @@ namespace CRM.API.Configuration
                 .ForMember(dest => dest.CreatedOn, opt => opt.MapFrom(src => src.CreatedOn.ToString(_dateFormat)));
             CreateMap<LeadDto, LeadOutputModel>()
                 .ForMember(dest => dest.RegistrationDate, opt => opt.MapFrom(src => src.RegistrationDate.ToString(_dateFormat)));
+        }
+
+        private void CreateMappingToModel()
+        {
+            CreateMap<TransactionInputModel, TransactionModel>();
+        }
+
+        private void CreateMappingFromModel()
+        {
+            CreateMap<TransactionModel, TransactionInputModel>();
         }
     }
 }

@@ -41,6 +41,7 @@ namespace CRM.API
             services.AddScoped<ILeadRepository, LeadRepository>();
 
             services.AddScoped<ILeadService, LeadService>();
+            services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<IAuthenticationService, AuthenticationService>();
 
             services.AddControllersWithViews();
