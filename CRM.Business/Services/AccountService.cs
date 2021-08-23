@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using CRM.Business.Models;
+using CRM.Business.Requests;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
-using DevEdu.Core.Requests;
 using RestSharp;
+using static CRM.Business.TransactionEndpoint;
 
 namespace CRM.Business.Services
 {
@@ -12,7 +13,7 @@ namespace CRM.Business.Services
         private readonly IAccountRepository _accountRepository;
         private const string BaseEndpoint = "https://localhost:44386/";
         private string _endPoint;
-        private string GetTransactionsByAccountIdEndpoint;
+        
         private readonly RestClient _client;
         private readonly RequestHelper _requestHelper;
 
@@ -37,9 +38,16 @@ namespace CRM.Business.Services
         public List<TransactionModel> GetTransactionsByAccountId(int id)
         {
             _endPoint = string.Format(GetTransactionsByAccountIdEndpoint, id);
-            var request = _requestHelper.CreateGetRequest(_endPoint);
+            var request = _requestHelper.CreateGetRequest(string.Format(GetTransactionsByAccountIdEndpoint, id));
             var response = _client.Execute<List<TransactionModel>>(request);
             return response.Data;
+        }
+
+        public long AddDeposit(TransactionModel model)
+        {
+            var request = _requestHelper.CreatePostRequest(AddDepositEndpoint, model);
+            var result = _client.Execute<long>(request);
+            return result.Data;
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using RestSharp;
 
-namespace DevEdu.Core.Requests
+namespace CRM.Business.Requests
 {
     public class RequestHelper
     {

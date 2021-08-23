@@ -9,5 +9,6 @@ namespace CRM.Business.Services
         int AddAccount(AccountDto dto);
         void DeleteAccount(int id);
         List<TransactionModel> GetTransactionsByAccountId(int id);
+        long AddDeposit(TransactionModel model);
     }
 }
