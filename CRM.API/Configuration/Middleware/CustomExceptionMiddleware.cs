@@ -15,6 +15,12 @@ namespace CRM.API.Middleware
     {
         private readonly RequestDelegate _next;
         private const string jsonType = "application/json";
+        private const string _messageAuthorization = "Authorization exception";
+        private const string _messageValidation = "Validation exception";
+        private const string _messageEntity = "Entity not found exception";
+        private const int _authorizationCode = 1000;
+        private const int _validationCode = 1001;
+        private const int _entityCode = 1002;
 
         public CustomExceptionMiddleware(RequestDelegate next) => _next = next;
 
@@ -54,7 +60,7 @@ namespace CRM.API.Middleware
 
             context.Response.ContentType = jsonType;
             context.Response.StatusCode = (int)code;
-
+            
             return context.Response.WriteAsync(result);
         }
     }

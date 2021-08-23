@@ -1,3 +1,4 @@
+using CRM.API.Middleware;
 using CRM.Business.Services;
 using CRM.DAL.Repositories;
 using Microsoft.AspNetCore.Builder;
@@ -44,7 +45,7 @@ namespace CRM.API
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "CRM.API v1"));
             }
-
+            app.UseMiddleware<CustomExceptionMiddleware>();
             app.UseHttpsRedirection();
 
             app.UseRouting();
