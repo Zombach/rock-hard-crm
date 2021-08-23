@@ -1,4 +1,7 @@
-﻿namespace CRM.Business
+﻿using CRM.Core;
+using Microsoft.Extensions.Options;
+
+namespace CRM.Business
 {
     public class TransactionEndpoint
     {

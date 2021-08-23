@@ -3,7 +3,7 @@ using CRM.API.Models;
 using CRM.Business.Models;
 using CRM.DAL.Models;
 
-namespace CRM.API.Configuration
+namespace CRM.Configuration
 {
     public class MapperProfile : Profile
     {
@@ -12,8 +12,8 @@ namespace CRM.API.Configuration
         {
             CreateMappingToDto();
             CreateMappingFromDto();
-            CreateMappingToModel();
-            CreateMappingFromModel();
+            CreateMappingToBusiness();
+            CreateMappingFromBusiness();
         }
 
         private void CreateMappingToDto()
@@ -36,14 +36,14 @@ namespace CRM.API.Configuration
                 .ForMember(dest => dest.RegistrationDate, opt => opt.MapFrom(src => src.RegistrationDate.ToString(_dateFormat)));
         }
 
-        private void CreateMappingToModel()
+        private void CreateMappingToBusiness()
         {
-            CreateMap<TransactionInputModel, TransactionModel>();
+            CreateMap<TransactionInputModel, TransactionBusinessModel>();
         }
 
-        private void CreateMappingFromModel()
+        private void CreateMappingFromBusiness()
         {
-            CreateMap<TransactionModel, TransactionInputModel>();
+            CreateMap<TransactionBusinessModel, TransactionInputModel>();
         }
     }
 }

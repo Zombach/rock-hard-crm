@@ -11,6 +11,6 @@ namespace CRM.API.Models
         public Currency Currency { get; set; }
         public string CreatedOn { get; set; }
         public decimal Balance { get; set; }
-        public List<TransactionModel> Transactions { get; set; }
+        public List<TransactionBusinessModel> Transactions { get; set; }
     }
 }

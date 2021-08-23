@@ -18,6 +18,9 @@ namespace CRM.API.Extensions
             services.AddOptions<AuthSettings>()
                 .Bind(configuration.GetSection(nameof(AuthSettings)))
                 .ValidateDataAnnotations();
+            services.AddOptions<ConnectionUrl>()
+               .Bind(configuration.GetSection(nameof(ConnectionUrl)))
+               .ValidateDataAnnotations();
         }
 
         public static void AddBearerAuthentication(this IServiceCollection services)

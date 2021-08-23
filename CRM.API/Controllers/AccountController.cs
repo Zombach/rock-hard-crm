@@ -48,23 +48,23 @@ namespace CRM.API.Controllers
         [HttpGet("by-account/{accountId}")]
         [Description("Get transactions by account")]
         [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
-        public ActionResult<List<TransactionModel>> AddTransaction(int accountId)
+        public ActionResult<List<TransactionBusinessModel>> AddTransaction(int accountId)
         {
             var output = _accountService.GetTransactionsByAccountId(accountId);
             return StatusCode(201, output);
         }
 
-        // api/transaction/deposit
-        [HttpPost("deposit")]
-        [Description("Add deposit")]
-        [ProducesResponseType(typeof(long), StatusCodes.Status201Created)]
-        public ActionResult<long> AddDeposit([FromBody] TransactionInputModel inputModel)
-        {
-            var dto = _mapper.Map<TransactionModel>(inputModel);
-            var output = _accountService.AddDeposit(dto);
+        //// api/transaction/deposit
+        //[HttpPost("deposit")]
+        //[Description("Add deposit")]
+        //[ProducesResponseType(typeof(long), StatusCodes.Status201Created)]
+        //public ActionResult<long> AddDeposit([FromBody] TransactionInputModel inputModel)
+        //{
+        //    var dto = _mapper.Map<TransactionBusinessModel>(inputModel);
+        //    var output = _accountService.AddDeposit(dto);
 
-            return StatusCode(201, output);
-        }
+        //    return StatusCode(201, output);
+        //}
 
         //// api/transaction/withdraw
         //[HttpPost("withdraw")]

@@ -1,8 +1,11 @@
 ﻿using System.Collections.Generic;
+using AutoMapper;
 using CRM.Business.Models;
 using CRM.Business.Requests;
+using CRM.Core;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
+using Microsoft.Extensions.Options;
 using RestSharp;
 using static CRM.Business.TransactionEndpoint;
 
@@ -11,16 +14,15 @@ namespace CRM.Business.Services
     public class AccountService : IAccountService
     {
         private readonly IAccountRepository _accountRepository;
-        private const string BaseEndpoint = "https://localhost:44386/";
-        private string _endPoint;
-        
+        private readonly IMapper _mapper;
         private readonly RestClient _client;
         private readonly RequestHelper _requestHelper;
 
-        public AccountService(IAccountRepository accountRepository)
+        public AccountService(IAccountRepository accountRepository, IOptions<ConnectionUrl> options, IMapper mapper)
         {
             _accountRepository = accountRepository;
-            _client = new RestClient(BaseEndpoint);
+            _mapper = mapper;
+            _client = new RestClient(options.Value.TstoreUrl);
             _requestHelper = new RequestHelper();
         }
 
@@ -35,19 +37,18 @@ namespace CRM.Business.Services
             _accountRepository.DeleteAccount(id);
         }
 
-        public List<TransactionModel> GetTransactionsByAccountId(int id)
+        public AccountBusinessModel GetTransactionsByAccountId(int id)
         {
-            _endPoint = string.Format(GetTransactionsByAccountIdEndpoint, id);
+            var accountDto = _accountRepository.GetAccountById(id);
+            var accountModel = _mapper.Map<AccountBusinessModel>(accountDto);
             var request = _requestHelper.CreateGetRequest(string.Format(GetTransactionsByAccountIdEndpoint, id));
-            var response = _client.Execute<List<TransactionModel>>(request);
-            return response.Data;
-        }
+            accountModel.Transactions = _client.Execute<List<TransactionBusinessModel>>(request).Data;
 
-        public long AddDeposit(TransactionModel model)
-        {
-            var request = _requestHelper.CreatePostRequest(AddDepositEndpoint, model);
-            var result = _client.Execute<long>(request);
-            return result.Data;
+            foreach(var transactions in accountModel.Transactions)
+            {
+                accountModel.Balance += transactions.Amount;
+            }
+            return accountModel;
         }
     }
 }

@@ -3,7 +3,7 @@ using CRM.DAL.Enums;
 
 namespace CRM.Business.Models
 {
-    public class TransactionModel
+    public class TransactionBusinessModel
     {
         public int Id { get; set; }
         public TransactionType TransactionType { get; set; }
