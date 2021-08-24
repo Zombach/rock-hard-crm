@@ -1,6 +1,8 @@
-﻿using CRM.Business.Options;
+﻿using CRM.Business.FilterModels;
+using CRM.Business.Options;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -69,17 +71,17 @@ namespace CRM.Business.Services
         public List<LeadDto> GetLeadsByFilters(LeadFilterModel filters)
         {
             var leads = _leadRepository.GetAllLeads();
-            if(!string.IsNullOrEmpty(filters.FirstName))
+            if (!string.IsNullOrEmpty(filters.FirstName))
             {
-                leads = leads.Where(l => l.FirstName.StartsWith(filters.FirstName)).ToList();
+                leads = leads.Where(l => IsSearchForString(filters.SearchType, l.FirstName, filters.FirstName)).ToList();
             }
             if(!string.IsNullOrEmpty(filters.LastName))
             {
-                leads = leads.Where(l => l.LastName.StartsWith(filters.LastName)).ToList();
+                leads = leads.Where(l => IsSearchForString(filters.SearchType, l.LastName, filters.LastName)).ToList();
             }
             if(!string.IsNullOrEmpty(filters.Patronymic))
             {
-                leads = leads.Where(l => l.Patronymic.StartsWith(filters.Patronymic)).ToList();
+                leads = leads.Where(l => IsSearchForString(filters.SearchType, l.LastName, filters.LastName)).ToList();
             }
             if(!(filters.Roles is null || filters.Roles.Count == 0))
             {
@@ -108,6 +110,18 @@ namespace CRM.Business.Services
                 leads = leads.Where(l => l.BirthDate.CompareTo(filters.BirthDateTo) < 0).ToList();
             }
             return leads;
+        }
+
+        private bool IsSearchForString(SearchType searchType, string a, string b)
+        {
+            switch (searchType)
+            {
+                case (SearchType.StartsWith):
+                    return a.StartsWith(b);
+                case (SearchType.Contains):
+                    return a.Contains(b);                    
+            }
+            return false;
         }
     }
 }

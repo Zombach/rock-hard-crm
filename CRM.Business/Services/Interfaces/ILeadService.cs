@@ -1,4 +1,5 @@
-﻿using CRM.DAL.Models;
+﻿using CRM.Business.FilterModels;
+using CRM.DAL.Models;
 using System.Collections.Generic;
 
 namespace CRM.Business.Services

@@ -10,6 +10,7 @@ namespace CRM.API.Models
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Patronymic { get; set; }
+        public int? SearchType { get; set; }
         public List<Role> Roles { get; set; }
         public List<CityInputModel> Cities { get; set; }
 

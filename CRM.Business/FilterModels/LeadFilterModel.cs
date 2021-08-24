@@ -3,13 +3,14 @@ using CRM.DAL.Models;
 using System;
 using System.Collections.Generic;
 
-namespace CRM.Business
+namespace CRM.Business.FilterModels
 {
     public class LeadFilterModel
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Patronymic { get; set; }
+        public SearchType SearchType { get; set; }
         public List<Role> Roles { get; set; }
         public List<CityDto> Cities { get; set; }
         public DateTime? BirthDateFrom { get; set; }

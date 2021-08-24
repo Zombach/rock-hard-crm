@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using CRM.API.Models;
-using CRM.Business;
+using CRM.Business.FilterModels;
 using CRM.Business.Services;
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
