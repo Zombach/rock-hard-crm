@@ -50,7 +50,7 @@ namespace CRM.DAL.Repositories
                     return result;
                 },
                 new { id },
-                splitOn: "id",
+                splitOn: "Id",
                 commandType: CommandType.StoredProcedure)
               .FirstOrDefault();
         }

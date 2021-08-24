@@ -5,10 +5,10 @@ BEGIN
 	SELECT 
 		Id,
 		LeadId,
-		Currency,
 		CreatedOn,
 		Closed,
-		IsDeleted
+		IsDeleted,
+		Currency AS Id
 	FROM dbo.[Account]
 	WHERE Id = @Id
 END
