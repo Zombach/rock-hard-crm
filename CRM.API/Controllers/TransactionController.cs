@@ -4,11 +4,7 @@ using CRM.Business.Models;
 using CRM.Business.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace CRM.API.Controllers
 {
@@ -25,39 +21,38 @@ namespace CRM.API.Controllers
             _transactionService = transactionService;
         }
 
-
-        // api/transaction/deposit
-        [HttpPost("deposit")]
+        // api/transaction/deposit/5
+        [HttpPost("deposit/{accountId}")]
         [Description("Add deposit")]
         [ProducesResponseType(typeof(long), StatusCodes.Status201Created)]
-        public ActionResult<long> AddDeposit([FromBody] TransactionInputModel inputModel)
+        public ActionResult<long> AddDeposit(int accountId, [FromBody] TransactionInputModel inputModel)
         {
-            var dto = _mapper.Map<TransactionBusinessModel>(inputModel);
-            var output = _transactionService.AddTransaction(dto);
+            var model = _mapper.Map<TransactionBusinessModel>(inputModel);
+            var output = _transactionService.AddDeposit(accountId, model);
 
             return StatusCode(201, output);
         }
 
-        // api/transaction/withdraw
-        [HttpPost("withdraw")]
+        // api/transaction/withdraw/5
+        [HttpPost("withdraw/{accountId}")]
         [Description("Add withdraw")]
         [ProducesResponseType(typeof(long), StatusCodes.Status201Created)]
-        public ActionResult<long> AddWithdraw([FromBody] TransactionInputModel inputModel)
+        public ActionResult<long> AddWithdraw(int accountId, [FromBody] TransactionInputModel inputModel)
         {
-            var dto = _mapper.Map<TransactionBusinessModel>(inputModel);
-            var output = _transactionService.AddTransaction(dto);
+            var model = _mapper.Map<TransactionBusinessModel>(inputModel);
+            var output = _transactionService.AddWithdraw(accountId, model);
 
             return StatusCode(201, output);
         }
 
-        // api/transaction/transfer
-        [HttpPost("transfer")]
+        // api/transaction/transfer/from/{accountId}/to/{accountId}
+        [HttpPost("transfer/from/{accountId}/to/{recipientId}")]
         [Description("Add transfer")]
         [ProducesResponseType(typeof(string), StatusCodes.Status201Created)]
-        public ActionResult<string> AddTransfer([FromBody] TransactionInputModel inputModel)
+        public ActionResult<string> AddTransfer(int accountId, int recipientId, [FromBody] TransactionInputModel inputModel)
         {
-            var dto = _mapper.Map<TransactionBusinessModel>(inputModel);
-            var output = _transactionService.AddTransaction(dto);
+            var model = _mapper.Map<TransferBusinessModel>(inputModel);
+            var output = _transactionService.AddTransfer(accountId, recipientId, model);
 
             return StatusCode(201, output);
         }

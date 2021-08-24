@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using CRM.Business.Models;
+﻿using CRM.Business.Models;
 using CRM.DAL.Models;
 
 namespace CRM.Business.Services

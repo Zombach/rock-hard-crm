@@ -1,12 +1,12 @@
 ﻿using AutoMapper;
 using CRM.API.Models;
+using CRM.Business.Models;
 using CRM.Business.Services;
 using CRM.DAL.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.ComponentModel;
-using CRM.Business.Models;
 
 namespace CRM.API.Controllers
 {
@@ -53,41 +53,5 @@ namespace CRM.API.Controllers
             var output = _accountService.GetTransactionsByAccountId(accountId);
             return StatusCode(201, output);
         }
-
-        //// api/transaction/deposit
-        //[HttpPost("deposit")]
-        //[Description("Add deposit")]
-        //[ProducesResponseType(typeof(long), StatusCodes.Status201Created)]
-        //public ActionResult<long> AddDeposit([FromBody] TransactionInputModel inputModel)
-        //{
-        //    var dto = _mapper.Map<TransactionBusinessModel>(inputModel);
-        //    var output = _accountService.AddDeposit(dto);
-
-        //    return StatusCode(201, output);
-        //}
-
-        //// api/transaction/withdraw
-        //[HttpPost("withdraw")]
-        //[Description("Add withdraw")]
-        //[ProducesResponseType(typeof(long), StatusCodes.Status201Created)]
-        //public ActionResult<long> AddWithdraw([FromBody] TransactionInputModel inputModel)
-        //{
-        //    var dto = _mapper.Map<TransactionDto>(inputModel);
-        //    var output = _transactionService.AddWithdraw(dto);
-
-        //    return StatusCode(201, output);
-        //}
-
-        //// api/transaction/transfer
-        //[HttpPost("transfer")]
-        //[Description("Add transfer")]
-        //[ProducesResponseType(typeof(string), StatusCodes.Status201Created)]
-        //public ActionResult<string> AddTransfer([FromBody] TransferInputModel inputModel)
-        //{
-        //    var dto = _mapper.Map<TransferDto>(inputModel);
-        //    var output = _transactionService.AddTransfer(dto);
-
-        //    return StatusCode(201, output);
-        //}
     }
 }

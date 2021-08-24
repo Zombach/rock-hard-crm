@@ -2,11 +2,11 @@
 using CRM.Business.Models;
 using CRM.DAL.Models;
 
-namespace CRM.Configuration
+namespace CRM.Business.Configuration
 {
-    public class MapperProfile : Profile
+    public class BusinessProfile : Profile
     {
-        public MapperProfile()
+        public BusinessProfile()
         {
             CreateMappingFromDto();
         }

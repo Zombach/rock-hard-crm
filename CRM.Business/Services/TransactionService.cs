@@ -1,36 +1,52 @@
 ﻿using CRM.Business.Models;
 using CRM.Business.Requests;
+using CRM.Core;
+using CRM.DAL.Repositories;
+using Microsoft.Extensions.Options;
 using RestSharp;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static CRM.Business.TransactionEndpoint;
 
 namespace CRM.Business.Services
 {
     public class TransactionService : ITransactionService
     {
-        //private const string BaseEndpoint = "https://localhost:44386/";
-        //private const string BaseEndpoint = ConigurationSettings
-        //private string _endPoint;
-
         private readonly RestClient _client;
         private readonly RequestHelper _requestHelper;
+        private readonly IAccountRepository _accountRepository;
 
-        //public List<TransactionBusinessModel> GetTransactionsByAccountId(int id)
-        //{
-        //    _endPoint = string.Format(GetTransactionsByAccountIdEndpoint, id);
-        //    var request = _requestHelper.CreateGetRequest(string.Format(GetTransactionsByAccountIdEndpoint, id));
-        //    var response = _client.Execute<List<TransactionBusinessModel>>(request);
-        //    return response.Data;
-        //}
-
-        public long AddTransaction(TransactionBusinessModel model)
+        public TransactionService(IOptions<ConnectionUrl> options, IAccountRepository accountRepository)
         {
+            _client = new RestClient(options.Value.TstoreUrl);
+            _requestHelper = new RequestHelper();
+            _accountRepository = accountRepository;
+        }
+
+        public long AddDeposit(int accountId, TransactionBusinessModel model)
+        {
+            model.AccountId = accountId;
+            model.Currency = _accountRepository.GetAccountById(accountId).Currency;
             var request = _requestHelper.CreatePostRequest(AddDepositEndpoint, model);
             var result = _client.Execute<long>(request);
+            return result.Data;
+        }
+
+        public long AddWithdraw(int accountId, TransactionBusinessModel model)
+        {
+            model.AccountId = accountId;
+            model.Currency = _accountRepository.GetAccountById(accountId).Currency;
+            var request = _requestHelper.CreatePostRequest(AddWithdrawEndpoint, model);
+            var result = _client.Execute<long>(request);
+            return result.Data;
+        }
+
+        public string AddTransfer(int accountId, int recipientId, TransferBusinessModel model)
+        {
+            model.AccountId = accountId;
+            model.Currency = _accountRepository.GetAccountById(accountId).Currency;
+            model.RecipientAccountId = recipientId;
+            model.RecipientCurrency = _accountRepository.GetAccountById(accountId).Currency;
+            var request = _requestHelper.CreatePostRequest(AddTransferEndpoint, model);
+            var result = _client.Execute<string>(request);
             return result.Data;
         }
     }

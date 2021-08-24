@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using AutoMapper;
+﻿using AutoMapper;
 using CRM.Business.Models;
 using CRM.Business.Requests;
 using CRM.Core;
@@ -7,6 +6,7 @@ using CRM.DAL.Models;
 using CRM.DAL.Repositories;
 using Microsoft.Extensions.Options;
 using RestSharp;
+using System.Collections.Generic;
 using static CRM.Business.TransactionEndpoint;
 
 namespace CRM.Business.Services
@@ -42,11 +42,12 @@ namespace CRM.Business.Services
             var accountDto = _accountRepository.GetAccountById(id);
             var accountModel = _mapper.Map<AccountBusinessModel>(accountDto);
             var request = _requestHelper.CreateGetRequest(string.Format(GetTransactionsByAccountIdEndpoint, id));
-            accountModel.Transactions = _client.Execute<List<TransactionBusinessModel>>(request).Data;
+            var transactions = _client.Execute<List<TransactionBusinessModel>>(request).Data;
 
-            foreach(var transactions in accountModel.Transactions)
+            accountModel.Transactions = transactions;
+            foreach (var transaction in accountModel.Transactions)
             {
-                accountModel.Balance += transactions.Amount;
+                accountModel.Balance += transaction.Amount;
             }
             return accountModel;
         }

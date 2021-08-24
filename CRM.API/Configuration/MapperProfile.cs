@@ -3,7 +3,7 @@ using CRM.API.Models;
 using CRM.Business.Models;
 using CRM.DAL.Models;
 
-namespace CRM.Configuration
+namespace CRM.API.Configuration
 {
     public class MapperProfile : Profile
     {
@@ -24,7 +24,7 @@ namespace CRM.Configuration
             CreateMap<LeadInputModel, LeadDto>();
             //.ForMember(dest => dest.City, opt => opt.MapFrom(src => new CityDto { Id = src.CityId }));
             CreateMap<LeadUpdateInputModel, LeadDto>();
-                //.ForMember(dest => dest.City, opt => opt.MapFrom(src => new CityDto { Id = src.CityId }));
+            //.ForMember(dest => dest.City, opt => opt.MapFrom(src => new CityDto { Id = src.CityId }));
         }
 
         private void CreateMappingFromDto()
@@ -39,6 +39,7 @@ namespace CRM.Configuration
         private void CreateMappingToBusiness()
         {
             CreateMap<TransactionInputModel, TransactionBusinessModel>();
+            CreateMap<TransactionInputModel, TransferBusinessModel>();
         }
 
         private void CreateMappingFromBusiness()
