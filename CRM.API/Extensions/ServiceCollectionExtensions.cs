@@ -5,7 +5,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 
-
 namespace CRM.API.Extensions
 {
     public static class ServiceCollectionExtensions
