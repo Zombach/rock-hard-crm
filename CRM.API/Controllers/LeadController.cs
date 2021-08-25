@@ -1,7 +1,10 @@
 ﻿using AutoMapper;
 using CRM.API.Models;
 using CRM.Business.Services;
+using CRM.DAL.Enums;
 using CRM.DAL.Models;
+using DevEdu.API.Common;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -9,6 +12,7 @@ using System.ComponentModel;
 
 namespace CRM.API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class LeadController : Controller
@@ -20,17 +24,6 @@ namespace CRM.API.Controllers
         {
             _mapper = mapper;
             _leadService = leadService;
-        }
-
-        // api/lead
-        [HttpPost]
-        [Description("Add new lead")]
-        [ProducesResponseType(typeof(LeadOutputModel), StatusCodes.Status201Created)]
-        public ActionResult<LeadOutputModel> AddLead([FromBody] LeadInputModel model)
-        {
-            var dto = _mapper.Map<LeadDto>(model);
-            var addedLead = _mapper.Map<LeadOutputModel>(_leadService.AddLead(dto));
-            return StatusCode(201, addedLead);
         }
 
         // api/lead/id
@@ -45,6 +38,7 @@ namespace CRM.API.Controllers
         }
 
         // api/lead
+        [AuthorizeRoles(Role.Admin)]
         [HttpGet]
         [Description("Get all Leads")]
         [ProducesResponseType(typeof(List<LeadOutputModel>), StatusCodes.Status200OK)]

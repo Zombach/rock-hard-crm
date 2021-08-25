@@ -4,6 +4,8 @@ using Dapper;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using CRM.Core;
+using Microsoft.Extensions.Options;
 
 namespace CRM.DAL.Repositories
 {
@@ -15,6 +17,8 @@ namespace CRM.DAL.Repositories
         private const string _deleteLeadByIdProcedure = "dbo.Lead_Delete";
         private const string _getLeadByEmailProcedure = "dbo.Lead_SelectByEmail";
         private const string _getAllLeadsProcedure = "dbo.Lead_SelectAll";
+
+        public LeadRepository(IOptions<DatabaseSettings> options) : base(options) { }
 
         public int AddLead(LeadDto dto)
         {
