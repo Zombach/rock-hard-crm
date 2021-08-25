@@ -10,13 +10,14 @@ namespace CRM.API.Configuration.Middleware.ExceptionResponses
         public List<ValidationError> Errors { get; set; }
 
         private const int ValidationCode = 1001;
+        private const int ValidationStatusCode = 422;
         private const string MessageValidation = "Validation exception";
 
         public ValidationExceptionResponse(ValidationException exception)
         {
             Errors = new List<ValidationError>
             {
-                new ValidationError {Code = 422, Field = exception.FieldOfError, Message = exception.Message}
+                new ValidationError {Code = ValidationStatusCode, Field = exception.FieldOfError, Message = exception.Message}
             };
         }
         public ValidationExceptionResponse(ModelStateDictionary modelState)
@@ -28,7 +29,7 @@ namespace CRM.API.Configuration.Middleware.ExceptionResponses
             {
                 Errors.Add(new ValidationError
                 {
-                    Code = 422,
+                    Code = ValidationStatusCode,
                     Field = state.Key,
                     Message = state.Value.Errors[0].ErrorMessage
                 });

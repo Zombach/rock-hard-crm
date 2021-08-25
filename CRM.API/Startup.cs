@@ -1,4 +1,4 @@
-using CRM.API.Middleware;
+using CRM.API.Configuration.Middleware;
 using CRM.Business.Services;
 using CRM.DAL.Repositories;
 using Microsoft.AspNetCore.Builder;

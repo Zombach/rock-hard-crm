@@ -6,7 +6,7 @@ using System;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace CRM.API.Middleware
+namespace CRM.API.Configuration.Middleware
 {
     public class CustomExceptionMiddleware
     {
@@ -18,11 +18,11 @@ namespace CRM.API.Middleware
         private const string _messageInvalidArgument = "Invalid argument exception";
         private const string _messageUnknownError = "Unknown error";
 
-        private const int _authorizationCode = 1000;
+        private const int _authorizationCode = 2000;
         private const int _validationCode = 1001;
-        private const int _entityCode = 1002;
-        private const int _unknownErrorCode = 1003;
-        private const int _invalidCode = 1004;
+        private const int _entityCode = 400;
+        private const int _unknownErrorCode = 3000;
+        private const int _invalidCode = 1002;
 
 
         public CustomExceptionMiddleware(RequestDelegate next) => _next = next;
@@ -46,7 +46,7 @@ namespace CRM.API.Middleware
             switch (exception)
             {
                 case ValidationException validationException:
-                    code = HttpStatusCode.BadRequest;
+                    code = HttpStatusCode.UnprocessableEntity;
                     error = new ValidationExceptionResponse(validationException)
                     {
                         Code = _validationCode,
