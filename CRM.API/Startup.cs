@@ -1,3 +1,4 @@
+using CRM.API.Configuration.Middleware;
 using CRM.API.Extensions;
 using CRM.Business.Options;
 using CRM.Business.Services;
@@ -74,7 +75,7 @@ namespace CRM.API
                 app.UseOpenApi();
                 app.UseSwaggerUi3();
             }
-
+            app.UseMiddleware<CustomExceptionMiddleware>();
             app.UseDefaultFiles();
             app.UseStaticFiles();
 
