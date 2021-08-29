@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 
-namespace DevEdu.API.Common
+namespace CRM.API.Common
 {
     [AttributeUsage(AttributeTargets.Property)]
     public class CustomDateFormatAttribute : ValidationAttribute

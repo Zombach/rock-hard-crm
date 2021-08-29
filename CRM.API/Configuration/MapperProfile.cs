@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using CRM.API.Models;
+using CRM.Business.Models;
 using CRM.DAL.Models;
 
 namespace CRM.API.Configuration
@@ -11,6 +12,8 @@ namespace CRM.API.Configuration
         {
             CreateMappingToDto();
             CreateMappingFromDto();
+            CreateMappingToBusiness();
+            CreateMappingFromBusiness();
         }
 
         private void CreateMappingToDto()
@@ -21,7 +24,7 @@ namespace CRM.API.Configuration
             CreateMap<LeadInputModel, LeadDto>();
             //.ForMember(dest => dest.City, opt => opt.MapFrom(src => new CityDto { Id = src.CityId }));
             CreateMap<LeadUpdateInputModel, LeadDto>();
-                //.ForMember(dest => dest.City, opt => opt.MapFrom(src => new CityDto { Id = src.CityId }));
+            //.ForMember(dest => dest.City, opt => opt.MapFrom(src => new CityDto { Id = src.CityId }));
         }
 
         private void CreateMappingFromDto()
@@ -31,6 +34,17 @@ namespace CRM.API.Configuration
                 .ForMember(dest => dest.CreatedOn, opt => opt.MapFrom(src => src.CreatedOn.ToString(_dateFormat)));
             CreateMap<LeadDto, LeadOutputModel>()
                 .ForMember(dest => dest.RegistrationDate, opt => opt.MapFrom(src => src.RegistrationDate.ToString(_dateFormat)));
+        }
+
+        private void CreateMappingToBusiness()
+        {
+            CreateMap<TransactionInputModel, TransactionBusinessModel>();
+            CreateMap<TransactionInputModel, TransferBusinessModel>();
+        }
+
+        private void CreateMappingFromBusiness()
+        {
+            CreateMap<TransactionBusinessModel, TransactionInputModel>();
         }
     }
 }

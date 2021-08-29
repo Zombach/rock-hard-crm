@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
+using CRM.API.Common;
 using CRM.API.Models;
 using CRM.Business.Services;
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
-using DevEdu.API.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
