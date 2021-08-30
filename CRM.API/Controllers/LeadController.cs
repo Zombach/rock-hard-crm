@@ -53,22 +53,13 @@ namespace CRM.API.Controllers
         [HttpGet("{id}")]
         [Description("Return lead by id")]
         [ProducesResponseType(typeof(LeadOutputModel), StatusCodes.Status200OK)]
-        public LeadOutputModel GetLeadById(int leadId)
+        public LeadOutputModel GetLeadById(int id)
         {
-            var dto = _leadService.GetLeadById(leadId);
+            var dto = _leadService.GetLeadById(id);
             var outPut = _mapper.Map<LeadOutputModel>(dto);
             return outPut;
         }
 
-        // api/lead/get-lead-by-email
-        [HttpGet("get-lead-by-email")]
-        [Description("Return lead by email")]
-        [ProducesResponseType(typeof(LeadOutputModel), StatusCodes.Status200OK)]
-        public LeadOutputModel GetLeadByEmail(string email)
-        {
-            var outPut = _leadService.GetLeadByEmail(email);
-            return _mapper.Map<LeadOutputModel>(outPut);
-        }
 
         // api/lead/3
         [HttpDelete("{id}")]

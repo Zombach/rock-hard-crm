@@ -8,6 +8,7 @@ namespace CRM.API.Configuration
     public class MapperProfile : Profile
     {
         private const string _dateFormat = "dd.MM.yyyy";
+
         public MapperProfile()
         {
             CreateMappingToDto();
@@ -33,7 +34,8 @@ namespace CRM.API.Configuration
             CreateMap<AccountDto, AccountOutputModel>()
                 .ForMember(dest => dest.CreatedOn, opt => opt.MapFrom(src => src.CreatedOn.ToString(_dateFormat)));
             CreateMap<LeadDto, LeadOutputModel>()
-                .ForMember(dest => dest.RegistrationDate, opt => opt.MapFrom(src => src.RegistrationDate.ToString(_dateFormat)));
+                .ForMember(dest => dest.RegistrationDate, opt => opt.MapFrom(src => src.RegistrationDate.ToString(_dateFormat)))
+                .ForMember(dest => dest.BirthDate, opt => opt.MapFrom(src => src.BirthDate.ToString(_dateFormat)));
         }
 
         private void CreateMappingToBusiness()

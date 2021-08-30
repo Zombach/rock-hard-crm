@@ -11,6 +11,7 @@ BEGIN
 		l.Email,
 		l.PhoneNumber,
 		l.IsDeleted,
+		l.BirthDate,
 		a.Id,
 		a.Currency,
 		a.CreatedOn,

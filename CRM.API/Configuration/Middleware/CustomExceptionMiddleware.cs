@@ -53,16 +53,16 @@ namespace CRM.API.Configuration.Middleware
                         Message = _messageValidation
                     };
                     break;
-                case InvalidArgumentException :
-                    code = HttpStatusCode.BadRequest; 
+                case InvalidArgumentException:
+                    code = HttpStatusCode.BadRequest;
                     error = GenerateExceptionResponse(_invalidCode, _messageInvalidArgument, exception);
                     break;
                 case EntityNotFoundException _:
-                    code = HttpStatusCode.NotFound; 
+                    code = HttpStatusCode.NotFound;
                     error = GenerateExceptionResponse(_entityCode, _messageEntity, exception);
                     break;
                 case AuthorizationException _:
-                    code = HttpStatusCode.Forbidden; 
+                    code = HttpStatusCode.Forbidden;
                     error = GenerateExceptionResponse(_authorizationCode, _messageAuthorization, exception);
                     break;
                 default:
@@ -79,13 +79,13 @@ namespace CRM.API.Configuration.Middleware
 
             context.Response.ContentType = jsonType;
             context.Response.StatusCode = (int)code;
-            
+
             return context.Response.WriteAsync(result);
         }
 
         private ExceptionResponse GenerateExceptionResponse(int code, string message, Exception ex)
         {
-            ExceptionResponse result = new ExceptionResponse()
+            var result = new ExceptionResponse
             {
                 Code = code,
                 Message = message,
