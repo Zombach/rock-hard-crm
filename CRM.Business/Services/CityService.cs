@@ -1,5 +1,4 @@
-﻿using CRM.Business.Services;
-using CRM.DAL.Models;
+﻿using CRM.DAL.Models;
 using CRM.DAL.Repositories;
 using System.Collections.Generic;
 
@@ -19,7 +18,5 @@ namespace CRM.Business.Services
             var listDtos = _cityRepository.GetAllCities();
             return listDtos;
         }
-
-        
     }
 }

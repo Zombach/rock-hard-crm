@@ -16,13 +16,6 @@ namespace CRM.Business.Services
             _accountRepository = accountRepository;
         }
 
-        public LeadDto AddLead(LeadDto dto)
-        {
-            dto.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password, AuthOptions.WorkFactor, true);
-            dto.Id = _leadRepository.AddLead(dto);
-            return dto;
-        }
-
         public LeadDto UpdateLead(int id, LeadDto dto)
         {
             dto.Id = id;

@@ -15,12 +15,12 @@ namespace CRM.API.Controllers
     public class DictionaryController : Controller
     {
         private readonly IMapper _mapper;
-        private readonly ICityService _citySerivice;
+        private readonly ICityService _cityService;
 
-        public DictionaryController(IMapper mapper, ICityService citySerivice)
+        public DictionaryController(IMapper mapper, ICityService cityService)
         {
             _mapper = mapper;
-            _citySerivice = citySerivice;
+            _cityService = cityService;
         }
 
         // api/dictionary/city
@@ -29,12 +29,9 @@ namespace CRM.API.Controllers
         [ProducesResponseType(typeof(List<CityOutputModel>), StatusCodes.Status200OK)]
         public List<CityOutputModel> GetAllCities()
         {
-            var listDto = _citySerivice.GetAllCities();
+            var listDto = _cityService.GetAllCities();
             var listOutPut = _mapper.Map<List<CityOutputModel>>(listDto);
             return listOutPut;
         }
-
-
-
     }
 }
