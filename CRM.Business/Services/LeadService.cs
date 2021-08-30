@@ -1,5 +1,4 @@
-﻿using CRM.Business.Options;
-using CRM.DAL.Models;
+﻿using CRM.DAL.Models;
 using CRM.DAL.Repositories;
 using System.Collections.Generic;
 
