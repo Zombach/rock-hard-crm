@@ -11,6 +11,7 @@ namespace CRM.DAL.Repositories
 {
     public class LeadRepository : BaseRepository, ILeadRepository
     {
+        private const string _insertLeadProcedure = "dbo.Lead_Insert";
         private const string _updateLeadProcedure = "dbo.Lead_Update";
         private const string _getLeadByIdProcedure = "dbo.Lead_SelectById";
         private const string _deleteLeadByIdProcedure = "dbo.Lead_Delete";
@@ -19,6 +20,26 @@ namespace CRM.DAL.Repositories
         private const string _getLeadsByCityProcedure = "dbo.Lead_SelectByCity";
 
         public LeadRepository(IOptions<DatabaseSettings> options) : base(options) { }
+
+        public int AddLead(LeadDto dto)
+        {
+            return _connection.QuerySingleOrDefault<int>(
+                _insertLeadProcedure,
+                new
+                {
+                    dto.FirstName,
+                    dto.LastName,
+                    dto.Patronymic,
+                    dto.Email,
+                    dto.PhoneNumber,
+                    dto.Password,
+                    role = (int)dto.Role,
+                    cityId = dto.City.Id,
+                    dto.BirthDate
+                },
+                commandType: CommandType.StoredProcedure
+            );
+        }
 
         public void UpdateLead(LeadDto dto)
         {

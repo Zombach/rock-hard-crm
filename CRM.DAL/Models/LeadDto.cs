@@ -18,5 +18,6 @@ namespace CRM.DAL.Models
         public Role Role { get; set; }
         public CityDto City { get; set; }
         public List<AccountDto> Accounts { get; set; }
+        public DateTime BirthDate { get; set; }
     }
 }
