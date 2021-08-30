@@ -43,12 +43,6 @@ namespace CRM.Business.Services
             return lead;
         }
 
-        public LeadDto GetLeadByEmail(string email)
-        {
-            var lead = _leadRepository.GetLeadByEmail(email);
-            return lead;
-        }
-
         public void DeleteLeadById(int id)
         {
             _leadRepository.DeleteLeadById(id);

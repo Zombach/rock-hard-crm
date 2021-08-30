@@ -1,16 +1,16 @@
+using CRM.API.Configuration.Middleware;
 using CRM.API.Extensions;
+using CRM.Business.Configuration;
 using CRM.Business.Options;
 using CRM.Business.Services;
+using CRM.Core;
 using CRM.DAL.Repositories;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.IdentityModel.Tokens;
 using NSwag.Generation.Processors.Security;
-using CRM.Core;
 
 namespace CRM.API
 {
@@ -35,15 +35,17 @@ namespace CRM.API
             services.AddAppConfiguration(Configuration);
             services.AddScoped<IAuthOptions, AuthOptions>();
             services.AddBearerAuthentication();
-            services.AddAutoMapper(typeof(Startup));
+            services.AddAutoMapper(typeof(Startup), typeof(BusinessProfile));
 
             services.AddScoped<IAccountRepository, AccountRepository>();
             services.AddScoped<ILeadRepository, LeadRepository>();
             services.AddScoped<ICityRepository, CityRepository>();
 
             services.AddScoped<ILeadService, LeadService>();
+            services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<ICityService, CityService>();
             services.AddScoped<IAuthenticationService, AuthenticationService>();
+            services.AddScoped<ITransactionService, TransactionService>();
 
             services.AddControllersWithViews();
 
@@ -76,7 +78,7 @@ namespace CRM.API
                 app.UseOpenApi();
                 app.UseSwaggerUi3();
             }
-
+            app.UseMiddleware<CustomExceptionMiddleware>();
             app.UseDefaultFiles();
             app.UseStaticFiles();
 

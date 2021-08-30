@@ -15,6 +15,7 @@ namespace CRM.DAL.Models
         public string PhoneNumber { get; set; }
         public string Password { get; set; }
         public bool IsDeleted { get; set; }
+        public DateTime BirthDate { get; set; }
         public Role Role { get; set; }
         public CityDto City { get; set; }
         public List<AccountDto> Accounts { get; set; }

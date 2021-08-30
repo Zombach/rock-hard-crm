@@ -1,7 +1,7 @@
 ﻿using CRM.DAL.Enums;
 using Microsoft.AspNetCore.Authorization;
 
-namespace DevEdu.API.Common
+namespace CRM.API.Common
 {
     public class AuthorizeRolesAttribute : AuthorizeAttribute
     {

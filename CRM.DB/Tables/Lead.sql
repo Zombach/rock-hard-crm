@@ -10,7 +10,7 @@
     [Role]             INT            NOT NULL,
     [CityId]           INT            NOT NULL,
     [IsDeleted]        BIT            DEFAULT ('0') NOT NULL,
-    [BirthDate]        DATE           NOT NULL
+    [BirthDate]        DATE           NOT NULL,
     CONSTRAINT [PK_LEAD] PRIMARY KEY CLUSTERED ([Id] ASC),
     CONSTRAINT [Lead_fk0] FOREIGN KEY ([CityId]) REFERENCES [dbo].[City] ([Id]) ON UPDATE NO ACTION
 );
