@@ -1,4 +1,5 @@
 ﻿using CRM.DAL.Enums;
+using System;
 using System.Collections.Generic;
 
 namespace CRM.API.Models
@@ -14,6 +15,7 @@ namespace CRM.API.Models
         public string PhoneNumber { get; set; }
         public string Password { get; set; }
         public bool IsDeleted { get; set; }
+        public DateTime BirthDate { get; set; }
         public Role Role { get; set; }
         public CityOutputModel City { get; set; }
         public List<AccountOutputModel> Accounts { get; set; }
