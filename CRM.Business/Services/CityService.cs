@@ -15,8 +15,7 @@ namespace CRM.Business.Services
 
         public List<CityDto> GetAllCities()
         {
-            var listDtos = _cityRepository.GetAllCities();
-            return listDtos;
+            return _cityRepository.GetAllCities();
         }
     }
 }

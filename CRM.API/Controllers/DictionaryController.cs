@@ -3,10 +3,8 @@ using CRM.API.Models;
 using CRM.Business.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 
 namespace CRM.API.Controllers
 {
