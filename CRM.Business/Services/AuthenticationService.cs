@@ -22,16 +22,13 @@ namespace CRM.Business.Services
         }
         public string HashPassword(string pass, byte[] salt = default)
         {
-            if (salt == default)
-            {
-                salt = GetSalt();
-            }
+            salt ??= GetSalt();
             var pkbdf2 = new Rfc2898DeriveBytes(pass, salt, 10000, HashAlgorithmName.SHA384);
-            byte[] hash = pkbdf2.GetBytes(20);
-            byte[] hashBytes = new byte[36];
+            var hash = pkbdf2.GetBytes(20);
+            var hashBytes = new byte[36];
             Array.Copy(salt, 0, hashBytes, 0, 16);
             Array.Copy(hash, 0, hashBytes, 16, 20);
-            string hashedPassword = Convert.ToBase64String(hashBytes);
+            var hashedPassword = Convert.ToBase64String(hashBytes);
             return hashedPassword;
         }
 
@@ -65,10 +62,10 @@ namespace CRM.Business.Services
 
         public bool Verify(string hashedPassword, string userPassword)
         {
-            byte[] hashBytes = Convert.FromBase64String(hashedPassword);
-            byte[] salt = new byte[16];
+            var hashBytes = Convert.FromBase64String(hashedPassword);
+            var salt = new byte[16];
             Array.Copy(hashBytes, 0, salt, 0, 16);
-            string result = HashPassword(userPassword, salt);
+            var result = HashPassword(userPassword, salt);
             return result == hashedPassword;
         }
 
@@ -77,18 +74,15 @@ namespace CRM.Business.Services
             var lead = _leadRepository.GetLeadByEmail(email);
 
             var claims = new List<Claim>();
-            if (lead != default && Verify(lead.Password, password))
-            {
-                claims.Add(new Claim(JwtRegisteredClaimNames.NameId, lead.Id.ToString()));
-                claims.Add(new Claim(ClaimsIdentity.DefaultNameClaimType, lead.Email));
-                claims.Add(new Claim(ClaimsIdentity.DefaultRoleClaimType, lead.Role.ToString()));
+            if (lead == default || !Verify(lead.Password, password)) return default;
+            claims.Add(new Claim(JwtRegisteredClaimNames.NameId, lead.Id.ToString()));
+            claims.Add(new Claim(ClaimsIdentity.DefaultNameClaimType, lead.Email));
+            claims.Add(new Claim(ClaimsIdentity.DefaultRoleClaimType, lead.Role.ToString()));
 
-                ClaimsIdentity claimsIdentity =
-                    new(claims, "Token", ClaimsIdentity.DefaultNameClaimType,
-                        ClaimsIdentity.DefaultRoleClaimType);
-                return claimsIdentity;
-            }
-            return default;
+            ClaimsIdentity claimsIdentity =
+                new(claims, "Token", ClaimsIdentity.DefaultNameClaimType,
+                    ClaimsIdentity.DefaultRoleClaimType);
+            return claimsIdentity;
         }
     }
 }

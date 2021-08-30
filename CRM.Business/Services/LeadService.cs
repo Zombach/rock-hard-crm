@@ -21,8 +21,8 @@ namespace CRM.Business.Services
         public LeadDto AddLead(LeadDto dto)
         {
             dto.Password = _authenticationService.HashPassword(dto.Password);
-            dto.Id = _leadRepository.AddLead(dto);
-            return dto;
+            var id = _leadRepository.AddLead(dto);
+            return _leadRepository.GetLeadById(id);
         }
 
         public LeadDto UpdateLead(int id, LeadDto dto)
