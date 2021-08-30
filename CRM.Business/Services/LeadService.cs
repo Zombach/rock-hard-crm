@@ -9,18 +9,20 @@ namespace CRM.Business.Services
     {
         private readonly ILeadRepository _leadRepository;
         private readonly IAccountRepository _accountRepository;
+        private readonly IAuthenticationService _authenticationService;
 
-        public LeadService(ILeadRepository leadRepository, IAccountRepository accountRepository)
+        public LeadService(ILeadRepository leadRepository, IAccountRepository accountRepository, IAuthenticationService authenticationService)
         {
             _leadRepository = leadRepository;
             _accountRepository = accountRepository;
+            _authenticationService = authenticationService;
         }
 
         public LeadDto AddLead(LeadDto dto)
         {
-            dto.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password, AuthOptions.WorkFactor, true);
-            dto.Id = _leadRepository.AddLead(dto);
-            return dto;
+            dto.Password = _authenticationService.HashPassword(dto.Password);
+            var id = _leadRepository.AddLead(dto);
+            return _leadRepository.GetLeadById(id);
         }
 
         public LeadDto UpdateLead(int id, LeadDto dto)

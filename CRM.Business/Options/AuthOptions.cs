@@ -7,12 +7,6 @@ namespace CRM.Business.Options
 {
     public class AuthOptions : IAuthOptions
     {
-        //public const string Issuer = "TheBestCrmEver";
-        //public const string Audience = "CrmClient";
-        //const string _key = "secret_key_for_token_qqq";
-        //public const int Lifetime = 1440;
-        public const int WorkFactor = 13;
-
         private readonly string _key;   // key for encoding last part of the token
 
         public string Issuer => "TheBestCrmEver"; // for example auth.myserver.com
