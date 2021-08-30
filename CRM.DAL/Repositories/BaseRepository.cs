@@ -1,7 +1,7 @@
-﻿using System.Data;
-using System.Data.SqlClient;
-using CRM.Core;
+﻿using CRM.Core;
 using Microsoft.Extensions.Options;
+using System.Data;
+using System.Data.SqlClient;
 
 namespace CRM.DAL.Repositories
 {

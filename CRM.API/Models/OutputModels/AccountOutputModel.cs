@@ -1,4 +1,6 @@
-﻿using CRM.DAL.Enums;
+﻿using CRM.Business.Models;
+using CRM.DAL.Enums;
+using System.Collections.Generic;
 
 namespace CRM.API.Models
 {
@@ -8,5 +10,7 @@ namespace CRM.API.Models
         public int LeadId { get; set; }
         public Currency Currency { get; set; }
         public string CreatedOn { get; set; }
+        public decimal Balance { get; set; }
+        public List<TransactionBusinessModel> Transactions { get; set; }
     }
 }

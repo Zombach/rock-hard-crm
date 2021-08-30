@@ -79,9 +79,9 @@ namespace CRM.Business.Services
             var claims = new List<Claim>();
             if (lead != default && Verify(lead.Password, password))
             {
-                    claims.Add(new Claim(JwtRegisteredClaimNames.NameId, lead.Id.ToString()));
-                    claims.Add(new Claim(ClaimsIdentity.DefaultNameClaimType, lead.Email));
-                    claims.Add(new Claim(ClaimsIdentity.DefaultRoleClaimType, lead.Role.ToString()));
+                claims.Add(new Claim(JwtRegisteredClaimNames.NameId, lead.Id.ToString()));
+                claims.Add(new Claim(ClaimsIdentity.DefaultNameClaimType, lead.Email));
+                claims.Add(new Claim(ClaimsIdentity.DefaultRoleClaimType, lead.Role.ToString()));
 
                 ClaimsIdentity claimsIdentity =
                     new(claims, "Token", ClaimsIdentity.DefaultNameClaimType,
