@@ -1,4 +1,5 @@
-﻿using CRM.DAL.Models;
+﻿using CRM.DAL.Enums;
+using CRM.DAL.Models;
 using CRM.DAL.Repositories;
 using System.Collections.Generic;
 
@@ -21,6 +22,7 @@ namespace CRM.Business.Services
         {
             dto.Password = _authenticationService.HashPassword(dto.Password);
             var id = _leadRepository.AddLead(dto);
+            _accountRepository.AddAccount(new AccountDto { LeadId = id, Currency = Currency.RUB });
             return _leadRepository.GetLeadById(id);
         }
 
