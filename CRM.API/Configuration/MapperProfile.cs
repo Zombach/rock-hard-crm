@@ -22,7 +22,8 @@ namespace CRM.API.Configuration
             CreateMap<CityInputModel, CityDto>();
             CreateMap<AccountInputModel, AccountDto>();
             CreateMap<LeadSignInModel, LeadDto>();
-            CreateMap<LeadInputModel, LeadDto>();
+            CreateMap<LeadInputModel, LeadDto>()
+                .ForMember(dest => dest.City, opt => opt.MapFrom(src => new CityDto { Id = src.CityId }));
             CreateMap<LeadUpdateInputModel, LeadDto>();
         }
 

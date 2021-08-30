@@ -32,6 +32,6 @@ namespace CRM.API.Models
         public string BirthDate { get; set; }
 
         public Role Role { get; set; }
-        public CityInputModel City { get; set; }
+        public int CityId { get; set; }
     }
 }
