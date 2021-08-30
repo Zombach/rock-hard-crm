@@ -17,6 +17,7 @@ namespace CRM.DAL.Repositories
         private const string _deleteLeadByIdProcedure = "dbo.Lead_Delete";
         private const string _getLeadByEmailProcedure = "dbo.Lead_SelectByEmail";
         private const string _getAllLeadsProcedure = "dbo.Lead_SelectAll";
+        private const string _getLeadsByCityProcedure = "dbo.Lead_SelectByCity";
 
         public LeadRepository(IOptions<DatabaseSettings> options) : base(options) { }
 

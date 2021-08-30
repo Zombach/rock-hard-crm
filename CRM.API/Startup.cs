@@ -39,9 +39,11 @@ namespace CRM.API
 
             services.AddScoped<IAccountRepository, AccountRepository>();
             services.AddScoped<ILeadRepository, LeadRepository>();
+            services.AddScoped<ICityRepository, CityRepository>();
 
             services.AddScoped<ILeadService, LeadService>();
             services.AddScoped<IAccountService, AccountService>();
+            services.AddScoped<ICityService, CityService>();
             services.AddScoped<IAuthenticationService, AuthenticationService>();
             services.AddScoped<ITransactionService, TransactionService>();
 

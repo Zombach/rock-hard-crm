@@ -26,7 +26,7 @@ namespace CRM.API.Controllers
             _leadService = leadService;
         }
 
-        // api/lead/id
+        // api/lead/3
         [HttpPut("{id}")]
         [Description("Update lead")]
         [ProducesResponseType(typeof(LeadOutputModel), StatusCodes.Status200OK)]
@@ -71,8 +71,8 @@ namespace CRM.API.Controllers
             return NoContent();
         }
 
-        // api/lead/account/create
-        [HttpPost("account/create")]
+        // api/lead/account
+        [HttpPost("account")]
         [Description("Create lead account")]
         [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
         public ActionResult<int> AddAccount([FromBody] AccountInputModel inputModel)
