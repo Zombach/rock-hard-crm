@@ -7,9 +7,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.ComponentModel;
+using CRM.API.Extensions;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CRM.API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class AccountController : Controller
@@ -29,28 +32,31 @@ namespace CRM.API.Controllers
         [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
         public ActionResult<int> AddAccount([FromBody] AccountInputModel inputModel)
         {
+            var userInfo = this.GetUserIdAndRoles();
             var dto = _mapper.Map<AccountDto>(inputModel);
-            var accountId = _accountService.AddAccount(dto);
+            var accountId = _accountService.AddAccount(dto, userInfo);
             return StatusCode(201, accountId);
         }
 
         // api/account/3
         [HttpDelete("account/{id}")]
-        [Description("Delete lead account by id")]
+        [Description("Delete lead account")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult DeleteAccountById(int id)
         {
-            _accountService.DeleteAccount(id);
+            var userInfo = this.GetUserIdAndRoles();
+            _accountService.DeleteAccount(id, userInfo);
             return NoContent();
         }
 
-        // api/account/transaction
-        [HttpGet("by-account/{accountId}")]
-        [Description("Get transactions by account")]
+        // api/account/{accountId}
+        [HttpGet("{accountId}")]
+        [Description("Get account with transactions")]
         [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
-        public ActionResult<List<TransactionBusinessModel>> AddTransaction(int accountId)
+        public ActionResult<List<TransactionBusinessModel>> GetAccountWithTransactions(int accountId)
         {
-            var output = _accountService.GetTransactionsByAccountId(accountId);
+            var userInfo = this.GetUserIdAndRoles();
+            var output = _accountService.GetAccountWithTransactions(accountId, userInfo);
             return StatusCode(201, output);
         }
     }

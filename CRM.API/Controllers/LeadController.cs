@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.ComponentModel;
+using CRM.API.Extensions;
 
 namespace CRM.API.Controllers
 {
@@ -32,8 +33,9 @@ namespace CRM.API.Controllers
         [ProducesResponseType(typeof(LeadOutputModel), StatusCodes.Status200OK)]
         public LeadOutputModel UpdateUserById(int id, [FromBody] LeadUpdateInputModel model)
         {
+            var userInfo = this.GetUserIdAndRoles();
             var dto = _mapper.Map<LeadDto>(model);
-            dto = _leadService.UpdateLead(id, dto);
+            dto = _leadService.UpdateLead(id, dto, userInfo);
             return _mapper.Map<LeadOutputModel>(dto);
         }
 

@@ -46,13 +46,13 @@ namespace CRM.API.Controllers
         }
 
         // api/transaction/transfer/from/{accountId}/to/{accountId}
-        [HttpPost("transfer/from/{accountId}/to/{recipientId}")]
+        [HttpPost("transfer")]
         [Description("Add transfer")]
         [ProducesResponseType(typeof(string), StatusCodes.Status201Created)]
-        public ActionResult<string> AddTransfer(int accountId, int recipientId, [FromBody] TransactionInputModel inputModel)
+        public ActionResult<string> AddTransfer([FromBody] TransactionInputModel inputModel)
         {
             var model = _mapper.Map<TransferBusinessModel>(inputModel);
-            var output = _transactionService.AddTransfer(accountId, recipientId, model);
+            var output = _transactionService.AddTransfer(model);
 
             return StatusCode(201, output);
         }

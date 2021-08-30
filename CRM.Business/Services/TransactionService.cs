@@ -39,12 +39,10 @@ namespace CRM.Business.Services
             return result.Data;
         }
 
-        public string AddTransfer(int accountId, int recipientId, TransferBusinessModel model)
+        public string AddTransfer(TransferBusinessModel model)
         {
-            model.AccountId = accountId;
-            model.Currency = _accountRepository.GetAccountById(accountId).Currency;
-            model.RecipientAccountId = recipientId;
-            model.RecipientCurrency = _accountRepository.GetAccountById(accountId).Currency;
+            model.Currency = _accountRepository.GetAccountById(model.AccountId).Currency;
+            model.RecipientCurrency = _accountRepository.GetAccountById(model.RecipientAccountId).Currency;
             var request = _requestHelper.CreatePostRequest(AddTransferEndpoint, model);
             var result = _client.Execute<string>(request);
             return result.Data;

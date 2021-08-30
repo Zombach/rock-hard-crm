@@ -6,6 +6,6 @@ namespace CRM.Business.Services
     {
         long AddDeposit(int accountId, TransactionBusinessModel model);
         long AddWithdraw(int accountId, TransactionBusinessModel model);
-        string AddTransfer(int accountId, int recipientId, TransferBusinessModel model);
+        string AddTransfer(TransferBusinessModel model);
     }
 }

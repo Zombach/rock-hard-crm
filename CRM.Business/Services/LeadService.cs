@@ -2,6 +2,7 @@
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
 using System.Collections.Generic;
+using CRM.Business.IdentityInfo;
 
 namespace CRM.Business.Services
 {
@@ -21,12 +22,13 @@ namespace CRM.Business.Services
         public LeadDto AddLead(LeadDto dto)
         {
             dto.Password = _authenticationService.HashPassword(dto.Password);
+            dto.Role = Role.Regular;
             var id = _leadRepository.AddLead(dto);
             _accountRepository.AddAccount(new AccountDto { LeadId = id, Currency = Currency.RUB });
             return _leadRepository.GetLeadById(id);
         }
 
-        public LeadDto UpdateLead(int id, LeadDto dto)
+        public LeadDto UpdateLead(int id, LeadDto dto, UserIdentityInfo userIdentityInfo)
         {
             dto.Id = id;
             _leadRepository.UpdateLead(dto);

@@ -1,5 +1,4 @@
 ﻿using CRM.API.Common;
-using CRM.DAL.Enums;
 using System.ComponentModel.DataAnnotations;
 using static CRM.API.Common.ValidationMessage;
 
@@ -31,7 +30,8 @@ namespace CRM.API.Models
         [CustomDateFormat(ErrorMessage = WrongFormatBirthDate)]
         public string BirthDate { get; set; }
 
-        public Role Role { get; set; }
+        [Required(ErrorMessage = CityIdRequired)]
+        [Range(minimum: 1, maximum: int.MaxValue, ErrorMessage = WrongFormatCityId)]
         public int CityId { get; set; }
     }
 }

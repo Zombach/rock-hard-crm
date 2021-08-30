@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System;
+using AutoMapper;
 using CRM.Business.Models;
 using CRM.Business.Requests;
 using CRM.Core;
@@ -7,6 +8,7 @@ using CRM.DAL.Repositories;
 using Microsoft.Extensions.Options;
 using RestSharp;
 using System.Collections.Generic;
+using CRM.Business.IdentityInfo;
 using static CRM.Business.TransactionEndpoint;
 
 namespace CRM.Business.Services
@@ -26,18 +28,27 @@ namespace CRM.Business.Services
             _requestHelper = new RequestHelper();
         }
 
-        public int AddAccount(AccountDto dto)
+        public int AddAccount(AccountDto dto, UserIdentityInfo userIdentityInfo)
         {
+            dto.LeadId = userIdentityInfo.LeadId;
             var accountId = _accountRepository.AddAccount(dto);
             return accountId;
         }
 
-        public void DeleteAccount(int id)
+        public void DeleteAccount(int id, UserIdentityInfo userIdentityInfo)
         {
+            var dto = _accountRepository.GetAccountById(id);
+            if (!userIdentityInfo.IsAdmin())
+            {
+                if (dto.LeadId!=userIdentityInfo.LeadId)
+                {
+                    throw new Exception("It is not your account");
+                }
+            }
             _accountRepository.DeleteAccount(id);
         }
 
-        public AccountBusinessModel GetTransactionsByAccountId(int id)
+        public AccountBusinessModel GetAccountWithTransactions(int id, UserIdentityInfo userIdentityInfo)
         {
             var accountDto = _accountRepository.GetAccountById(id);
             var accountModel = _mapper.Map<AccountBusinessModel>(accountDto);

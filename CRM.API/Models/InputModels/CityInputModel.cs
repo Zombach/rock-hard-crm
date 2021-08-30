@@ -1,8 +1,11 @@
-﻿namespace CRM.API.Models
+﻿using System.ComponentModel.DataAnnotations;
+using static CRM.API.Common.ValidationMessage;
+
+namespace CRM.API.Models
 {
     public class CityInputModel
     {
-        public int Id { get; set; }
+        [Required(ErrorMessage = NameRequired)]
         public string Name { get; set; }
     }
 }
