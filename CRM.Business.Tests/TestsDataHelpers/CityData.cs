@@ -3,8 +3,17 @@ using CRM.DAL.Models;
 
 namespace CRM.Business.Tests.TestsDataHelpers
 {
-    public class CityData
+    public static class CityData
     {
+        public static CityDto GetCityDto()
+        {
+            return new()
+            {
+                Id = 1,
+                Name = "saint-Petersburg"
+            };
+        }
+
         public static List<CityDto> GetListCityDto()
         {
             return new List<CityDto>()

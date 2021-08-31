@@ -52,16 +52,5 @@ namespace CRM.Business.Services
         {
             _leadRepository.DeleteLeadById(id);
         }
-
-        public int AddAccount(AccountDto dto)
-        {
-            var accountId = _accountRepository.AddAccount(dto);
-            return accountId;
-        }
-
-        public void DeleteAccount(int id)
-        {
-            _accountRepository.DeleteAccount(id);
-        }
     }
 }

@@ -11,7 +11,5 @@ namespace CRM.Business.Services
         List<LeadDto> GetAllLeads();
         LeadDto GetLeadById(int id);
         LeadDto UpdateLead(int id, LeadDto dto, UserIdentityInfo userIdentityInfo);
-        int AddAccount(AccountDto dto);
-        void DeleteAccount(int id);
     }
 }
