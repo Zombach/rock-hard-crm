@@ -1,10 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
-using CRM.API.Common;
+﻿using CRM.API.Common;
+using System.ComponentModel.DataAnnotations;
 using static CRM.API.Common.ValidationMessage;
 
 namespace CRM.API.Models
 {
-    public class LeadUpdateInputModel
+    public class LeadInputModel
     {
         [Required(ErrorMessage = FirstNameRequired)]
         public string FirstName { get; set; }
@@ -21,6 +21,10 @@ namespace CRM.API.Models
 
         [Required(ErrorMessage = PhoneNumberRequired)]
         public string PhoneNumber { get; set; }
+
+        [Required(ErrorMessage = PasswordRequired)]
+        [MinLength(8, ErrorMessage = WrongFormatPassword)]
+        public string Password { get; set; }
 
         [Required(ErrorMessage = BirthDateRequired)]
         [CustomDateFormat(ErrorMessage = WrongDateFormat)]

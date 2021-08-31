@@ -1,7 +1,7 @@
 ﻿using CRM.DAL.Enums;
 using static CRM.API.Common.ValidationMessage;
 using System.Collections.Generic;
-using DevEdu.API.Common;
+using CRM.API.Common;
 
 namespace CRM.API.Models
 {
