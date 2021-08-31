@@ -4,8 +4,8 @@ namespace CRM.Business.Services
 {
     public interface ITransactionService
     {
-        long AddDeposit(int accountId, TransactionBusinessModel model);
-        long AddWithdraw(int accountId, TransactionBusinessModel model);
+        long AddDeposit(TransactionBusinessModel model);
+        long AddWithdraw(TransactionBusinessModel model);
         string AddTransfer(TransferBusinessModel model);
     }
 }

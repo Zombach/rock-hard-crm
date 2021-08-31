@@ -25,9 +25,9 @@ namespace CRM.Business.Services
             _accountValidationHelper = accountValidationHelper;
         }
 
-        public long AddDeposit(int accountId, TransactionBusinessModel model)
+        public long AddDeposit(TransactionBusinessModel model)
         {
-            var account = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(accountId);
+            var account = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(model.AccountId);
             model.AccountId = account.Id;
             model.Currency = account.Currency;
 
@@ -36,9 +36,9 @@ namespace CRM.Business.Services
             return result.Data;
         }
 
-        public long AddWithdraw(int accountId, TransactionBusinessModel model)
+        public long AddWithdraw(TransactionBusinessModel model)
         {
-            var account = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(accountId);
+            var account = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(model.AccountId);
             model.AccountId = account.Id;
             model.Currency = account.Currency;
 
