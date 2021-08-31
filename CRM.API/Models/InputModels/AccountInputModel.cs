@@ -1,10 +1,12 @@
-﻿using CRM.DAL.Enums;
+﻿using System.ComponentModel.DataAnnotations;
+using CRM.DAL.Enums;
+using static CRM.API.Common.ValidationMessage;
 
 namespace CRM.API.Models
 {
     public class AccountInputModel
     {
-        public int LeadId { get; set; }
+        [Required(ErrorMessage = CurrencyRequired)]
         public Currency Currency { get; set; }
     }
 }

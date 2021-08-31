@@ -1,9 +1,11 @@
+﻿using CRM.DAL.Enums;
 ﻿using CRM.Business.FilterModels;
 using CRM.Business.Options;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
 using System;
 using System.Collections.Generic;
+using CRM.Business.IdentityInfo;
 using System.Linq;
 
 namespace CRM.Business.Services
@@ -12,21 +14,25 @@ namespace CRM.Business.Services
     {
         private readonly ILeadRepository _leadRepository;
         private readonly IAccountRepository _accountRepository;
+        private readonly IAuthenticationService _authenticationService;
 
-        public LeadService(ILeadRepository leadRepository, IAccountRepository accountRepository)
+        public LeadService(ILeadRepository leadRepository, IAccountRepository accountRepository, IAuthenticationService authenticationService)
         {
             _leadRepository = leadRepository;
             _accountRepository = accountRepository;
+            _authenticationService = authenticationService;
         }
 
         public LeadDto AddLead(LeadDto dto)
         {
-            dto.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password, AuthOptions.WorkFactor, true);
-            dto.Id = _leadRepository.AddLead(dto);
-            return dto;
+            dto.Password = _authenticationService.HashPassword(dto.Password);
+            dto.Role = Role.Regular;
+            var id = _leadRepository.AddLead(dto);
+            _accountRepository.AddAccount(new AccountDto { LeadId = id, Currency = Currency.RUB });
+            return _leadRepository.GetLeadById(id);
         }
 
-        public LeadDto UpdateLead(int id, LeadDto dto)
+        public LeadDto UpdateLead(int id, LeadDto dto, UserIdentityInfo userIdentityInfo)
         {
             dto.Id = id;
             _leadRepository.UpdateLead(dto);
@@ -43,12 +49,6 @@ namespace CRM.Business.Services
         public LeadDto GetLeadById(int id)
         {
             var lead = _leadRepository.GetLeadById(id);
-            return lead;
-        }
-
-        public LeadDto GetLeadByEmail(string email)
-        {
-            var lead = _leadRepository.GetLeadByEmail(email);
             return lead;
         }
 

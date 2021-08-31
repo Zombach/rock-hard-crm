@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 
 namespace CRM.Business.Services
 {
@@ -18,6 +19,17 @@ namespace CRM.Business.Services
         {
             _leadRepository = leadRepository;
             _options = authOptions;
+        }
+        public string HashPassword(string pass, byte[] salt = default)
+        {
+            salt ??= GetSalt();
+            var pkbdf2 = new Rfc2898DeriveBytes(pass, salt, 10000, HashAlgorithmName.SHA384);
+            var hash = pkbdf2.GetBytes(20);
+            var hashBytes = new byte[36];
+            Array.Copy(salt, 0, hashBytes, 0, 16);
+            Array.Copy(hash, 0, hashBytes, 16, 20);
+            var hashedPassword = Convert.ToBase64String(hashBytes);
+            return hashedPassword;
         }
 
         public string SignIn(LeadDto dto)
@@ -41,23 +53,36 @@ namespace CRM.Business.Services
             return encodedJwt;
         }
 
+        public byte[] GetSalt()
+        {
+            byte[] salt;
+            new RNGCryptoServiceProvider().GetBytes(salt = new byte[16]);
+            return salt;
+        }
+
+        public bool Verify(string hashedPassword, string userPassword)
+        {
+            var hashBytes = Convert.FromBase64String(hashedPassword);
+            var salt = new byte[16];
+            Array.Copy(hashBytes, 0, salt, 0, 16);
+            var result = HashPassword(userPassword, salt);
+            return result == hashedPassword;
+        }
+
         private ClaimsIdentity GetIdentity(string email, string password)
         {
             var lead = _leadRepository.GetLeadByEmail(email);
 
             var claims = new List<Claim>();
-            if (lead != default && BCrypt.Net.BCrypt.EnhancedVerify(password, lead.Password))
-            {
-                    claims.Add(new Claim(JwtRegisteredClaimNames.NameId, lead.Id.ToString()));
-                    claims.Add(new Claim(ClaimsIdentity.DefaultNameClaimType, lead.Email));
-                    claims.Add(new Claim(ClaimsIdentity.DefaultRoleClaimType, lead.Role.ToString()));
+            if (lead == default || !Verify(lead.Password, password)) return default;
+            claims.Add(new Claim(JwtRegisteredClaimNames.NameId, lead.Id.ToString()));
+            claims.Add(new Claim(ClaimsIdentity.DefaultNameClaimType, lead.Email));
+            claims.Add(new Claim(ClaimsIdentity.DefaultRoleClaimType, lead.Role.ToString()));
 
-                ClaimsIdentity claimsIdentity =
-                    new(claims, "Token", ClaimsIdentity.DefaultNameClaimType,
-                        ClaimsIdentity.DefaultRoleClaimType);
-                return claimsIdentity;
-            }
-            return default;
+            ClaimsIdentity claimsIdentity =
+                new(claims, "Token", ClaimsIdentity.DefaultNameClaimType,
+                    ClaimsIdentity.DefaultRoleClaimType);
+            return claimsIdentity;
         }
     }
 }

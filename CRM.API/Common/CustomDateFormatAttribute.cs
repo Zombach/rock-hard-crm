@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 
-namespace DevEdu.API.Common
+namespace CRM.API.Common
 {
     [AttributeUsage(AttributeTargets.Property)]
     public class CustomDateFormatAttribute : ValidationAttribute
@@ -13,7 +13,7 @@ namespace DevEdu.API.Common
             if (value is null)
                 return true;
             CultureInfo cultureInfo = CultureInfo.CreateSpecificCulture("ru-RU");
-            return DateTime.TryParseExact(value.ToString(), _dateFormat, cultureInfo, DateTimeStyles.None, out var date);
+            return value == null || DateTime.TryParseExact(value.ToString(), _dateFormat, cultureInfo, DateTimeStyles.None, out var date);
         }
     }
 }

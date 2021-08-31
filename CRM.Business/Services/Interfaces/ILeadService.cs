@@ -1,6 +1,7 @@
 ﻿using CRM.Business.FilterModels;
 using CRM.DAL.Models;
 using System.Collections.Generic;
+using CRM.Business.IdentityInfo;
 
 namespace CRM.Business.Services
 {
@@ -10,8 +11,7 @@ namespace CRM.Business.Services
         void DeleteLeadById(int id);
         List<LeadDto> GetAllLeads();
         LeadDto GetLeadById(int id);
-        LeadDto GetLeadByEmail(string email);
-        LeadDto UpdateLead(int id, LeadDto dto);
+        LeadDto UpdateLead(int id, LeadDto dto, UserIdentityInfo userIdentityInfo);
         int AddAccount(AccountDto dto);
         void DeleteAccount(int id);
         List<LeadDto> GetLeadsByFilters(LeadFilterModel filters);

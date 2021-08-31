@@ -5,10 +5,9 @@
 	@Email				nvarchar(50),
 	@PhoneNumber		nvarchar(12),
 	@Password			nvarchar(200),                            
-	@Role				int,
-	@CityId				int,
-	@BirthDate			datetime
-	
+	@Role				INT,
+	@CityId				INT,
+	@BirthDate			DATE
 AS
 BEGIN
 	INSERT INTO dbo.[Lead] 
@@ -20,8 +19,8 @@ BEGIN
 		[PhoneNumber],
 		[Password],
 		[Role],
-		[CityId], 
-		[BirthDate])
+		[BirthDate],
+		[CityId])
 	VALUES 
 		(@FirstName,
 		@LastName,
@@ -29,8 +28,9 @@ BEGIN
 		getdate(),
 		@Email,
 		@PhoneNumber,
-		@Password,@Role,
-		@CityId, 
-		@BirthDate)
+		@Password,
+		@Role,
+		@BirthDate,
+		@CityId)
 	SELECT @@IDENTITY
 END

@@ -1,15 +1,16 @@
 ﻿using AutoMapper;
+using CRM.API.Common;
 using CRM.API.Models;
 using CRM.Business.FilterModels;
 using CRM.Business.Services;
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
-using DevEdu.API.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.ComponentModel;
+using CRM.API.Extensions;
 
 namespace CRM.API.Controllers
 {
@@ -27,14 +28,15 @@ namespace CRM.API.Controllers
             _leadService = leadService;
         }
 
-        // api/lead/id
+        // api/lead/3
         [HttpPut("{id}")]
         [Description("Update lead")]
         [ProducesResponseType(typeof(LeadOutputModel), StatusCodes.Status200OK)]
         public LeadOutputModel UpdateUserById(int id, [FromBody] LeadUpdateInputModel model)
         {
+            var userInfo = this.GetUserIdAndRoles();
             var dto = _mapper.Map<LeadDto>(model);
-            dto = _leadService.UpdateLead(id, dto);
+            dto = _leadService.UpdateLead(id, dto, userInfo);
             return _mapper.Map<LeadOutputModel>(dto);
         }
 
@@ -67,22 +69,13 @@ namespace CRM.API.Controllers
         [HttpGet("{id}")]
         [Description("Return lead by id")]
         [ProducesResponseType(typeof(LeadOutputModel), StatusCodes.Status200OK)]
-        public LeadOutputModel GetLeadById(int leadId)
+        public LeadOutputModel GetLeadById(int id)
         {
-            var dto = _leadService.GetLeadById(leadId);
+            var dto = _leadService.GetLeadById(id);
             var outPut = _mapper.Map<LeadOutputModel>(dto);
             return outPut;
         }
 
-        // api/lead/get-lead-by-email
-        [HttpGet("get-lead-by-email")]
-        [Description("Return lead by email")]
-        [ProducesResponseType(typeof(LeadOutputModel), StatusCodes.Status200OK)]
-        public LeadOutputModel GetLeadByEmail(string email)
-        {
-            var outPut = _leadService.GetLeadByEmail(email);
-            return _mapper.Map<LeadOutputModel>(outPut);
-        }
 
         // api/lead/3
         [HttpDelete("{id}")]
@@ -94,8 +87,8 @@ namespace CRM.API.Controllers
             return NoContent();
         }
 
-        // api/lead/account/create
-        [HttpPost("account/create")]
+        // api/lead/account
+        [HttpPost("account")]
         [Description("Create lead account")]
         [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
         public ActionResult<int> AddAccount([FromBody] AccountInputModel inputModel)

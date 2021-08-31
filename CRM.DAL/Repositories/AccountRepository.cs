@@ -1,10 +1,10 @@
-﻿using CRM.DAL.Enums;
+﻿using CRM.Core;
+using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using Dapper;
+using Microsoft.Extensions.Options;
 using System.Data;
 using System.Linq;
-using CRM.Core;
-using Microsoft.Extensions.Options;
 
 namespace CRM.DAL.Repositories
 {
@@ -50,10 +50,9 @@ namespace CRM.DAL.Repositories
                     return result;
                 },
                 new { id },
-                splitOn: "id",
+                splitOn: "Id",
                 commandType: CommandType.StoredProcedure)
               .FirstOrDefault();
         }
-
     }
 }

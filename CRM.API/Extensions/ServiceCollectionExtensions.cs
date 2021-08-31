@@ -1,16 +1,15 @@
 ﻿using CRM.Business.Options;
 using CRM.Core;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-
 
 namespace CRM.API.Extensions
 {
     public static class ServiceCollectionExtensions
     {
-        public static void AddAppConfiguration(this IServiceCollection services,IConfiguration configuration)
+        public static void AddAppConfiguration(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddOptions<DatabaseSettings>()
                 .Bind(configuration.GetSection(nameof(DatabaseSettings)))
@@ -18,6 +17,9 @@ namespace CRM.API.Extensions
             services.AddOptions<AuthSettings>()
                 .Bind(configuration.GetSection(nameof(AuthSettings)))
                 .ValidateDataAnnotations();
+            services.AddOptions<ConnectionUrl>()
+               .Bind(configuration.GetSection(nameof(ConnectionUrl)))
+               .ValidateDataAnnotations();
         }
 
         public static void AddBearerAuthentication(this IServiceCollection services)

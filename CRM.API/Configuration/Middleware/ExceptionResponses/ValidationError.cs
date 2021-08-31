@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace CRM.API.Configuration.Middleware.ExceptionResponses
+﻿namespace CRM.API.Configuration.Middleware.ExceptionResponses
 {
     public class ValidationError
     {

@@ -3,7 +3,6 @@
     public class CityDto
     {
         public int Id;
-
         public string Name;
 
         public override bool Equals(object obj)

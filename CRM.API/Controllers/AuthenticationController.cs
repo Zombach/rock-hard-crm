@@ -25,7 +25,7 @@ namespace CRM.API.Controllers
             _mapper = mapper;
         }
 
-        [HttpPost("/api/register")]
+        [HttpPost("register")]
         [ProducesResponseType(typeof(LeadOutputModel), StatusCodes.Status201Created)]
         public ActionResult<LeadOutputModel> Register([FromBody] LeadInputModel model)
         {
@@ -34,7 +34,7 @@ namespace CRM.API.Controllers
             return StatusCode(201, addedLead);
         }
 
-        [HttpPost("/api/sign-in")]
+        [HttpPost("sign-in")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         public string SignIn(LeadSignInModel model)
         {

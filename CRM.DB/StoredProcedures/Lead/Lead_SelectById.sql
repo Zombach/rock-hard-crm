@@ -12,6 +12,7 @@ BEGIN
 		l.PhoneNumber,
 		l.BirthDate,
 		l.IsDeleted,
+		l.BirthDate,
 		a.Id,
 		a.Currency,
 		a.CreatedOn,

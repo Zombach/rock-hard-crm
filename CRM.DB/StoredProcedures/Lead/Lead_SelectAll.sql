@@ -7,13 +7,10 @@ BEGIN
 		l.LastName,
 		l.Patronymic,
 		l.Email,
-		l.PhoneNumber,
-		l.BirthDate,
-		l.RegistrationDate,
-		c.id,
+		c.Id,
 		c.Name,
 		l.Role as Id
 	FROM dbo.[Lead] l
-	INNER JOIN City c on c.id = l.CityId
+	INNER JOIN City c on c.Id = l.CityId
 	WHERE IsDeleted = 0
 END

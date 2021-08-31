@@ -1,11 +1,11 @@
-﻿using CRM.DAL.Enums;
+﻿using CRM.Core;
+using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using Dapper;
+using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using CRM.Core;
-using Microsoft.Extensions.Options;
 
 namespace CRM.DAL.Repositories
 {
@@ -17,41 +17,43 @@ namespace CRM.DAL.Repositories
         private const string _deleteLeadByIdProcedure = "dbo.Lead_Delete";
         private const string _getLeadByEmailProcedure = "dbo.Lead_SelectByEmail";
         private const string _getAllLeadsProcedure = "dbo.Lead_SelectAll";
+        private const string _getLeadsByCityProcedure = "dbo.Lead_SelectByCity";
 
         public LeadRepository(IOptions<DatabaseSettings> options) : base(options) { }
 
-        public int AddLead(LeadDto dto)
+        public int AddLead(LeadDto lead)
         {
             return _connection.QuerySingleOrDefault<int>(
                 _insertLeadProcedure,
                 new
                 {
-                    dto.FirstName,
-                    dto.LastName,
-                    dto.Patronymic,
-                    dto.Email,
-                    dto.PhoneNumber,
-                    dto.Password,
-                    dto.BirthDate,
-                    role = (int)dto.Role,
-                    cityId = dto.City.Id
+                    lead.FirstName,
+                    lead.LastName,
+                    lead.Patronymic,
+                    lead.Email,
+                    lead.PhoneNumber,
+                    lead.Password,
+                    role = (int)lead.Role,
+                    cityId = lead.City.Id,
+                    lead.BirthDate
                 },
                 commandType: CommandType.StoredProcedure
             );
         }
 
-        public void UpdateLead(LeadDto dto)
+        public void UpdateLead(LeadDto lead)
         {
             _connection.Execute(
                 _updateLeadProcedure,
                 new
                 {
-                    dto.Id,
-                    dto.FirstName,
-                    dto.LastName,
-                    dto.Patronymic,
-                    dto.Email,
-                    dto.PhoneNumber,
+                    lead.Id,
+                    lead.FirstName,
+                    lead.LastName,
+                    lead.Patronymic,
+                    lead.Email,
+                    lead.PhoneNumber,
+                    lead.BirthDate
                 },
                 commandType: CommandType.StoredProcedure
             );
