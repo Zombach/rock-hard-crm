@@ -1,5 +1,4 @@
-﻿using CRM.Business.FilterModels;
-using CRM.DAL.Models;
+﻿using CRM.DAL.Models;
 using System.Collections.Generic;
 using CRM.Business.IdentityInfo;
 
@@ -14,6 +13,6 @@ namespace CRM.Business.Services
         LeadDto UpdateLead(int id, LeadDto dto, UserIdentityInfo userIdentityInfo);
         int AddAccount(AccountDto dto);
         void DeleteAccount(int id);
-        List<LeadDto> GetLeadsByFilters(LeadFilterModel filters);
+        List<LeadDto> GetLeadsByFilters(LeadFiltersDto filter);
     }
 }

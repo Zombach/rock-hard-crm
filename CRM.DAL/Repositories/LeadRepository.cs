@@ -2,6 +2,7 @@
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using Dapper;
+using DapperQueryBuilder;
 using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using System.Data;
@@ -17,6 +18,7 @@ namespace CRM.DAL.Repositories
         private const string _deleteLeadByIdProcedure = "dbo.Lead_Delete";
         private const string _getLeadByEmailProcedure = "dbo.Lead_SelectByEmail";
         private const string _getAllLeadsProcedure = "dbo.Lead_SelectAll";
+        private const string _getAllLeadsByFilters = "dbo.Lead_SelectAllByFilters";
 
         public LeadRepository(IOptions<DatabaseSettings> options) : base(options) { }
 
@@ -60,7 +62,7 @@ namespace CRM.DAL.Repositories
 
         public List<LeadDto> GetAllLeads()
         {
-            var leadDictionary = new Dictionary<int, LeadDto>();
+            //var leadDictionary = new Dictionary<int, LeadDto>();
             return _connection
                 .Query<LeadDto, CityDto, Role, LeadDto>(
                 _getAllLeadsProcedure,
@@ -128,6 +130,53 @@ namespace CRM.DAL.Repositories
                 _deleteLeadByIdProcedure,
                 new { id },
                 commandType: CommandType.StoredProcedure);
+        }
+
+        public List<LeadDto> GetLeadsByFilters(LeadFiltersDto filter)
+        {
+            var query = _connection.QueryBuilder
+                            (@$"SELECT 
+		                    l.Id,
+		                    l.FirstName,
+		                    l.LastName,
+		                    l.Patronymic,
+		                    l.Email,
+		                    c.Id,
+		                    c.Name,
+		                    l.Role as Id
+	                        FROM dbo.[Lead] l
+	                        INNER JOIN City c on c.Id = l.CityId 
+                            WHERE IsDeleted = 0 ");
+
+            if (filter.SearchType == SearchType.StartsWith)
+            {
+                query.AppendLine($"AND l.FirstName LIKE {filter.FirstName}%");
+                query.AppendLine($"AND l.LastName LIKE {filter.LastName}%");
+                query.AppendLine($"AND l.Patronymic LIKE {filter.Patronymic}%");
+                //query.Where($"FirstName LIKE {firstName}");
+                //query.Where($"LastName LIKE {lastName}");
+                //query.Where($"Patronymic LIKE '{patronymic}'");
+            }
+
+            var result =  _connection
+                .Query<LeadDto, CityDto, Role, LeadDto>(
+                query.Sql,
+                (lead, city, role) =>
+                {
+                    lead.Role = role;
+                    lead.City = city;
+                    return lead;
+                },
+                new
+                {
+                    filter.FirstName,
+                    filter.LastName,
+                    filter.Patronymic
+                },
+                commandType: CommandType.Text,
+                splitOn: "Id")
+                .ToList();
+            return result;
         }
     }
 }

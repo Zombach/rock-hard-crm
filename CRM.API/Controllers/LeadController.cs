@@ -1,11 +1,7 @@
 ﻿using AutoMapper;
-using CRM.API.Common;
 using CRM.API.Models;
-using CRM.Business.FilterModels;
 using CRM.Business.Services;
-using CRM.DAL.Enums;
 using CRM.DAL.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -57,12 +53,12 @@ namespace CRM.API.Controllers
         [HttpPost("/filter")]
         [Description("Get all Leads by filters")]
         [ProducesResponseType(typeof(List<LeadOutputModel>), StatusCodes.Status200OK)]
-        public List<LeadOutputModel> GetAllLeadsByFilters([FromBody] LeadFilterInputModel leadFilter)
+        public List<LeadOutputModel> GetAllLeadsByFilters([FromBody] LeadFiltersInputModel leadFilter)
         {
-            var filterModel = _mapper.Map<LeadFilterModel>(leadFilter);
-            var listDto = _leadService.GetLeadsByFilters(filterModel); 
-            var listOutPut = _mapper.Map<List<LeadOutputModel>>(listDto);
-            return listOutPut;
+            var filter = _mapper.Map<LeadFiltersDto>(leadFilter);
+            var leads = _leadService.GetLeadsByFilters(filter); 
+            var result = _mapper.Map<List<LeadOutputModel>>(leads);
+            return result;
         }
 
         // api/lead/3

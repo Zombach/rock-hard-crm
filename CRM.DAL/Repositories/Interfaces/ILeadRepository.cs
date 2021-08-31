@@ -11,5 +11,6 @@ namespace CRM.DAL.Repositories
         LeadDto GetLeadByEmail(string email);
         LeadDto GetLeadById(int id);
         void UpdateLead(LeadDto lead);
+        List<LeadDto> GetLeadsByFilters(LeadFiltersDto filter);
     }
 }

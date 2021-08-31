@@ -1,11 +1,9 @@
 ﻿using CRM.DAL.Enums;
-using CRM.DAL.Models;
-using System;
 using System.Collections.Generic;
 
-namespace CRM.Business.FilterModels
+namespace CRM.DAL.Models
 {
-    public class LeadFilterModel
+    public class LeadFiltersDto
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
@@ -13,7 +11,7 @@ namespace CRM.Business.FilterModels
         public SearchType SearchType { get; set; }
         public List<Role> Roles { get; set; }
         public List<CityDto> Cities { get; set; }
-        public DateTime? BirthDateFrom { get; set; }
-        public DateTime? BirthDateTo { get; set; }
+        public string BirthDateFrom { get; set; }
+        public string BirthDateTo { get; set; }
     }
 }

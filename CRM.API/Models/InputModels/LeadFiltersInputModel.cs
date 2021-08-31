@@ -5,19 +5,19 @@ using CRM.API.Common;
 
 namespace CRM.API.Models
 {
-    public class LeadFilterInputModel
+    public class LeadFiltersInputModel
     {
+        public int? SearchType { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Patronymic { get; set; }
-        public int? SearchType { get; set; }
         public List<Role> Roles { get; set; }
-        public List<CityInputModel> Cities { get; set; }
+        public List<int> Cities { get; set; }
 
-        [CustomDateFormatAttribute(ErrorMessage = WrongDateFormat)]
+        [CustomDateFormat(ErrorMessage = WrongDateFormat)]
         public string BirthDateFrom { get; set; }
 
-        [CustomDateFormatAttribute(ErrorMessage = WrongDateFormat)]
+        [CustomDateFormat(ErrorMessage = WrongDateFormat)]
         public string BirthDateTo { get; set; }
     }
 }
