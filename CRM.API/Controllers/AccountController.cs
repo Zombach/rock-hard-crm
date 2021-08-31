@@ -1,14 +1,14 @@
 ﻿using AutoMapper;
+using CRM.API.Extensions;
 using CRM.API.Models;
 using CRM.Business.Models;
 using CRM.Business.Services;
 using CRM.DAL.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.ComponentModel;
-using CRM.API.Extensions;
-using Microsoft.AspNetCore.Authorization;
 
 namespace CRM.API.Controllers
 {
@@ -32,9 +32,9 @@ namespace CRM.API.Controllers
         [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
         public ActionResult<int> AddAccount([FromBody] AccountInputModel inputModel)
         {
-            var userInfo = this.GetUserIdAndRoles();
+            var leadId = this.GetLeadId();
             var dto = _mapper.Map<AccountDto>(inputModel);
-            var accountId = _accountService.AddAccount(dto, userInfo);
+            var accountId = _accountService.AddAccount(dto, leadId);
             return StatusCode(201, accountId);
         }
 
@@ -44,8 +44,8 @@ namespace CRM.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult DeleteAccountById(int id)
         {
-            var userInfo = this.GetUserIdAndRoles();
-            _accountService.DeleteAccount(id, userInfo);
+            var leadId = this.GetLeadId();
+            _accountService.DeleteAccount(id, leadId);
             return NoContent();
         }
 
@@ -55,8 +55,8 @@ namespace CRM.API.Controllers
         [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
         public ActionResult<List<TransactionBusinessModel>> GetAccountWithTransactions(int accountId)
         {
-            var userInfo = this.GetUserIdAndRoles();
-            var output = _accountService.GetAccountWithTransactions(accountId, userInfo);
+            var leadId = this.GetLeadId();
+            var output = _accountService.GetAccountWithTransactions(accountId, leadId);
             return StatusCode(201, output);
         }
     }

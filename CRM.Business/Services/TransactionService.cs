@@ -1,7 +1,7 @@
 ﻿using CRM.Business.Models;
 using CRM.Business.Requests;
 using CRM.Core;
-using CRM.DAL.Repositories;
+using DevEdu.Business.ValidationHelpers;
 using Microsoft.Extensions.Options;
 using RestSharp;
 using static CRM.Business.TransactionEndpoint;
@@ -12,19 +12,25 @@ namespace CRM.Business.Services
     {
         private readonly RestClient _client;
         private readonly RequestHelper _requestHelper;
-        private readonly IAccountRepository _accountRepository;
+        private readonly IAccountValidationHelper _accountValidationHelper;
 
-        public TransactionService(IOptions<ConnectionUrl> options, IAccountRepository accountRepository)
+        public TransactionService
+        (
+            IOptions<ConnectionUrl> options,
+            IAccountValidationHelper accountValidationHelper
+        )
         {
             _client = new RestClient(options.Value.TstoreUrl);
             _requestHelper = new RequestHelper();
-            _accountRepository = accountRepository;
+            _accountValidationHelper = accountValidationHelper;
         }
 
         public long AddDeposit(int accountId, TransactionBusinessModel model)
         {
-            model.AccountId = accountId;
-            model.Currency = _accountRepository.GetAccountById(accountId).Currency;
+            var account = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(accountId);
+            model.AccountId = account.Id;
+            model.Currency = account.Currency;
+
             var request = _requestHelper.CreatePostRequest(AddDepositEndpoint, model);
             var result = _client.Execute<long>(request);
             return result.Data;
@@ -32,8 +38,10 @@ namespace CRM.Business.Services
 
         public long AddWithdraw(int accountId, TransactionBusinessModel model)
         {
-            model.AccountId = accountId;
-            model.Currency = _accountRepository.GetAccountById(accountId).Currency;
+            var account = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(accountId);
+            model.AccountId = account.Id;
+            model.Currency = account.Currency;
+
             var request = _requestHelper.CreatePostRequest(AddWithdrawEndpoint, model);
             var result = _client.Execute<long>(request);
             return result.Data;
@@ -41,8 +49,11 @@ namespace CRM.Business.Services
 
         public string AddTransfer(TransferBusinessModel model)
         {
-            model.Currency = _accountRepository.GetAccountById(model.AccountId).Currency;
-            model.RecipientCurrency = _accountRepository.GetAccountById(model.RecipientAccountId).Currency;
+            var account = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(model.AccountId);
+            var recipientAccount= _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(model.RecipientAccountId);
+
+            model.Currency = account.Currency;
+            model.RecipientCurrency = recipientAccount.Currency;
             var request = _requestHelper.CreatePostRequest(AddTransferEndpoint, model);
             var result = _client.Execute<string>(request);
             return result.Data;
