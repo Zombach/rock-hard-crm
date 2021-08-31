@@ -20,6 +20,7 @@ namespace CRM.API.Controllers
     {
         private readonly IMapper _mapper;
         private readonly ILeadService _leadService;
+        private readonly IAccountService _accountService;
 
         public LeadController(IMapper mapper, ILeadService leadService)
         {
@@ -79,8 +80,9 @@ namespace CRM.API.Controllers
         [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
         public ActionResult<int> AddAccount([FromBody] AccountInputModel inputModel)
         {
+            var userInfo = this.GetUserIdAndRoles();
             var dto = _mapper.Map<AccountDto>(inputModel);
-            var accountId = _leadService.AddAccount(dto);
+            var accountId = _accountService.AddAccount(dto, userInfo);
             return StatusCode(201, accountId);
         }
 
@@ -90,7 +92,8 @@ namespace CRM.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult DeleteAccountById(int id)
         {
-            _leadService.DeleteAccount(id);
+            var userInfo = this.GetUserIdAndRoles();
+            _accountService.DeleteAccount(id, userInfo);
             return NoContent();
         }
     }
