@@ -151,15 +151,15 @@ namespace CRM.DAL.Repositories
 	           //             INNER JOIN City c on c.Id = l.CityId 
             //                WHERE IsDeleted = 0 ");
 
-            //if (filter.SearchType == SearchType.StartsWith)
-            //{
-            //    query.AppendLine($"AND l.FirstName LIKE {filter.FirstName}%");
-            //    query.AppendLine($"AND l.LastName LIKE {filter.LastName}%");
-            //    query.AppendLine($"AND l.Patronymic LIKE {filter.Patronymic}%");
-            //    //query.Where($"FirstName LIKE {firstName}");
-            //    //query.Where($"LastName LIKE {lastName}");
-            //    //query.Where($"Patronymic LIKE '{patronymic}'");
-            //}
+            if (filter.SearchType == SearchType.StartsWith)
+            {
+                query.AppendLine($"AND l.FirstName LIKE {filter.FirstName}%");
+                query.AppendLine($"AND l.LastName LIKE {filter.LastName}%");
+                query.AppendLine($"AND l.Patronymic LIKE {filter.Patronymic}%");
+                //query.Where($"FirstName LIKE {firstName}");
+                //query.Where($"LastName LIKE {lastName}");
+                //query.Where($"Patronymic LIKE '{patronymic}'");
+            }
 
             var sql = sqlBuilder.ToString();
 
