@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
-using CRM.DAL.Enums;
+﻿using CRM.DAL.Enums;
+using System.ComponentModel.DataAnnotations;
 using static CRM.API.Common.ValidationMessage;
 
 namespace CRM.API.Models

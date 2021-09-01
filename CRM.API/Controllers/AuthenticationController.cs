@@ -15,10 +15,12 @@ namespace CRM.API.Controllers
         private readonly IAuthenticationService _authService;
         private readonly IMapper _mapper;
 
-        public AuthenticationController(
+        public AuthenticationController
+        (
             IMapper mapper,
             IAuthenticationService authService,
-            ILeadService leadService)
+            ILeadService leadService
+        )
         {
             _authService = authService;
             _leadService = leadService;
