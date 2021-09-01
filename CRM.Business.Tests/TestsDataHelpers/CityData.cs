@@ -16,7 +16,7 @@ namespace CRM.Business.Tests.TestsDataHelpers
 
         public static List<CityDto> GetListCityDto()
         {
-            return new List<CityDto>()
+            return new List<CityDto>
             {
                 new()
                 {
