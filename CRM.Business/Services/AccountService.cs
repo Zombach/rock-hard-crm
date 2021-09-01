@@ -20,6 +20,14 @@ namespace CRM.Business.Services
         private readonly RestClient _client;
         private readonly RequestHelper _requestHelper;
 
+        public AccountService(IAccountRepository accountRepository, RestClient client, IMapper mapper, RequestHelper requestHelper)
+        {
+            _accountRepository = accountRepository;
+            _mapper = mapper;
+            _client = client;
+            _requestHelper = requestHelper;
+        }
+
         public AccountService(IAccountRepository accountRepository, IOptions<ConnectionUrl> options, IMapper mapper)
         {
             _accountRepository = accountRepository;
