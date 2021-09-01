@@ -1,4 +1,5 @@
 ﻿using CRM.DAL.Enums;
+using System;
 using System.Collections.Generic;
 
 namespace CRM.DAL.Models
@@ -9,9 +10,9 @@ namespace CRM.DAL.Models
         public string LastName { get; set; }
         public string Patronymic { get; set; }
         public SearchType SearchType { get; set; }
-        public List<Role> Roles { get; set; }
-        public List<CityDto> Cities { get; set; }
-        public string BirthDateFrom { get; set; }
-        public string BirthDateTo { get; set; }
+        public int? Role { get; set; }
+        public int? City { get; set; }
+        public DateTime BirthDateFrom { get; set; }
+        public DateTime BirthDateTo { get; set; }
     }
 }

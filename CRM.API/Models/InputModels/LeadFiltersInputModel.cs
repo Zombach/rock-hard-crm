@@ -11,8 +11,8 @@ namespace CRM.API.Models
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Patronymic { get; set; }
-        public List<Role> Roles { get; set; }
-        public List<int> Cities { get; set; }
+        public int? Role { get; set; }
+        public int? City { get; set; }
 
         [CustomDateFormat(ErrorMessage = WrongDateFormat)]
         public string BirthDateFrom { get; set; }
