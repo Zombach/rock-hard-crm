@@ -12,7 +12,7 @@ namespace CRM.API.Models
         public string LastName { get; set; }
         public string Patronymic { get; set; }
         public int? Role { get; set; }
-        public int? City { get; set; }
+        public List<int> City { get; set; }
 
         [CustomDateFormat(ErrorMessage = WrongDateFormat)]
         public string BirthDateFrom { get; set; }
