@@ -5,6 +5,7 @@ using CRM.Business.Options;
 using CRM.Business.Services;
 using CRM.Core;
 using CRM.DAL.Repositories;
+using DevEdu.Business.ValidationHelpers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -46,6 +47,9 @@ namespace CRM.API
             services.AddScoped<ICityService, CityService>();
             services.AddScoped<IAuthenticationService, AuthenticationService>();
             services.AddScoped<ITransactionService, TransactionService>();
+
+            services.AddScoped<ILeadValidationHelper, LeadValidationHelper>();
+            services.AddScoped<IAccountValidationHelper, AccountValidationHelper>();
 
             services.AddControllersWithViews();
 

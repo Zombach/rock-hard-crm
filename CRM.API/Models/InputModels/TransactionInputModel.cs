@@ -5,8 +5,8 @@ namespace CRM.API.Models
 {
     public class TransactionInputModel
     {
+        [Required(ErrorMessage = AccountRequired)]
         public int AccountId { get; set; }
-        public int RecipientId { get; set; }
 
         [Required(ErrorMessage = AmountRequired)]
         public decimal Amount { get; set; }

@@ -30,7 +30,6 @@ namespace CRM.API.Configuration
             CreateMap<LeadFiltersInputModel, LeadFiltersDto>()
                 .ForMember(dest => dest.BirthDateFrom, opt => opt.MapFrom(src => DateTime.ParseExact(src.BirthDateFrom, _dateFormat, CultureInfo.InvariantCulture)))
                 .ForMember(dest => dest.BirthDateTo, opt => opt.MapFrom(src => DateTime.ParseExact(src.BirthDateTo, _dateFormat, CultureInfo.InvariantCulture)));
-            
         }
 
         private void CreateMappingFromDto()

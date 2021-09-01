@@ -9,6 +9,8 @@
         public const string WrongEmailFormat = "You've got to use the correct email format";
         public const string NameRequired = "Name must be provided";
         public const string AmountRequired = "Amount must be provided";
+        public const string AccountRequired = "Account id must be provided";
+        public const string RecipientAccountRequired = "Recipient account id must be provided";
         public const string CurrencyRequired = "Currency must be provided";
         public const string PasswordRequired = "Password must be provided";
         public const string WrongFormatPassword = "Password must contain at least 8 characters";

@@ -138,31 +138,6 @@ namespace CRM.DAL.Repositories
 
         public List<LeadDto> GetLeadsByFilters(LeadFiltersDto filter)
         {
-            //var query = _connection.QueryBuilder
-            //                (@$"SELECT 
-            //          l.Id,
-            //          l.FirstName,
-            //          l.LastName,
-            //          l.Patronymic,
-            //          l.Email,
-            //          c.Id,
-            //          c.Name,
-            //          l.Role as Id
-            //             FROM dbo.[Lead] l
-            //             INNER JOIN City c on c.Id = l.CityId 
-            //                WHERE IsDeleted = 0 ");
-
-            //if (filter.SearchType == SearchType.StartsWith)
-            //{
-            //    query.AppendLine($"AND l.FirstName LIKE {filter.FirstName}%");
-            //    query.AppendLine($"AND l.LastName LIKE {filter.LastName}%");
-            //    query.AppendLine($"AND l.Patronymic LIKE {filter.Patronymic}%");
-            //    //query.Where($"FirstName LIKE {firstName}");
-            //    //query.Where($"LastName LIKE {lastName}");
-            //    //query.Where($"Patronymic LIKE '{patronymic}'");
-            //}
-
-            //var sql = sqlBuilder.ToString();
             var table = new DataTable();
             table.Columns.Add("CityId");
 
