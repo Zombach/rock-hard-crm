@@ -8,6 +8,7 @@ using DevEdu.Business.ValidationHelpers;
 using Microsoft.Extensions.Options;
 using RestSharp;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using static CRM.Business.TransactionEndpoint;
 
 namespace CRM.Business.Services
@@ -50,7 +51,7 @@ namespace CRM.Business.Services
         public void DeleteAccount(int id, int leadId)
         {
             var dto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(id);
-            _accountValidationHelper.CheckLeadAccessToAccount(dto.Id, leadId);
+            _accountValidationHelper.CheckLeadAccessToAccount(dto.LeadId, leadId);
 
             _accountRepository.DeleteAccount(id);
         }
@@ -58,19 +59,33 @@ namespace CRM.Business.Services
         public AccountBusinessModel GetAccountWithTransactions(int id, int leadId)
         {
             var dto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(id);
-            _accountValidationHelper.CheckLeadAccessToAccount(dto.Id, leadId);
+            _accountValidationHelper.CheckLeadAccessToAccount(dto.LeadId, leadId);
 
             var accountModel = _mapper.Map<AccountBusinessModel>(dto);
             var request = _requestHelper.CreateGetRequest($"{GetTransactionsByAccountIdEndpoint}{id}");
 
-            var transactions = _client.Execute<List<TransactionBusinessModel>>(request).Data;
-            if (transactions == null) return accountModel;
+            var response = _client.Execute<string>(request);
+            var transfers = new List<TransferBusinessModel>();
+            var transactions = new List<TransactionBusinessModel>();
+            var result = JsonConvert.DeserializeObject<List<TransferBusinessModel>>(response.Data);
 
+            if (result!=null)
+                foreach (var obj in result)
+                {
+                    if (obj.RecipientAccountId != default)
+                    {
+                        transfers.Add(obj);
+                    }
+                    else
+                    {
+                        transactions.Add(obj);
+                    }
+                    accountModel.Balance += obj.Amount;
+                }
+            
             accountModel.Transactions = transactions;
-            foreach (var transaction in accountModel.Transactions)
-            {
-                accountModel.Balance += transaction.Amount;
-            }
+            accountModel.Transfers = transfers;
+
             return accountModel;
         }
     }
