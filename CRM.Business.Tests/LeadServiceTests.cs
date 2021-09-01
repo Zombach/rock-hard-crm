@@ -11,11 +11,11 @@ namespace CRM.Business.Tests
 {
     public class LeadServiceTests
     {
-        private Mock< ILeadRepository> _leadRepoMock;
-        private Mock< IAccountRepository> _accountRepoMock;
+        private Mock<ILeadRepository> _leadRepoMock;
+        private Mock<IAccountRepository> _accountRepoMock;
         private IAuthenticationService _authenticationService;
-        private LeadService _sut;
         private IAuthOptions _authOptions;
+        private LeadService _sut;
 
 
         [SetUp]
@@ -40,9 +40,9 @@ namespace CRM.Business.Tests
             var actualLeadDto = _sut.AddLead(input);
 
             //Then
-            Assert.AreEqual(expectedLeadDto,actualLeadDto);
-            _leadRepoMock.Verify(x=>x.AddLead(input),Times.Once);
-            _leadRepoMock.Verify(x=>x.GetLeadById(expectedLeadDto.Id),Times.Once);
+            Assert.AreEqual(expectedLeadDto, actualLeadDto);
+            _leadRepoMock.Verify(x => x.AddLead(input), Times.Once);
+            _leadRepoMock.Verify(x => x.GetLeadById(expectedLeadDto.Id), Times.Once);
         }
 
         [Test]
@@ -51,7 +51,7 @@ namespace CRM.Business.Tests
             //Given
             var input = LeadData.GetInputLeadDto();
             var expectedLeadDto = LeadData.GetLead();
-            var userInfo = UserIdentityInfoData.GetUserIdentityInfo(expectedLeadDto.Id,new List<Role>{expectedLeadDto.Role});
+            var userInfo = UserIdentityInfoData.GetUserIdentityInfo(expectedLeadDto.Id, new List<Role> { expectedLeadDto.Role });
             _leadRepoMock.Setup(x => x.UpdateLead(input));
             _leadRepoMock.Setup(x => x.GetLeadById(expectedLeadDto.Id)).Returns(expectedLeadDto);
 
@@ -59,9 +59,9 @@ namespace CRM.Business.Tests
             var actualLeadDto = _sut.UpdateLead(expectedLeadDto.Id, input, userInfo);
 
             //Then
-            Assert.AreEqual(expectedLeadDto,actualLeadDto);
-            _leadRepoMock.Verify(x=>x.UpdateLead(input),Times.Once);
-            _leadRepoMock.Verify(x=>x.GetLeadById(expectedLeadDto.Id), Times.Once);
+            Assert.AreEqual(expectedLeadDto, actualLeadDto);
+            _leadRepoMock.Verify(x => x.UpdateLead(input), Times.Once);
+            _leadRepoMock.Verify(x => x.GetLeadById(expectedLeadDto.Id), Times.Once);
         }
 
         [Test]
@@ -103,7 +103,7 @@ namespace CRM.Business.Tests
 
 
             //When
-           _sut.DeleteLeadById(expectedLeadDto.Id);
+            _sut.DeleteLeadById(expectedLeadDto.Id);
 
             //Then
             _leadRepoMock.Verify(x => x.DeleteLeadById(expectedLeadDto.Id), Times.Once);

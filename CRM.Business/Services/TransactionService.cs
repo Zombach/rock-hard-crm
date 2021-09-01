@@ -14,6 +14,13 @@ namespace CRM.Business.Services
         private readonly RequestHelper _requestHelper;
         private readonly IAccountRepository _accountRepository;
 
+        public TransactionService(IAccountRepository accountRepository, RestClient restClient)
+        {
+            _client = restClient;
+            _accountRepository = accountRepository;
+            _requestHelper = new RequestHelper();
+        }
+
         public TransactionService(IOptions<ConnectionUrl> options, IAccountRepository accountRepository)
         {
             _client = new RestClient(options.Value.TstoreUrl);

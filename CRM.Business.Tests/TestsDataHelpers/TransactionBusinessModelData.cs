@@ -7,6 +7,29 @@ namespace CRM.Business.Tests.TestsDataHelpers
 {
     public static class TransactionBusinessModelData
     {
+        public static TransactionBusinessModel GeTransactionBusinessModel()
+        {
+            return new()
+            {
+                Id = 1,
+                AccountId = 1,
+                Currency = Currency.RUB,
+                TransactionType = TransactionType.Deposit,
+                Date = DateTime.Now,
+                Amount = decimal.One
+            };
+        }
+
+        public static TransferBusinessModel GetTransferBusinessModel()
+        {
+            return new()
+            {
+                RecipientAccountId = 1,
+                RecipientAmount = 12,
+                RecipientCurrency = Currency.RUB
+            };
+        }
+
         public static List<TransactionBusinessModel> GetListTransactionBusinessModel()
         {
             return new()
