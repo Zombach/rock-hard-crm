@@ -4,9 +4,12 @@ using CRM.DAL.Models;
 using Dapper;
 using DapperQueryBuilder;
 using Microsoft.Extensions.Options;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text;
+using static System.FormattableString;
 
 namespace CRM.DAL.Repositories
 {
@@ -158,7 +161,9 @@ namespace CRM.DAL.Repositories
             //    //query.Where($"Patronymic LIKE '{patronymic}'");
             //}
 
-            var result =  _connection
+            var sql = sqlBuilder.ToString();
+
+            var result = _connection
                 .Query<LeadDto, CityDto, Role, LeadDto>(
                 _getAllLeadsByFilters,
                 (lead, city, role) =>
