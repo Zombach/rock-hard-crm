@@ -134,33 +134,33 @@ namespace CRM.DAL.Repositories
 
         public List<LeadDto> GetLeadsByFilters(LeadFiltersDto filter)
         {
-            var query = _connection.QueryBuilder
-                            (@$"SELECT 
-		                    l.Id,
-		                    l.FirstName,
-		                    l.LastName,
-		                    l.Patronymic,
-		                    l.Email,
-		                    c.Id,
-		                    c.Name,
-		                    l.Role as Id
-	                        FROM dbo.[Lead] l
-	                        INNER JOIN City c on c.Id = l.CityId 
-                            WHERE IsDeleted = 0 ");
+            //var query = _connection.QueryBuilder
+            //                (@$"SELECT 
+		          //          l.Id,
+		          //          l.FirstName,
+		          //          l.LastName,
+		          //          l.Patronymic,
+		          //          l.Email,
+		          //          c.Id,
+		          //          c.Name,
+		          //          l.Role as Id
+	           //             FROM dbo.[Lead] l
+	           //             INNER JOIN City c on c.Id = l.CityId 
+            //                WHERE IsDeleted = 0 ");
 
-            if (filter.SearchType == SearchType.StartsWith)
-            {
-                query.AppendLine($"AND l.FirstName LIKE {filter.FirstName}%");
-                query.AppendLine($"AND l.LastName LIKE {filter.LastName}%");
-                query.AppendLine($"AND l.Patronymic LIKE {filter.Patronymic}%");
-                //query.Where($"FirstName LIKE {firstName}");
-                //query.Where($"LastName LIKE {lastName}");
-                //query.Where($"Patronymic LIKE '{patronymic}'");
-            }
+            //if (filter.SearchType == SearchType.StartsWith)
+            //{
+            //    query.AppendLine($"AND l.FirstName LIKE {filter.FirstName}%");
+            //    query.AppendLine($"AND l.LastName LIKE {filter.LastName}%");
+            //    query.AppendLine($"AND l.Patronymic LIKE {filter.Patronymic}%");
+            //    //query.Where($"FirstName LIKE {firstName}");
+            //    //query.Where($"LastName LIKE {lastName}");
+            //    //query.Where($"Patronymic LIKE '{patronymic}'");
+            //}
 
             var result =  _connection
                 .Query<LeadDto, CityDto, Role, LeadDto>(
-                query.Sql,
+                _getAllLeadsByFilters,
                 (lead, city, role) =>
                 {
                     lead.Role = role;
@@ -171,9 +171,14 @@ namespace CRM.DAL.Repositories
                 {
                     filter.FirstName,
                     filter.LastName,
-                    filter.Patronymic
+                    filter.Patronymic,
+                    filter.SearchType,
+                    filter.Role,
+                    filter.City,
+                    filter.BirthDateFrom,
+                    filter.BirthDateTo
                 },
-                commandType: CommandType.Text,
+                commandType: CommandType.StoredProcedure,
                 splitOn: "Id")
                 .ToList();
             return result;
