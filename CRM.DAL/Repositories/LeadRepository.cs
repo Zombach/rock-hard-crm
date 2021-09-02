@@ -4,12 +4,12 @@ using CRM.DAL.Models;
 using Dapper;
 using DapperQueryBuilder;
 using Microsoft.Extensions.Options;
-using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Text;
-using static System.FormattableString;
+using SqlKata;
+using SqlKata.Compilers;
+using System;
 
 namespace CRM.DAL.Repositories
 {
@@ -21,7 +21,6 @@ namespace CRM.DAL.Repositories
         private const string _deleteLeadByIdProcedure = "dbo.Lead_Delete";
         private const string _getLeadByEmailProcedure = "dbo.Lead_SelectByEmail";
         private const string _getAllLeadsProcedure = "dbo.Lead_SelectAll";
-        private const string _getAllLeadsByFilters = "dbo.Lead_SelectAllByFilters";
         private const string _cities = "dbo.Cities";
 
         public LeadRepository(IOptions<DatabaseSettings> options) : base(options) { }
@@ -138,37 +137,79 @@ namespace CRM.DAL.Repositories
 
         public List<LeadDto> GetLeadsByFilters(LeadFiltersDto filter)
         {
-            var table = new DataTable();
-            table.Columns.Add("CityId");
 
-            foreach (var city in filter.City)
+            var firstName = CreateStringBySearchingType(filter.SearchType, filter.FirstName);
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@p0", firstName);
+
+            var compiler = new SqlServerCompiler();
+
+            var query = new Query("Lead as l").Select("l.Id",
+                                                 "l.FirstName",
+                                                 "l.LastName",
+                                                 "l.Patronymic",
+                                                 "l.Email",
+                                                 "l.BirthDate",
+                                                 "City.Id",
+                                                 "City.Name",
+                                                 "l.Role as Id",
+                                                 "l.RegistrationDate");
+
+            //query = query.Where("l.IsDeleted", 0);
+
+            if (!String.IsNullOrEmpty(filter.FirstName))
             {
-                table.Rows.Add(city);
+
+                query = query.Where("l.FirstName", "LIKE", @firstName);
             }
+            if (!String.IsNullOrEmpty(filter.LastName))
+            {
+                query = query.Where("l.LastName", "LIKE", CreateStringBySearchingType(filter.SearchType, filter.LastName));
+            }
+            if (!String.IsNullOrEmpty(filter.Patronymic))
+            {
+                query = query.Where("l.Patronymic", "LIKE", CreateStringBySearchingType(filter.SearchType, filter.Patronymic));
+            }
+
+            query = query.Join("City", "City.Id", "l.CityId");
+
+            SqlResult sqlResult = compiler.Compile(query);
+
+            string sql = sqlResult.Sql;
+
             var result = _connection
                 .Query<LeadDto, CityDto, Role, LeadDto>(
-                _getAllLeadsByFilters,
+                sql,
                 (lead, city, role) =>
                 {
                     lead.Role = role;
                     lead.City = city;
                     return lead;
                 },
-                new
-                {
-                    filter.FirstName,
-                    filter.LastName,
-                    filter.Patronymic,
-                    filter.SearchType,
-                    filter.Role,
-                    tblCities = table.AsTableValuedParameter(_cities),
-                    filter.BirthDateFrom,
-                    filter.BirthDateTo
-                },
-                commandType: CommandType.StoredProcedure,
-                splitOn: "Id")
+                param: parameters,
+                splitOn: "id",
+                commandType: CommandType.Text)
                 .ToList();
             return result;
+        }
+
+        private string CreateStringBySearchingType(SearchType searchType, String searchingString)
+        {
+            switch (searchType)
+            {
+                case SearchType.StartsWith:
+                    searchingString = searchingString + "%";
+                    break;
+                case SearchType.Contains:
+                    searchingString = "%" + searchingString + "%";
+                    break;
+                case SearchType.EndsWith:
+                    searchingString = "%" + searchingString;
+                    break;
+            }
+
+            return searchingString;
         }
     }
 }
