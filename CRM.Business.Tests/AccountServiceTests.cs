@@ -1,13 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Net;
 using AutoMapper;
+using CRM.Business.Constants;
+using CRM.Business.Exceptions;
 using CRM.Business.Models;
 using CRM.Business.Requests;
 using CRM.Business.Services;
 using CRM.Business.Tests.TestsDataHelpers;
-using CRM.DAL.Enums;
+using static CRM.Business.TransactionEndpoint;
 using CRM.DAL.Repositories;
+using DevEdu.Business.ValidationHelpers;
 using Moq;
 using NUnit.Framework;
 using RestSharp;
@@ -16,33 +17,44 @@ namespace CRM.Business.Tests
 {
     public class AccountServiceTests
     {
+        private IAccountValidationHelper _accountValidationHelper;
         private Mock<IAccountRepository> _accountRepoMock;
+        private Mock<ILeadRepository> _leadRepoMock;
         private Mock<IMapper> _mapperMock;
         private Mock<RestClient> _clientMock;
-        private RequestHelper _requestHelper;
         private AccountService _sut;
+        private Mock<RequestHelper> _requestHelperMock;
 
         [SetUp]
         public void SetUp()
         {
+            _requestHelperMock = new Mock<RequestHelper>();
+            _leadRepoMock = new Mock<ILeadRepository>();
             _clientMock = new Mock<RestClient>();
             _mapperMock = new Mock<IMapper>();
             _accountRepoMock = new Mock<IAccountRepository>();
-            _requestHelper = new RequestHelper();
-            _sut = new AccountService(_accountRepoMock.Object, _clientMock.Object, _mapperMock.Object, _requestHelper);
+            _accountValidationHelper = new AccountValidationHelper(_accountRepoMock.Object);
+            _sut = new AccountService
+            (
+                _accountRepoMock.Object,
+                _leadRepoMock.Object,
+                _mapperMock.Object,
+                _accountValidationHelper,
+                _clientMock.Object,
+                _requestHelperMock.Object);
         }
 
         [Test]
         public void AddAccount()
         {
             //Given
+            var lead = LeadData.GetLead();
             var expectedAccount = AccountData.GetAccountDto();
-            var userInfo =
-                UserIdentityInfoData.GetUserIdentityInfo(expectedAccount.LeadId, new List<Role> { Role.Regular });
             _accountRepoMock.Setup(x => x.AddAccount(expectedAccount)).Returns(expectedAccount.Id);
+            _leadRepoMock.Setup(x => x.GetLeadById(lead.Id)).Returns(lead);
 
             //When
-            var actualId = _sut.AddAccount(expectedAccount, userInfo);
+            var actualId = _sut.AddAccount(expectedAccount, lead.Id);
 
             //Then
             Assert.AreEqual(expectedAccount.Id, actualId);
@@ -54,12 +66,11 @@ namespace CRM.Business.Tests
         {
             //Given
             var account = AccountData.GetAccountDto();
-            var userInfo = UserIdentityInfoData.GetUserIdentityInfo(account.Id, new List<Role> { Role.Regular });
             _accountRepoMock.Setup(x => x.DeleteAccount(account.Id));
             _accountRepoMock.Setup(x => x.GetAccountById(account.Id)).Returns(account);
 
             //When
-            _sut.DeleteAccount(account.Id, userInfo);
+            _sut.DeleteAccount(account.Id, account.LeadId);
 
             //Then
             _accountRepoMock.Verify(x => x.DeleteAccount(account.Id), Times.Once);
@@ -71,13 +82,12 @@ namespace CRM.Business.Tests
             //Given
             var account = AccountData.GetAccountDto();
             var accountAnother = AccountData.GetAnotherAccountDto();
-            var userInfo = UserIdentityInfoData.GetUserIdentityInfo(account.Id, new List<Role> { Role.Regular });
             _accountRepoMock.Setup(x => x.GetAccountById(account.Id)).Returns(accountAnother);
-            var expectedException = "It is not your account";
+            var expectedException = string.Format(ServiceMessages.LeadHasNoAccessMessage, account.LeadId);
 
             //When
-            var ex = Assert.Throws<Exception>(
-                () => _sut.DeleteAccount(account.Id, userInfo));
+            var ex = Assert.Throws<AuthorizationException>(
+                () => _sut.DeleteAccount(account.Id, account.LeadId));
 
             //Then
             Assert.AreEqual(expectedException, ex.Message);
@@ -88,9 +98,9 @@ namespace CRM.Business.Tests
         public void GetAccountWithTransactions()
         {
             var accountDto = AccountData.GetAccountDto();
-            var expectedList = TransactionData.GetListTransactionBusinessModel();
+            var expectedList = TransactionData.GetJSONstring();
             var accountBusinessModel = TransactionData.GetAccountBusinessModel();
-            var userInfo = UserIdentityInfoData.GetUserIdentityInfo(accountDto.LeadId, new List<Role> { Role.Regular });
+            var endPoint = $"{GetTransactionsByAccountIdEndpoint}{accountDto.Id}";
 
             _accountRepoMock.Setup(x => x
                 .GetAccountById(accountDto.Id))
@@ -99,15 +109,17 @@ namespace CRM.Business.Tests
                 .Map<AccountBusinessModel>(accountDto))
                 .Returns(accountBusinessModel);
             _clientMock.Setup(x => x
-                .Execute<List<TransactionBusinessModel>>(It.IsAny<IRestRequest>()))
-                .Returns(new RestResponse<List<TransactionBusinessModel>>
+                .Execute<string>(It.IsAny<IRestRequest>()))
+                .Returns(new RestResponse<string>
                 {
-                    Data = expectedList,
-                    StatusCode = HttpStatusCode.OK
+                    Data = expectedList
+
                 });
+            _requestHelperMock.Setup(x => x.CreateGetRequest(endPoint))
+                .Returns(new RestRequest(endPoint, Method.GET));
 
             //When
-            var actualList = _sut.GetAccountWithTransactions(accountDto.Id, userInfo);
+            var actualList = _sut.GetAccountWithTransactions(accountDto.Id, accountDto.LeadId);
 
             //Then
             Assert.AreEqual(accountBusinessModel, actualList);

@@ -80,9 +80,9 @@ namespace CRM.API.Controllers
         [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
         public ActionResult<int> AddAccount([FromBody] AccountInputModel inputModel)
         {
-            var userInfo = this.GetUserIdAndRoles();
+            var id = this.GetLeadId();
             var dto = _mapper.Map<AccountDto>(inputModel);
-            var accountId = _accountService.AddAccount(dto, userInfo);
+            var accountId = _accountService.AddAccount(dto, id);
             return StatusCode(201, accountId);
         }
 
@@ -92,8 +92,8 @@ namespace CRM.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult DeleteAccountById(int id)
         {
-            var userInfo = this.GetUserIdAndRoles();
-            _accountService.DeleteAccount(id, userInfo);
+            var leadId = this.GetLeadId();
+            _accountService.DeleteAccount(id, leadId);
             return NoContent();
         }
     }

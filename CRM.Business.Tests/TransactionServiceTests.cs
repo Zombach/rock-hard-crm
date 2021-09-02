@@ -1,6 +1,7 @@
 ﻿using CRM.Business.Services;
 using CRM.Business.Tests.TestsDataHelpers;
 using CRM.DAL.Repositories;
+using DevEdu.Business.ValidationHelpers;
 using Moq;
 using NUnit.Framework;
 using RestSharp;
@@ -12,14 +13,15 @@ namespace CRM.Business.Tests
         private Mock<RestClient> _clientMock;
         private Mock<IAccountRepository> _accountRepoMock;
         private TransactionService _sut;
-
+        private IAccountValidationHelper _accountValidationHelper;
 
         [SetUp]
         public void SetUp()
         {
             _accountRepoMock = new Mock<IAccountRepository>();
             _clientMock = new Mock<RestClient>();
-            _sut = new TransactionService(_accountRepoMock.Object, _clientMock.Object);
+            _accountValidationHelper = new AccountValidationHelper(_accountRepoMock.Object);
+            _sut = new TransactionService(_accountValidationHelper, _clientMock.Object);
         }
 
         [Test]
@@ -41,7 +43,7 @@ namespace CRM.Business.Tests
                 });
 
             //When
-            var actual = _sut.AddDeposit(model.Id, model);
+            var actual = _sut.AddDeposit(model);
 
             //Then
             Assert.AreEqual(expected, actual);
@@ -67,7 +69,7 @@ namespace CRM.Business.Tests
                 });
 
             //When
-            var actual = _sut.AddWithdraw(model.Id, model);
+            var actual = _sut.AddWithdraw(model);
 
             //Then
             Assert.AreEqual(expected, actual);

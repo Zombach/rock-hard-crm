@@ -16,6 +16,17 @@ namespace CRM.Business.Services
 
         public TransactionService
         (
+            IAccountValidationHelper accountValidationHelper, 
+            RestClient restClient
+        )
+        {
+            _client = restClient;
+            _accountValidationHelper = accountValidationHelper;
+            _requestHelper = new RequestHelper();
+        }
+
+        public TransactionService
+        (
             IOptions<ConnectionUrl> options,
             IAccountValidationHelper accountValidationHelper
         )

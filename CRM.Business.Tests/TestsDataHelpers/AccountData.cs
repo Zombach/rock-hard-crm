@@ -13,7 +13,7 @@ namespace CRM.Business.Tests.TestsDataHelpers
             {
                 Id = 1,
                 LeadId = 1,
-                Currency = Currency.RUB,
+                Currency = Currency.USD,
                 CreatedOn = DateTime.Now.AddYears(-1),
                 IsDeleted = false
             };
@@ -25,7 +25,7 @@ namespace CRM.Business.Tests.TestsDataHelpers
             {
                 Id = 2,
                 LeadId = 2,
-                Currency = Currency.RUB,
+                Currency = Currency.EUR,
                 CreatedOn = DateTime.Now.AddYears(-1),
                 IsDeleted = false
             };

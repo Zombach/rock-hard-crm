@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using CRM.Business.Models;
 using CRM.DAL.Enums;
+using Newtonsoft.Json;
 
 namespace CRM.Business.Tests.TestsDataHelpers
 {
@@ -64,6 +65,12 @@ namespace CRM.Business.Tests.TestsDataHelpers
                     Amount = decimal.One
                 }
             };
+        }
+
+        public static string GetJSONstring()
+        {
+            var list = GetListTransactionBusinessModel();
+            return JsonConvert.SerializeObject(list);
         }
     }
 }

@@ -26,6 +26,23 @@ namespace CRM.Business.Services
         (
             IAccountRepository accountRepository,
             ILeadRepository leadRepository,
+            IMapper mapper,
+            IAccountValidationHelper accountValidationHelper,
+            RestClient client,
+            RequestHelper requestHelper)
+        {
+            _accountRepository = accountRepository;
+            _leadRepository = leadRepository;
+            _mapper = mapper;
+            _accountValidationHelper = accountValidationHelper;
+            _client = client;
+            _requestHelper = requestHelper;
+        }
+
+        public AccountService
+        (
+            IAccountRepository accountRepository,
+            ILeadRepository leadRepository,
             IOptions<ConnectionUrl> options,
             IMapper mapper,
             IAccountValidationHelper accountValidationHelper
@@ -39,12 +56,12 @@ namespace CRM.Business.Services
             _accountValidationHelper = accountValidationHelper;
         }
 
-        public int AddAccount(AccountDto dto, int leadId)
+        public int AddAccount(AccountDto account, int leadId)
         {
             var lead = _leadRepository.GetLeadById(leadId);
-            _accountValidationHelper.CheckForDuplicateCurrencies(lead, dto.Currency);
-            dto.LeadId = lead.Id;
-            var accountId = _accountRepository.AddAccount(dto);
+            _accountValidationHelper.CheckForDuplicateCurrencies(lead, account.Currency);
+            account.LeadId = lead.Id;
+            var accountId = _accountRepository.AddAccount(account);
             return accountId;
         }
 
@@ -69,7 +86,7 @@ namespace CRM.Business.Services
             var transactions = new List<TransactionBusinessModel>();
             var result = JsonConvert.DeserializeObject<List<TransferBusinessModel>>(response.Data);
 
-            if (result!=null)
+            if (result != null)
                 foreach (var obj in result)
                 {
                     if (obj.RecipientAccountId != default)
@@ -82,7 +99,7 @@ namespace CRM.Business.Services
                     }
                     accountModel.Balance += obj.Amount;
                 }
-            
+
             accountModel.Transactions = transactions;
             accountModel.Transfers = transfers;
 
