@@ -137,12 +137,6 @@ namespace CRM.DAL.Repositories
 
         public List<LeadDto> GetLeadsByFilters(LeadFiltersDto filter)
         {
-
-            var firstName = CreateStringBySearchingType(filter.SearchType, filter.FirstName);
-
-            var parameters = new DynamicParameters();
-            parameters.Add("@p0", firstName);
-
             var compiler = new SqlServerCompiler();
 
             var query = new Query("Lead as l").Select("l.Id",
@@ -155,13 +149,10 @@ namespace CRM.DAL.Repositories
                                                  "City.Name",
                                                  "l.Role as Id",
                                                  "l.RegistrationDate");
-
-            //query = query.Where("l.IsDeleted", 0);
-
+                        
             if (!String.IsNullOrEmpty(filter.FirstName))
             {
-
-                query = query.Where("l.FirstName", "LIKE", @firstName);
+                query = query.Where("l.FirstName", "LIKE", CreateStringBySearchingType(filter.SearchType, filter.FirstName));
             }
             if (!String.IsNullOrEmpty(filter.LastName))
             {
@@ -171,23 +162,39 @@ namespace CRM.DAL.Repositories
             {
                 query = query.Where("l.Patronymic", "LIKE", CreateStringBySearchingType(filter.SearchType, filter.Patronymic));
             }
+            if (filter.Role != null)
+            {
+                query = query.Where("l.Role", filter.Role); 
+            }
+            if (filter.City != null || filter.City.Count != 0)
+            {
 
-            query = query.Join("City", "City.Id", "l.CityId");
+            }
+            if (filter.BirthDateFrom != null)
+            {
+                query = query.WhereTime("l.BirthDate", "<", filter.BirthDateFrom);
+            }
+            if (filter.BirthDateTo != null)
+            {
+                query = query.WhereTime("l.BirthDate", ">", filter.BirthDateTo);
+            }
+
+            query = query
+                .Where("l.IsDeleted", 0)
+                .Join("City", "City.Id", "l.CityId");
 
             SqlResult sqlResult = compiler.Compile(query);
 
-            string sql = sqlResult.Sql;
-
             var result = _connection
                 .Query<LeadDto, CityDto, Role, LeadDto>(
-                sql,
+                sqlResult.Sql,
                 (lead, city, role) =>
                 {
                     lead.Role = role;
                     lead.City = city;
                     return lead;
                 },
-                param: parameters,
+                param: sqlResult.NamedBindings,
                 splitOn: "id",
                 commandType: CommandType.Text)
                 .ToList();
