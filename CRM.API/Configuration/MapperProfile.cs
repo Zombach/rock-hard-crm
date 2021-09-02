@@ -16,7 +16,6 @@ namespace CRM.API.Configuration
             CreateMappingToDto();
             CreateMappingFromDto();
             CreateMappingToBusiness();
-            CreateMappingFromBusiness();
         }
 
         private void CreateMappingToDto()
@@ -49,11 +48,6 @@ namespace CRM.API.Configuration
         {
             CreateMap<TransactionInputModel, TransactionBusinessModel>();
             CreateMap<TransactionInputModel, TransferBusinessModel>();
-        }
-
-        private void CreateMappingFromBusiness()
-        {
-            CreateMap<TransactionBusinessModel, TransactionInputModel>();
         }
     }
 }
