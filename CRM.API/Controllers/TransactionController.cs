@@ -21,31 +21,31 @@ namespace CRM.API.Controllers
             _transactionService = transactionService;
         }
 
-        // api/transaction/deposit/5
-        [HttpPost("deposit/{accountId}")]
+        // api/transaction/deposit
+        [HttpPost("deposit")]
         [Description("Add deposit")]
         [ProducesResponseType(typeof(long), StatusCodes.Status201Created)]
-        public ActionResult<long> AddDeposit(int accountId, [FromBody] TransactionInputModel inputModel)
+        public ActionResult<long> AddDeposit([FromBody] TransactionInputModel inputModel)
         {
             var model = _mapper.Map<TransactionBusinessModel>(inputModel);
-            var output = _transactionService.AddDeposit(accountId, model);
+            var output = _transactionService.AddDeposit(model);
 
             return StatusCode(201, output);
         }
 
-        // api/transaction/withdraw/5
-        [HttpPost("withdraw/{accountId}")]
+        // api/transaction/withdraw
+        [HttpPost("withdraw")]
         [Description("Add withdraw")]
         [ProducesResponseType(typeof(long), StatusCodes.Status201Created)]
-        public ActionResult<long> AddWithdraw(int accountId, [FromBody] TransactionInputModel inputModel)
+        public ActionResult<long> AddWithdraw([FromBody] TransactionInputModel inputModel)
         {
             var model = _mapper.Map<TransactionBusinessModel>(inputModel);
-            var output = _transactionService.AddWithdraw(accountId, model);
+            var output = _transactionService.AddWithdraw(model);
 
             return StatusCode(201, output);
         }
 
-        // api/transaction/transfer/from/{accountId}/to/{accountId}
+        // api/transaction/transfer
         [HttpPost("transfer")]
         [Description("Add transfer")]
         [ProducesResponseType(typeof(string), StatusCodes.Status201Created)]

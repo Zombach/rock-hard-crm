@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using CRM.API.Common;
+using CRM.API.Extensions;
 using CRM.API.Models;
 using CRM.Business.Services;
 using CRM.DAL.Enums;
@@ -9,7 +10,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.ComponentModel;
-using CRM.API.Extensions;
 
 namespace CRM.API.Controllers
 {
@@ -28,15 +28,15 @@ namespace CRM.API.Controllers
             _leadService = leadService;
         }
 
-        // api/lead/3
-        [HttpPut("{id}")]
+        // api/lead
+        [HttpPut]
         [Description("Update lead")]
         [ProducesResponseType(typeof(LeadOutputModel), StatusCodes.Status200OK)]
-        public LeadOutputModel UpdateUserById(int id, [FromBody] LeadUpdateInputModel model)
+        public LeadOutputModel UpdateUserById([FromBody] LeadUpdateInputModel model)
         {
-            var userInfo = this.GetUserIdAndRoles();
+            var id = this.GetLeadId();
             var dto = _mapper.Map<LeadDto>(model);
-            dto = _leadService.UpdateLead(id, dto, userInfo);
+            dto = _leadService.UpdateLead(id, dto);
             return _mapper.Map<LeadOutputModel>(dto);
         }
 
@@ -63,13 +63,13 @@ namespace CRM.API.Controllers
             return outPut;
         }
 
-
-        // api/lead/3
-        [HttpDelete("{id}")]
+        // api/lead
+        [HttpDelete]
         [Description("Delete lead by id")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public ActionResult DeleteLeadById(int id)
+        public ActionResult DeleteLeadById()
         {
+            var id = this.GetLeadId();
             _leadService.DeleteLeadById(id);
             return NoContent();
         }

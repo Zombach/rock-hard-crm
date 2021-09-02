@@ -1,6 +1,5 @@
 ﻿using CRM.DAL.Models;
 using System.Collections.Generic;
-using CRM.Business.IdentityInfo;
 
 namespace CRM.Business.Services
 {
@@ -10,6 +9,6 @@ namespace CRM.Business.Services
         void DeleteLeadById(int id);
         List<LeadDto> GetAllLeads();
         LeadDto GetLeadById(int id);
-        LeadDto UpdateLead(int id, LeadDto dto, UserIdentityInfo userIdentityInfo);
+        LeadDto UpdateLead(int id, LeadDto dto);
     }
 }

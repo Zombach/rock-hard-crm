@@ -2,7 +2,7 @@
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
 using System.Collections.Generic;
-using CRM.Business.IdentityInfo;
+using DevEdu.Business.ValidationHelpers;
 
 namespace CRM.Business.Services
 {
@@ -11,12 +11,20 @@ namespace CRM.Business.Services
         private readonly ILeadRepository _leadRepository;
         private readonly IAccountRepository _accountRepository;
         private readonly IAuthenticationService _authenticationService;
+        private readonly ILeadValidationHelper _leadValidationHelper;
 
-        public LeadService(ILeadRepository leadRepository, IAccountRepository accountRepository, IAuthenticationService authenticationService)
+        public LeadService
+        (
+            ILeadRepository leadRepository,
+            IAccountRepository accountRepository,
+            IAuthenticationService authenticationService,
+            ILeadValidationHelper leadValidationHelper
+        )
         {
             _leadRepository = leadRepository;
             _accountRepository = accountRepository;
             _authenticationService = authenticationService;
+            _leadValidationHelper = leadValidationHelper;
         }
 
         public LeadDto AddLead(LeadDto dto)
@@ -28,28 +36,27 @@ namespace CRM.Business.Services
             return _leadRepository.GetLeadById(id);
         }
 
-        public LeadDto UpdateLead(int id, LeadDto dto, UserIdentityInfo userIdentityInfo)
+        public LeadDto UpdateLead(int id, LeadDto dto)
         {
+            _leadValidationHelper.GetLeadByIdAndThrowIfNotFound(id);
             dto.Id = id;
             _leadRepository.UpdateLead(dto);
-            var lead = _leadRepository.GetLeadById(id);
-            return lead;
+            return _leadRepository.GetLeadById(id);
         }
 
         public List<LeadDto> GetAllLeads()
         {
-            var list = _leadRepository.GetAllLeads();
-            return list;
+            return _leadRepository.GetAllLeads();
         }
 
         public LeadDto GetLeadById(int id)
         {
-            var lead = _leadRepository.GetLeadById(id);
-            return lead;
+            return _leadValidationHelper.GetLeadByIdAndThrowIfNotFound(id);
         }
 
         public void DeleteLeadById(int id)
         {
+            _leadValidationHelper.GetLeadByIdAndThrowIfNotFound(id);
             _leadRepository.DeleteLeadById(id);
         }
     }
