@@ -152,15 +152,24 @@ namespace CRM.DAL.Repositories
                         
             if (!String.IsNullOrEmpty(filter.FirstName))
             {
-                query = query.Where("l.FirstName", "LIKE", CreateStringBySearchingType(filter.SearchType, filter.FirstName));
+                query = query.Where(
+                    "l.FirstName",
+                    BuildStringForCompare(filter.SearchType),
+                    CreateStringBySearchingType(filter.SearchType, filter.FirstName));
             }
             if (!String.IsNullOrEmpty(filter.LastName))
             {
-                query = query.Where("l.LastName", "LIKE", CreateStringBySearchingType(filter.SearchType, filter.LastName));
+                query = query.Where(
+                    "l.LastName",
+                    BuildStringForCompare(filter.SearchType),
+                    CreateStringBySearchingType(filter.SearchType, filter.LastName));
             }
             if (!String.IsNullOrEmpty(filter.Patronymic))
             {
-                query = query.Where("l.Patronymic", "LIKE", CreateStringBySearchingType(filter.SearchType, filter.Patronymic));
+                query = query.Where(
+                    "l.Patronymic",
+                    BuildStringForCompare(filter.SearchType),
+                    CreateStringBySearchingType(filter.SearchType, filter.Patronymic));
             }
             if (filter.Role != null)
             {
@@ -168,7 +177,7 @@ namespace CRM.DAL.Repositories
             }
             if (filter.City != null || filter.City.Count != 0)
             {
-
+                query = query.WhereIn("City.Id", filter.City);
             }
             if (filter.BirthDateFrom != null)
             {
@@ -201,7 +210,7 @@ namespace CRM.DAL.Repositories
             return result;
         }
 
-        private string CreateStringBySearchingType(SearchType searchType, String searchingString)
+        private string CreateStringBySearchingType(SearchType searchType, string searchingString)
         {
             switch (searchType)
             {
@@ -214,9 +223,23 @@ namespace CRM.DAL.Repositories
                 case SearchType.EndsWith:
                     searchingString = "%" + searchingString;
                     break;
+                case SearchType.Equals:
+                    break;
+                case SearchType.NotEquals:
+                    searchingString = "<>" + searchingString; 
+                    break;
             }
-
             return searchingString;
+        }
+
+        private string BuildStringForCompare(SearchType searchType)
+        {
+            string like = "LIKE";
+            if(searchType == SearchType.NotEquals)
+            {
+                like = "NOT " + like;
+            }
+            return like;
         }
     }
 }
