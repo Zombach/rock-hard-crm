@@ -154,22 +154,22 @@ namespace CRM.DAL.Repositories
             {
                 query = query.Where(
                     "l.FirstName",
-                    BuildStringForCompare(filter.SearchType),
-                    CreateStringBySearchingType(filter.SearchType, filter.FirstName));
+                    BuildStringForCompare(filter.SearchTypeForFirstName),
+                    CreateStringBySearchingType(filter.SearchTypeForFirstName, filter.FirstName));
             }
             if (!String.IsNullOrEmpty(filter.LastName))
             {
                 query = query.Where(
                     "l.LastName",
-                    BuildStringForCompare(filter.SearchType),
-                    CreateStringBySearchingType(filter.SearchType, filter.LastName));
+                    BuildStringForCompare(filter.SearchTypeForLastName),
+                    CreateStringBySearchingType(filter.SearchTypeForLastName, filter.LastName));
             }
             if (!String.IsNullOrEmpty(filter.Patronymic))
             {
                 query = query.Where(
                     "l.Patronymic",
-                    BuildStringForCompare(filter.SearchType),
-                    CreateStringBySearchingType(filter.SearchType, filter.Patronymic));
+                    BuildStringForCompare(filter.SearchTypeForPatronymic),
+                    CreateStringBySearchingType(filter.SearchTypeForPatronymic, filter.Patronymic));
             }
             if (filter.Role != null)
             {
@@ -210,7 +210,7 @@ namespace CRM.DAL.Repositories
             return result;
         }
 
-        private string CreateStringBySearchingType(SearchType searchType, string searchingString)
+        private string CreateStringBySearchingType(SearchType? searchType, string searchingString)
         {
             switch (searchType)
             {
@@ -232,7 +232,7 @@ namespace CRM.DAL.Repositories
             return searchingString;
         }
 
-        private string BuildStringForCompare(SearchType searchType)
+        private string BuildStringForCompare(SearchType? searchType)
         {
             string like = "LIKE";
             if(searchType == SearchType.NotEquals)

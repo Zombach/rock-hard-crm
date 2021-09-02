@@ -3,6 +3,7 @@ using CRM.API.Common;
 using CRM.API.Extensions;
 using CRM.API.Models;
 using CRM.Business.Services;
+using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -51,12 +52,21 @@ namespace CRM.API.Controllers
 
         // api/lead/filter
         //[AuthorizeRoles(Role.Admin)]
-        [HttpPost("/filter")]
+        [HttpPost("/filter/{searchTypeForFirstName}/" +
+            "{searchTypeForLastName}/" +
+            "{searchTypeForPatronymic}")]
         [Description("Get all Leads by filters")]
         [ProducesResponseType(typeof(List<LeadByFiltersOutputModel>), StatusCodes.Status200OK)]
-        public List<LeadByFiltersOutputModel> GetAllLeadsByFilters([FromBody] LeadFiltersInputModel leadFilter)
-        {
+        public List<LeadByFiltersOutputModel> GetAllLeadsByFilters(
+            [FromBody] LeadFiltersInputModel leadFilter, 
+            SearchType? searchTypeForFirstName,
+            SearchType? searchTypeForLastName,
+            SearchType? searchTypeForPatronymic)
+        {            
             var filter = _mapper.Map<LeadFiltersDto>(leadFilter);
+            filter.SearchTypeForFirstName = searchTypeForFirstName;
+            filter.SearchTypeForLastName = searchTypeForLastName;
+            filter.SearchTypeForPatronymic = searchTypeForPatronymic;
             var leads = _leadService.GetLeadsByFilters(filter); 
             var result = _mapper.Map<List<LeadByFiltersOutputModel>>(leads);
             return result;
