@@ -172,11 +172,11 @@ namespace CRM.DAL.Repositories
             }
             if (filter.BirthDateFrom != null)
             {
-                query = query.WhereTime("l.BirthDate", "<", filter.BirthDateFrom);
+                query = query.WhereDate("l.BirthDate", ">", filter.BirthDateFrom.ToString());
             }
             if (filter.BirthDateTo != null)
             {
-                query = query.WhereTime("l.BirthDate", ">", filter.BirthDateTo);
+                query = query.WhereDate("l.BirthDate", "<", filter.BirthDateTo.ToString());
             }
 
             query = query
