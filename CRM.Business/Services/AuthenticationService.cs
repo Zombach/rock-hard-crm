@@ -50,7 +50,6 @@ namespace CRM.Business.Services
                 signingCredentials: new SigningCredentials(_options.GetSymmetricSecurityKey(),
                     SecurityAlgorithms.HmacSha256));
             var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
-
             return encodedJwt;
         }
 
