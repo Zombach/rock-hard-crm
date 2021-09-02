@@ -2,7 +2,6 @@
 using CRM.Business.Tests.TestsDataHelpers;
 using CRM.DAL.Repositories;
 using Moq;
-using NUnit.Compatibility;
 using NUnit.Framework;
 using RestSharp;
 
@@ -28,7 +27,7 @@ namespace CRM.Business.Tests
         {
             //Given
             var expected = 234324243L;
-            var model = TransactionBusinessModelData.GeTransactionBusinessModel();
+            var model = TransactionData.GeTransactionBusinessModel();
             var account = AccountData.GetAccountDto();
 
             _accountRepoMock.Setup(x => x
@@ -54,7 +53,7 @@ namespace CRM.Business.Tests
         {
             //Given
             var expected = 2344243L;
-            var model = TransactionBusinessModelData.GeTransactionBusinessModel();
+            var model = TransactionData.GeTransactionBusinessModel();
             var account = AccountData.GetAccountDto();
 
             _accountRepoMock.Setup(x => x
@@ -80,7 +79,7 @@ namespace CRM.Business.Tests
         {
             //Given
             var expected = "Transaction";
-            var model = TransactionBusinessModelData.GetTransferBusinessModel();
+            var model = TransactionData.GetTransferBusinessModel();
             var account = AccountData.GetAccountDto();
             var accountAnother = AccountData.GetAnotherAccountDto();
 

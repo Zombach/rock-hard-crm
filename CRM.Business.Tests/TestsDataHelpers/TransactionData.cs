@@ -5,8 +5,19 @@ using CRM.DAL.Enums;
 
 namespace CRM.Business.Tests.TestsDataHelpers
 {
-    public static class TransactionBusinessModelData
+    public static class TransactionData
     {
+        public static AccountBusinessModel GetAccountBusinessModel() => new()
+        {
+            Id = 1,
+            LeadId = 1,
+            Currency = Currency.RUB,
+            CreatedOn = DateTime.Now.AddYears(-1),
+            IsDeleted = false,
+            Transactions = GetListTransactionBusinessModel(),
+            Balance = 1000
+        };
+
         public static TransactionBusinessModel GeTransactionBusinessModel()
         {
             return new()

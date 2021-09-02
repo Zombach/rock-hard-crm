@@ -88,8 +88,8 @@ namespace CRM.Business.Tests
         public void GetAccountWithTransactions()
         {
             var accountDto = AccountData.GetAccountDto();
-            var expectedList = TransactionBusinessModelData.GetListTransactionBusinessModel();
-            var accountBusinessModel = AccountBusinessModelData.GetAccountBusinessModel();
+            var expectedList = TransactionData.GetListTransactionBusinessModel();
+            var accountBusinessModel = TransactionData.GetAccountBusinessModel();
             var userInfo = UserIdentityInfoData.GetUserIdentityInfo(accountDto.LeadId, new List<Role> { Role.Regular });
 
             _accountRepoMock.Setup(x => x

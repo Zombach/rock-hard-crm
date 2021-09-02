@@ -72,7 +72,5 @@ namespace CRM.Business.Tests
             //When
             Assert.Throws<FormatException>(() => _sut.Verify(hashedPassword, userPassword));
         }
-
-
     }
 }
