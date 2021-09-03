@@ -63,7 +63,6 @@
     <Folder Include="StoredProcedures\Lead" />
     <Folder Include="StoredProcedures\Account" />
     <Folder Include="StoredProcedures\City" />
-    <Folder Include="Types" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Tables\Account.sql" />
@@ -79,8 +78,6 @@
     <Build Include="StoredProcedures\Account\Account_SelectById.sql" />
     <Build Include="StoredProcedures\City\City_SelectAll.sql" />
     <Build Include="StoredProcedures\Lead\Lead_Insert.sql" />
-    <Build Include="StoredProcedures\Lead\Lead_SelectAllByFilters.sql" />
-    <Build Include="Types\Cities.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="CRM.DB.refactorlog" />

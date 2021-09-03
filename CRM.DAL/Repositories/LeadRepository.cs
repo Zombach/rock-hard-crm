@@ -175,7 +175,7 @@ namespace CRM.DAL.Repositories
             {
                 query = query.Where("l.Role", filter.Role); 
             }
-            if (filter.City != null || filter.City.Count != 0)
+            if (filter.City != null && filter.City.Count != 0)
             {
                 query = query.WhereIn("City.Id", filter.City);
             }
@@ -223,11 +223,8 @@ namespace CRM.DAL.Repositories
                 case SearchType.EndsWith:
                     searchingString = "%" + searchingString;
                     break;
-                case SearchType.Equals:
-                    break;
-                case SearchType.NotEquals:
-                    searchingString = "<>" + searchingString; 
-                    break;
+                default: 
+                    return searchingString;
             }
             return searchingString;
         }
