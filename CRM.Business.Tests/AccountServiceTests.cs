@@ -1,12 +1,11 @@
-﻿using System;
-using AutoMapper;
+﻿using AutoMapper;
 using CRM.Business.Constants;
 using CRM.Business.Exceptions;
 using CRM.Business.Models;
 using CRM.Business.Requests;
 using CRM.Business.Services;
 using CRM.Business.Tests.TestsDataHelpers;
-using static CRM.Business.TransactionEndpoint;
+using CRM.Business.ValidationHelpers;
 using CRM.DAL.Repositories;
 using DevEdu.Business.ValidationHelpers;
 using Moq;
@@ -23,12 +22,12 @@ namespace CRM.Business.Tests
         private Mock<IMapper> _mapperMock;
         private Mock<RestClient> _clientMock;
         private AccountService _sut;
-        private Mock<RequestHelper> _requestHelperMock;
+        private RequestHelper _requestHelper;
 
         [SetUp]
         public void SetUp()
         {
-            _requestHelperMock = new Mock<RequestHelper>();
+            _requestHelper = new RequestHelper();
             _leadRepoMock = new Mock<ILeadRepository>();
             _clientMock = new Mock<RestClient>();
             _mapperMock = new Mock<IMapper>();
@@ -41,7 +40,7 @@ namespace CRM.Business.Tests
                 _mapperMock.Object,
                 _accountValidationHelper,
                 _clientMock.Object,
-                _requestHelperMock.Object);
+                _requestHelper);
         }
 
         [Test]
@@ -100,7 +99,6 @@ namespace CRM.Business.Tests
             var accountDto = AccountData.GetAccountDto();
             var expectedList = TransactionData.GetJSONstring();
             var accountBusinessModel = TransactionData.GetAccountBusinessModel();
-            var endPoint = $"{GetTransactionsByAccountIdEndpoint}{accountDto.Id}";
 
             _accountRepoMock.Setup(x => x
                 .GetAccountById(accountDto.Id))
@@ -113,10 +111,7 @@ namespace CRM.Business.Tests
                 .Returns(new RestResponse<string>
                 {
                     Data = expectedList
-
                 });
-            _requestHelperMock.Setup(x => x.CreateGetRequest(endPoint))
-                .Returns(new RestRequest(endPoint, Method.GET));
 
             //When
             var actualList = _sut.GetAccountWithTransactions(accountDto.Id, accountDto.LeadId);

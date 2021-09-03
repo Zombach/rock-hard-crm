@@ -4,8 +4,9 @@ using CRM.Business.Exceptions;
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
+using DevEdu.Business.ValidationHelpers;
 
-namespace DevEdu.Business.ValidationHelpers
+namespace CRM.Business.ValidationHelpers
 {
     public class AccountValidationHelper : IAccountValidationHelper
     {

@@ -1,8 +1,6 @@
-﻿using System.Collections.Generic;
-using CRM.Business.Options;
+﻿using CRM.Business.Options;
 using CRM.Business.Services;
 using CRM.Business.Tests.TestsDataHelpers;
-using CRM.DAL.Enums;
 using CRM.DAL.Repositories;
 using DevEdu.Business.ValidationHelpers;
 using Moq;
