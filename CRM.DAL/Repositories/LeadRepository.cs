@@ -231,10 +231,10 @@ namespace CRM.DAL.Repositories
 
         private string BuildStringForCompare(SearchType? searchType)
         {
-            string like = "LIKE";
+            string like = "=";
             if(searchType == SearchType.NotEquals)
             {
-                like = "NOT " + like;
+                like = "!" + like;
             }
             return like;
         }
