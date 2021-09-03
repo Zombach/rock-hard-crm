@@ -72,6 +72,7 @@ namespace CRM.Business.Tests
             _sut.DeleteAccount(account.Id, account.LeadId);
 
             //Then
+            _accountRepoMock.Verify(x => x.GetAccountById(account.Id), Times.Once);
             _accountRepoMock.Verify(x => x.DeleteAccount(account.Id), Times.Once);
         }
 
@@ -81,8 +82,8 @@ namespace CRM.Business.Tests
             //Given
             var account = AccountData.GetAccountDto();
             var accountAnother = AccountData.GetAnotherAccountDto();
-            _accountRepoMock.Setup(x => x.GetAccountById(account.Id)).Returns(accountAnother);
             var expectedException = string.Format(ServiceMessages.LeadHasNoAccessMessage, account.LeadId);
+            _accountRepoMock.Setup(x => x.GetAccountById(account.Id)).Returns(accountAnother);
 
             //When
             var ex = Assert.Throws<AuthorizationException>(
@@ -90,6 +91,7 @@ namespace CRM.Business.Tests
 
             //Then
             Assert.AreEqual(expectedException, ex.Message);
+            _accountRepoMock.Verify(x => x.GetAccountById(account.Id), Times.Once);
             _accountRepoMock.Verify(x => x.DeleteAccount(account.Id), Times.Never);
         }
 

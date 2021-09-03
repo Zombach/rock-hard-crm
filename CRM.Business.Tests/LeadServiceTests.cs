@@ -107,6 +107,7 @@ namespace CRM.Business.Tests
             _sut.DeleteLeadById(expectedLeadDto.Id);
 
             //Then
+            _leadRepoMock.Verify(x => x.GetLeadById(expectedLeadDto.Id), Times.Once);
             _leadRepoMock.Verify(x => x.DeleteLeadById(expectedLeadDto.Id), Times.Once);
         }
     }
