@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System;
+using AutoMapper;
 using CRM.Business.IdentityInfo;
 using CRM.Business.Models;
 using CRM.Business.Requests;
@@ -10,6 +11,9 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using RestSharp;
 using System.Collections.Generic;
+using System.Linq;
+using CRM.DAL.Enums;
+using Newtonsoft.Json.Serialization;
 using static CRM.Business.TransactionEndpoint;
 
 namespace CRM.Business.Services
@@ -57,38 +61,66 @@ namespace CRM.Business.Services
             _accountRepository.DeleteAccount(id);
         }
 
-        public AccountBusinessModel GetAccountWithTransactions(int id, LeadIdentityInfo leadInfo)
+        public AccountBusinessModel GetAccountWithTransactions(int accountId, LeadIdentityInfo leadInfo)
         {
-            var dto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(id);
+            JsonSerializerSettings aaa = new()
+            {
+                TypeNameHandling = TypeNameHandling.Objects
+            };
+
+            var dto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(accountId);
             if (!leadInfo.IsAdmin())
                 _accountValidationHelper.CheckLeadAccessToAccount(dto.LeadId, leadInfo.LeadId);
 
             var accountModel = _mapper.Map<AccountBusinessModel>(dto);
-            var request = _requestHelper.CreateGetRequest($"{GetTransactionsByAccountIdEndpoint}{id}");
+            var request = _requestHelper.CreateGetRequest($"{GetTransactionsByAccountIdEndpoint}{accountId}");
 
             var response = _client.Execute<string>(request);
             var transfers = new List<TransferBusinessModel>();
             var transactions = new List<TransactionBusinessModel>();
-            var result = JsonConvert.DeserializeObject<List<TransferBusinessModel>>(response.Data);
 
-            if (result != null)
+            var json = response.Data.Replace("TransactionStore.DAL.Models.TransferDto, TransactionStore.DAL", "CRM.Business.Models.TransferBusinessModel, CRM.Business"); 
+            json = json.Replace("TransactionStore.DAL.Models.TransactionDto, TransactionStore.DAL", "CRM.Business.Models.TransactionBusinessModel, CRM.Business");
+            var result = JsonConvert.DeserializeObject<List<object>>(json,aaa);
+            if (result!=null)
                 foreach (var obj in result)
                 {
-                    if (obj.RecipientAccountId != default)
+                    if (obj is TransferBusinessModel model)
                     {
-                        transfers.Add(obj);
+                        transfers.Add(model);
+                        if (model.AccountId == accountId)
+                        {
+                            accountModel.Balance += model.Amount;
+                        }
                     }
                     else
                     {
-                        transactions.Add(obj);
+                        var mode = (TransactionBusinessModel)obj;
+                        transactions.Add(mode);
+                        accountModel.Balance += mode.Amount;
                     }
-                    accountModel.Balance += obj.Amount;
-                }
 
+                }
             accountModel.Transactions = transactions;
             accountModel.Transfers = transfers;
 
             return accountModel;
         }
     }
+
+    //public class KnownTypesBinder : ISerializationBinder
+    //{
+    //    public IList<Type> KnownTypes { get; set; }
+
+    //    public Type BindToType(string assemblyName, string typeName)
+    //    {
+    //        return KnownTypes.SingleOrDefault(t => t.Name == typeName);
+    //    }
+
+    //    public void BindToName(Type serializedType, out string assemblyName, out string typeName)
+    //    {
+    //        assemblyName = null;
+    //        typeName = serializedType.Name;
+    //    }
+    //}
 }

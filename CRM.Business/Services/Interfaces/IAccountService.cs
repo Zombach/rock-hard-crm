@@ -8,6 +8,6 @@ namespace CRM.Business.Services
     {
         int AddAccount(AccountDto dto, int leadId);
         void DeleteAccount(int id, int leadId);
-        AccountBusinessModel GetAccountWithTransactions(int id, LeadIdentityInfo leadInfo);
+        AccountBusinessModel GetAccountWithTransactions(int accountId, LeadIdentityInfo leadInfo);
     }
 }

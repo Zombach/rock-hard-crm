@@ -1,8 +1,10 @@
 ﻿using CRM.DAL.Enums;
 using System;
+using System.Runtime.Serialization;
 
 namespace CRM.Business.Models
 {
+    [KnownType(typeof(TransactionBusinessModel))]
     public class TransactionBusinessModel
     {
         public long Id { get; set; }

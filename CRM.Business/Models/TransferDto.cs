@@ -1,7 +1,9 @@
-﻿using CRM.DAL.Enums;
+﻿using System.Runtime.Serialization;
+using CRM.DAL.Enums;
 
 namespace CRM.Business.Models
 {
+    [KnownType(typeof(TransferBusinessModel))]
     public class TransferBusinessModel : TransactionBusinessModel
     {
         public int RecipientAccountId { get; set; }
