@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CRM.Business.IdentityInfo;
 using CRM.Business.Models;
 using CRM.Business.Requests;
 using CRM.Core;
@@ -6,9 +7,9 @@ using CRM.DAL.Models;
 using CRM.DAL.Repositories;
 using DevEdu.Business.ValidationHelpers;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using RestSharp;
 using System.Collections.Generic;
-using Newtonsoft.Json;
 using static CRM.Business.TransactionEndpoint;
 
 namespace CRM.Business.Services
@@ -56,10 +57,11 @@ namespace CRM.Business.Services
             _accountRepository.DeleteAccount(id);
         }
 
-        public AccountBusinessModel GetAccountWithTransactions(int id, int leadId)
+        public AccountBusinessModel GetAccountWithTransactions(int id, LeadIdentityInfo leadInfo)
         {
             var dto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(id);
-            _accountValidationHelper.CheckLeadAccessToAccount(dto.LeadId, leadId);
+            if (!leadInfo.IsAdmin())
+                _accountValidationHelper.CheckLeadAccessToAccount(dto.LeadId, leadInfo.LeadId);
 
             var accountModel = _mapper.Map<AccountBusinessModel>(dto);
             var request = _requestHelper.CreateGetRequest($"{GetTransactionsByAccountIdEndpoint}{id}");
@@ -69,7 +71,7 @@ namespace CRM.Business.Services
             var transactions = new List<TransactionBusinessModel>();
             var result = JsonConvert.DeserializeObject<List<TransferBusinessModel>>(response.Data);
 
-            if (result!=null)
+            if (result != null)
                 foreach (var obj in result)
                 {
                     if (obj.RecipientAccountId != default)
@@ -82,7 +84,7 @@ namespace CRM.Business.Services
                     }
                     accountModel.Balance += obj.Amount;
                 }
-            
+
             accountModel.Transactions = transactions;
             accountModel.Transfers = transfers;
 

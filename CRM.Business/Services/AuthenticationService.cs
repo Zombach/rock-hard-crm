@@ -60,12 +60,12 @@ namespace CRM.Business.Services
             return salt;
         }
 
-        public bool Verify(string hashedPassword, string userPassword)
+        public bool Verify(string hashedPassword, string leadPassword)
         {
             var hashBytes = Convert.FromBase64String(hashedPassword);
             var salt = new byte[16];
             Array.Copy(hashBytes, 0, salt, 0, 16);
-            var result = HashPassword(userPassword, salt);
+            var result = HashPassword(leadPassword, salt);
             return result == hashedPassword;
         }
 

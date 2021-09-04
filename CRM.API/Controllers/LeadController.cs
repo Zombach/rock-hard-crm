@@ -31,7 +31,7 @@ namespace CRM.API.Controllers
         [HttpPut]
         [Description("Update lead")]
         [ProducesResponseType(typeof(LeadOutputModel), StatusCodes.Status200OK)]
-        public LeadOutputModel UpdateUserById([FromBody] LeadUpdateInputModel model)
+        public LeadOutputModel UpdateLeadById([FromBody] LeadUpdateInputModel model)
         {
             var id = this.GetLeadId();
             var dto = _mapper.Map<LeadDto>(model);

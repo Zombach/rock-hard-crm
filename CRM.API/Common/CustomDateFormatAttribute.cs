@@ -10,8 +10,8 @@ namespace CRM.API.Common
         private const string _dateFormat = "dd.MM.yyyy";
         public override bool IsValid(object value)
         {
-            CultureInfo cultureInfo = CultureInfo.CreateSpecificCulture("ru-RU");
-            return value == null || DateTime.TryParseExact(value.ToString(), _dateFormat, cultureInfo, DateTimeStyles.None, out var date);
+            var cultureInfo = CultureInfo.CreateSpecificCulture("ru-RU");
+            return value == null || DateTime.TryParseExact(value.ToString(), _dateFormat, cultureInfo, DateTimeStyles.None, out _);
         }
     }
 }

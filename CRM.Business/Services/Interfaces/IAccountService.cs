@@ -1,4 +1,5 @@
-﻿using CRM.Business.Models;
+﻿using CRM.Business.IdentityInfo;
+using CRM.Business.Models;
 using CRM.DAL.Models;
 
 namespace CRM.Business.Services
@@ -7,6 +8,6 @@ namespace CRM.Business.Services
     {
         int AddAccount(AccountDto dto, int leadId);
         void DeleteAccount(int id, int leadId);
-        AccountBusinessModel GetAccountWithTransactions(int id, int leadId);
+        AccountBusinessModel GetAccountWithTransactions(int id, LeadIdentityInfo leadInfo);
     }
 }
