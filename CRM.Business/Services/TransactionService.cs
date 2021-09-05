@@ -1,6 +1,8 @@
-﻿using CRM.Business.Models;
+﻿using CRM.Business.IdentityInfo;
+using CRM.Business.Models;
 using CRM.Business.Requests;
 using CRM.Core;
+using CRM.DAL.Models;
 using DevEdu.Business.ValidationHelpers;
 using Microsoft.Extensions.Options;
 using RestSharp;
@@ -25,9 +27,10 @@ namespace CRM.Business.Services
             _accountValidationHelper = accountValidationHelper;
         }
 
-        public long AddDeposit(TransactionBusinessModel model)
+        public long AddDeposit(TransactionBusinessModel model, LeadIdentityInfo leadInfo)
         {
-            var account = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(model.AccountId);
+            var account = CheckAccessAndReturnAccount(model, leadInfo);
+
             model.AccountId = account.Id;
             model.Currency = account.Currency;
 
@@ -36,9 +39,10 @@ namespace CRM.Business.Services
             return result.Data;
         }
 
-        public long AddWithdraw(TransactionBusinessModel model)
+        public long AddWithdraw(TransactionBusinessModel model, LeadIdentityInfo leadInfo)
         {
-            var account = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(model.AccountId);
+            var account = CheckAccessAndReturnAccount(model, leadInfo);
+
             model.AccountId = account.Id;
             model.Currency = account.Currency;
 
@@ -47,9 +51,9 @@ namespace CRM.Business.Services
             return result.Data;
         }
 
-        public string AddTransfer(TransferBusinessModel model)
+        public string AddTransfer(TransferBusinessModel model, LeadIdentityInfo leadInfo)
         {
-            var account = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(model.AccountId);
+            var account = CheckAccessAndReturnAccount(model, leadInfo);
             var recipientAccount = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(model.RecipientAccountId);
 
             model.Currency = account.Currency;
@@ -57,6 +61,14 @@ namespace CRM.Business.Services
             var request = _requestHelper.CreatePostRequest(AddTransferEndpoint, model);
             var result = _client.Execute<string>(request);
             return result.Data;
+        }
+
+        private AccountDto CheckAccessAndReturnAccount(TransactionBusinessModel model, LeadIdentityInfo leadInfo)
+        {
+            var account = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(model.AccountId);
+            _accountValidationHelper.CheckLeadAccessToAccount(account.LeadId, leadInfo.LeadId);
+            _accountValidationHelper.CheckForVipAccess(account.Currency, leadInfo);
+            return account;
         }
     }
 }

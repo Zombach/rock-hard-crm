@@ -5,6 +5,7 @@ using CRM.Business.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel;
+using CRM.API.Extensions;
 
 namespace CRM.API.Controllers
 {
@@ -27,8 +28,9 @@ namespace CRM.API.Controllers
         [ProducesResponseType(typeof(long), StatusCodes.Status201Created)]
         public ActionResult<long> AddDeposit([FromBody] TransactionInputModel inputModel)
         {
+            var leadInfo = this.GetLeadIdAndRoles();
             var model = _mapper.Map<TransactionBusinessModel>(inputModel);
-            var output = _transactionService.AddDeposit(model);
+            var output = _transactionService.AddDeposit(model, leadInfo);
 
             return StatusCode(201, output);
         }
@@ -39,8 +41,9 @@ namespace CRM.API.Controllers
         [ProducesResponseType(typeof(long), StatusCodes.Status201Created)]
         public ActionResult<long> AddWithdraw([FromBody] TransactionInputModel inputModel)
         {
+            var leadInfo = this.GetLeadIdAndRoles();
             var model = _mapper.Map<TransactionBusinessModel>(inputModel);
-            var output = _transactionService.AddWithdraw(model);
+            var output = _transactionService.AddWithdraw(model, leadInfo);
 
             return StatusCode(201, output);
         }
@@ -51,8 +54,9 @@ namespace CRM.API.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status201Created)]
         public ActionResult<string> AddTransfer([FromBody] TransactionInputModel inputModel)
         {
+            var leadInfo = this.GetLeadIdAndRoles();
             var model = _mapper.Map<TransferBusinessModel>(inputModel);
-            var output = _transactionService.AddTransfer(model);
+            var output = _transactionService.AddTransfer(model, leadInfo);
 
             return StatusCode(201, output);
         }

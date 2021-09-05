@@ -6,7 +6,7 @@ namespace CRM.Business.Services
 {
     public interface IAccountService
     {
-        int AddAccount(AccountDto dto, int leadId);
+        int AddAccount(AccountDto dto, LeadIdentityInfo leadInfo);
         void DeleteAccount(int id, int leadId);
         AccountBusinessModel GetAccountWithTransactions(int accountId, LeadIdentityInfo leadInfo);
     }

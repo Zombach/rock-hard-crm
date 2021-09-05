@@ -32,9 +32,9 @@ namespace CRM.API.Controllers
         [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
         public ActionResult<int> AddAccount([FromBody] AccountInputModel inputModel)
         {
-            var leadId = this.GetLeadId();
+            var leadInfo = this.GetLeadIdAndRoles();
             var dto = _mapper.Map<AccountDto>(inputModel);
-            var accountId = _accountService.AddAccount(dto, leadId);
+            var accountId = _accountService.AddAccount(dto, leadInfo);
             return StatusCode(201, accountId);
         }
 

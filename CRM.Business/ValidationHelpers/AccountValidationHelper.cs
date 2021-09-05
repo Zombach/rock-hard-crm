@@ -4,6 +4,8 @@ using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
 using System.Linq;
+using System.Runtime.InteropServices;
+using CRM.Business.IdentityInfo;
 
 namespace DevEdu.Business.ValidationHelpers
 {
@@ -28,6 +30,12 @@ namespace DevEdu.Business.ValidationHelpers
         {
             if (verifiableId != leadId)
                 throw new AuthorizationException(string.Format(ServiceMessages.LeadHasNoAccessMessage, leadId));
+        }
+
+        public void CheckForVipAccess(Currency currency, LeadIdentityInfo leadInfo)
+        {
+            if (currency is not (Currency.RUB or Currency.USD) && !leadInfo.Roles.Contains(Role.Vip))
+                throw new AuthorizationException(string.Format(ServiceMessages.LeadHasNoAccessMessageByRole, leadInfo.LeadId));
         }
 
         public void CheckForDuplicateCurrencies(LeadDto lead, Currency currency)
