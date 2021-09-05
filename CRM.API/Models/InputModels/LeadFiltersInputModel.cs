@@ -7,19 +7,19 @@ namespace CRM.API.Models
 {
     public class LeadFiltersInputModel
     {
-        public SearchType? SearchTypeForFirstName { get; set; }
-        public string FirstName { get; set; }
+        public SearchType? SearchTypeForFirstName { get; set; } 
+        public string FirstName { get; set; } // Masha
         public SearchType? SearchTypeForLastName { get; set; }
-        public string LastName { get; set; }
+        public string LastName { get; set; } // Nastya
         public SearchType? SearchTypeForPatronymic { get; set; }
-        public string Patronymic { get; set; }
-        public int? Role { get; set; }
-        public List<int> City { get; set; }
+        public string Patronymic { get; set; } // Masha
+        public int? Role { get; set; } // Nastya
+        public List<int> City { get; set; } // Masha
 
         [CustomDateFormat(ErrorMessage = WrongDateFormat)]
-        public string BirthDateFrom { get; set; }
+        public string BirthDateFrom { get; set; } // Nastya
 
         [CustomDateFormat(ErrorMessage = WrongDateFormat)]
-        public string BirthDateTo { get; set; }
+        public string BirthDateTo { get; set; } // Nasta
     }
 }
