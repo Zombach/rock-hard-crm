@@ -148,6 +148,10 @@ namespace CRM.Business.Services
         private string BuildStringForCompare(SearchType? searchType)
         {
             string like = "=";
+            if(searchType == SearchType.StartsWith || searchType == SearchType.Contains || searchType == SearchType.EndsWith)
+            {
+                like = "like";
+            }
             if (searchType == SearchType.NotEquals)
             {
                 like = "!" + like;
