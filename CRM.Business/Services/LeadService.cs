@@ -3,6 +3,9 @@ using CRM.DAL.Models;
 using CRM.DAL.Repositories;
 using System.Collections.Generic;
 using DevEdu.Business.ValidationHelpers;
+using SqlKata.Compilers;
+using SqlKata;
+using System;
 
 namespace CRM.Business.Services
 {
@@ -62,8 +65,94 @@ namespace CRM.Business.Services
 
         public List<LeadDto> GetLeadsByFilters(LeadFiltersDto filter)
         {
-            var result = _leadRepository.GetLeadsByFilters(filter);
+            var compiler = new SqlServerCompiler();
+
+            var query = new Query("Lead as l").Select("l.Id",
+                                                 "l.FirstName",
+                                                 "l.LastName",
+                                                 "l.Patronymic",
+                                                 "l.Email",
+                                                 "l.BirthDate",
+                                                 "City.Id",
+                                                 "City.Name",
+                                                 "l.Role as Id",
+                                                 "l.RegistrationDate");
+
+            if (!String.IsNullOrEmpty(filter.FirstName))
+            {
+                query = query.Where(
+                    "l.FirstName",
+                    BuildStringForCompare(filter.SearchTypeForFirstName),
+                    CreateStringBySearchingType(filter.SearchTypeForFirstName, filter.FirstName));
+            }
+            if (!String.IsNullOrEmpty(filter.LastName))
+            {
+                query = query.Where(
+                    "l.LastName",
+                    BuildStringForCompare(filter.SearchTypeForLastName),
+                    CreateStringBySearchingType(filter.SearchTypeForLastName, filter.LastName));
+            }
+            if (!String.IsNullOrEmpty(filter.Patronymic))
+            {
+                query = query.Where(
+                    "l.Patronymic",
+                    BuildStringForCompare(filter.SearchTypeForPatronymic),
+                    CreateStringBySearchingType(filter.SearchTypeForPatronymic, filter.Patronymic));
+            }
+            if (filter.Role != null)
+            {
+                query = query.Where("l.Role", filter.Role);
+            }
+            if (filter.City != null && filter.City.Count != 0)
+            {
+                query = query.WhereIn("City.Id", filter.City);
+            }
+            if (filter.BirthDateFrom != null)
+            {
+                query = query.WhereDate("l.BirthDate", ">", filter.BirthDateFrom.ToString());
+            }
+            if (filter.BirthDateTo != null)
+            {
+                query = query.WhereDate("l.BirthDate", "<", filter.BirthDateTo.ToString());
+            }
+
+            query = query
+                .Where("l.IsDeleted", 0)
+                .Join("City", "City.Id", "l.CityId");
+
+            SqlResult sqlResult = compiler.Compile(query);
+
+            var result = _leadRepository.GetLeadsByFilters(sqlResult);
             return result;
+        }
+
+        private string CreateStringBySearchingType(SearchType? searchType, string searchingString)
+        {
+            switch (searchType)
+            {
+                case SearchType.StartsWith:
+                    searchingString = searchingString + "%";
+                    break;
+                case SearchType.Contains:
+                    searchingString = "%" + searchingString + "%";
+                    break;
+                case SearchType.EndsWith:
+                    searchingString = "%" + searchingString;
+                    break;
+                default:
+                    return searchingString;
+            }
+            return searchingString;
+        }
+
+        private string BuildStringForCompare(SearchType? searchType)
+        {
+            string like = "=";
+            if (searchType == SearchType.NotEquals)
+            {
+                like = "!" + like;
+            }
+            return like;
         }
     }
 }

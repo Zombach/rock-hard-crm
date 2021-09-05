@@ -52,21 +52,13 @@ namespace CRM.API.Controllers
 
         // api/lead/filter
         //[AuthorizeRoles(Role.Admin)]
-        [HttpPost("/filter/{searchTypeForFirstName}/" +
-            "{searchTypeForLastName}/" +
-            "{searchTypeForPatronymic}")]
+        [HttpPost("/filter")]
         [Description("Get all Leads by filters")]
         [ProducesResponseType(typeof(List<LeadByFiltersOutputModel>), StatusCodes.Status200OK)]
         public List<LeadByFiltersOutputModel> GetAllLeadsByFilters(
-            [FromBody] LeadFiltersInputModel leadFilter, 
-            SearchType? searchTypeForFirstName,
-            SearchType? searchTypeForLastName,
-            SearchType? searchTypeForPatronymic)
+            [FromBody] LeadFiltersInputModel leadFilter)
         {            
             var filter = _mapper.Map<LeadFiltersDto>(leadFilter);
-            filter.SearchTypeForFirstName = searchTypeForFirstName;
-            filter.SearchTypeForLastName = searchTypeForLastName;
-            filter.SearchTypeForPatronymic = searchTypeForPatronymic;
             var leads = _leadService.GetLeadsByFilters(filter); 
             var result = _mapper.Map<List<LeadByFiltersOutputModel>>(leads);
             return result;

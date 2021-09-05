@@ -7,8 +7,11 @@ namespace CRM.API.Models
 {
     public class LeadFiltersInputModel
     {
+        public SearchType? SearchTypeForFirstName { get; set; }
         public string FirstName { get; set; }
+        public SearchType? SearchTypeForLastName { get; set; }
         public string LastName { get; set; }
+        public SearchType? SearchTypeForPatronymic { get; set; }
         public string Patronymic { get; set; }
         public int? Role { get; set; }
         public List<int> City { get; set; }

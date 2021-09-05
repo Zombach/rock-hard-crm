@@ -1,4 +1,5 @@
 ﻿using CRM.DAL.Models;
+using SqlKata;
 using System.Collections.Generic;
 
 namespace CRM.DAL.Repositories
@@ -11,6 +12,6 @@ namespace CRM.DAL.Repositories
         LeadDto GetLeadByEmail(string email);
         LeadDto GetLeadById(int id);
         void UpdateLead(LeadDto lead);
-        List<LeadDto> GetLeadsByFilters(LeadFiltersDto filter);
+        List<LeadDto> GetLeadsByFilters(SqlResult sqlResult);
     }
 }
