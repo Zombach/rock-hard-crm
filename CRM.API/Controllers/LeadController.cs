@@ -1,9 +1,7 @@
 ﻿using AutoMapper;
-using CRM.API.Common;
 using CRM.API.Extensions;
 using CRM.API.Models;
 using CRM.Business.Services;
-using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

@@ -6,6 +6,7 @@ using DevEdu.Business.ValidationHelpers;
 using SqlKata.Compilers;
 using SqlKata;
 using System;
+using CRM.Business.Extensions;
 
 namespace CRM.Business.Services
 {
@@ -78,43 +79,12 @@ namespace CRM.Business.Services
                                                  "l.Role as Id",
                                                  "l.RegistrationDate");
 
-            if (!String.IsNullOrEmpty(filter.FirstName))
-            {
-                query = query.Where(
-                    "l.FirstName",
-                    BuildStringForCompare(filter.SearchTypeForFirstName),
-                    CreateStringBySearchingType(filter.SearchTypeForFirstName, filter.FirstName));
-            }
-            if (!String.IsNullOrEmpty(filter.LastName))
-            {
-                query = query.Where(
-                    "l.LastName",
-                    BuildStringForCompare(filter.SearchTypeForLastName),
-                    CreateStringBySearchingType(filter.SearchTypeForLastName, filter.LastName));
-            }
-            if (!String.IsNullOrEmpty(filter.Patronymic))
-            {
-                query = query.Where(
-                    "l.Patronymic",
-                    BuildStringForCompare(filter.SearchTypeForPatronymic),
-                    CreateStringBySearchingType(filter.SearchTypeForPatronymic, filter.Patronymic));
-            }
-            if (filter.Role != null)
-            {
-                query = query.Where("l.Role", filter.Role);
-            }
-            if (filter.City != null && filter.City.Count != 0)
-            {
-                query = query.WhereIn("City.Id", filter.City);
-            }
-            if (filter.BirthDateFrom != null)
-            {
-                query = query.WhereDate("l.BirthDate", ">", filter.BirthDateFrom.ToString());
-            }
-            if (filter.BirthDateTo != null)
-            {
-                query = query.WhereDate("l.BirthDate", "<", filter.BirthDateTo.ToString());
-            }
+            query = this.FilterByName(query, filter.FirstName, filter.SearchTypeForFirstName, "FirstName");
+            query = this.FilterByName(query, filter.LastName, filter.SearchTypeForLastName, "LastName");
+            query = this.FilterByName(query, filter.Patronymic, filter.SearchTypeForPatronymic, "Patronymic");
+            query = this.FilterByRole(query, filter);
+            query = this.FilterByCity(query, filter);
+            query = this.FilterByBirthDate(query, filter);
 
             query = query
                 .Where("l.IsDeleted", 0)
@@ -122,41 +92,7 @@ namespace CRM.Business.Services
 
             SqlResult sqlResult = compiler.Compile(query);
 
-            var result = _leadRepository.GetLeadsByFilters(sqlResult);
-            return result;
-        }
-
-        private string CreateStringBySearchingType(SearchType? searchType, string searchingString)
-        {
-            switch (searchType)
-            {
-                case SearchType.StartsWith:
-                    searchingString = searchingString + "%";
-                    break;
-                case SearchType.Contains:
-                    searchingString = "%" + searchingString + "%";
-                    break;
-                case SearchType.EndsWith:
-                    searchingString = "%" + searchingString;
-                    break;
-                default:
-                    return searchingString;
-            }
-            return searchingString;
-        }
-
-        private string BuildStringForCompare(SearchType? searchType)
-        {
-            string like = "=";
-            if(searchType == SearchType.StartsWith || searchType == SearchType.Contains || searchType == SearchType.EndsWith)
-            {
-                like = "like";
-            }
-            if (searchType == SearchType.NotEquals)
-            {
-                like = "!" + like;
-            }
-            return like;
+            return _leadRepository.GetLeadsByFilters(sqlResult);
         }
     }
 }
