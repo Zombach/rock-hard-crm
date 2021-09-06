@@ -40,56 +40,13 @@ namespace CRM.API
             services.AddScoped<IAuthOptions, AuthOptions>();
             services.AddBearerAuthentication();
             services.AddAutoMapper(typeof(Startup), typeof(BusinessProfile));
-
-            services.AddScoped<IAccountRepository, AccountRepository>();
-            services.AddScoped<ILeadRepository, LeadRepository>();
-            services.AddScoped<ICityRepository, CityRepository>();
-
-            services.AddScoped<ILeadService, LeadService>();
-            services.AddScoped<IAccountService, AccountService>();
-            services.AddScoped<ICityService, CityService>();
-            services.AddScoped<IAuthenticationService, AuthenticationService>();
-            services.AddScoped<ITransactionService, TransactionService>();
-
-            services.AddScoped<ILeadValidationHelper, LeadValidationHelper>();
-            services.AddScoped<IAccountValidationHelper, AccountValidationHelper>();
-
+            services.AddRepositories();
+            services.AddCustomServices();
+            services.AddValidationHelpers();
             services.AddControllersWithViews();
-
             services.AddControllers();
-            services.AddSwaggerDocument(document =>
-            {
-                document.DocumentName = "CRM";
-                document.Title = "CRM API";
-                document.Version = "v1";
-                document.Description = "An interface for CRM.";
-
-                document.DocumentProcessors.Add(
-                    new SecurityDefinitionAppender("JWT token", new NSwag.OpenApiSecurityScheme
-                    {
-                        Type = NSwag.OpenApiSecuritySchemeType.ApiKey,
-                        Name = "Authorization",
-                        Description = "Copy 'Bearer ' + valid JWT token into field",
-                        In = NSwag.OpenApiSecurityApiKeyLocation.Header
-                    }));
-                document.OperationProcessors.Add(new OperationSecurityScopeProcessor("JWT token"));
-            });
-
-            services
-                .AddMvc()
-                .AddJsonOptions(options =>
-                {
-                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-                })
-
-                .ConfigureApiBehaviorOptions(options =>
-                {
-                    options.InvalidModelStateResponseFactory = context =>
-                    {
-                        var exc = new ValidationExceptionResponse(context.ModelState);
-                        return new UnprocessableEntityObjectResult(exc);
-                    };
-                });
+            services.AddSwagger();
+            services.AddValidationExceptionResponse();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -101,10 +58,10 @@ namespace CRM.API
                 app.UseOpenApi();
                 app.UseSwaggerUi3();
             }
+
             app.UseMiddleware<CustomExceptionMiddleware>();
             app.UseDefaultFiles();
             app.UseStaticFiles();
-
             app.UseRouting();
 
             app.UseAuthentication();

@@ -62,6 +62,9 @@ namespace CRM.API.Configuration.Middleware.ExceptionResponses
                 ValidationMessage.BirthDateRequired => 1015,
                 ValidationMessage.WrongFormatBirthDate => 1016,
                 ValidationMessage.PhoneNumberRequired => 1017,
+                ValidationMessage.WrongFormatRecipientAccount => 1018,
+                ValidationMessage.WrongFormatAmount => 1019,
+                ValidationMessage.WrongFormatAccount => 1020,
                 _ => 1500
             };
         }

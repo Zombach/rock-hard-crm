@@ -7,9 +7,7 @@ using CRM.DAL.Models;
 using CRM.DAL.Repositories;
 using DevEdu.Business.ValidationHelpers;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using RestSharp;
-using System.Linq;
 using static CRM.Business.TransactionEndpoint;
 
 namespace CRM.Business.Services

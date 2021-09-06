@@ -3,6 +3,7 @@ using CRM.DAL.Models;
 using CRM.DAL.Repositories;
 using DevEdu.Business.ValidationHelpers;
 using System.Collections.Generic;
+using CRM.Business.IdentityInfo;
 
 namespace CRM.Business.Services
 {
@@ -31,17 +32,17 @@ namespace CRM.Business.Services
         {
             dto.Password = _authenticationService.HashPassword(dto.Password);
             dto.Role = Role.Regular;
-            var id = _leadRepository.AddLead(dto);
-            _accountRepository.AddAccount(new AccountDto { LeadId = id, Currency = Currency.RUB });
-            return _leadRepository.GetLeadById(id);
+            var leadId = _leadRepository.AddLead(dto);
+            _accountRepository.AddAccount(new AccountDto { LeadId = leadId, Currency = Currency.RUB });
+            return _leadRepository.GetLeadById(leadId);
         }
 
-        public LeadDto UpdateLead(int id, LeadDto dto)
+        public LeadDto UpdateLead(int leadId, LeadDto dto)
         {
-            _leadValidationHelper.GetLeadByIdAndThrowIfNotFound(id);
-            dto.Id = id;
+            _leadValidationHelper.GetLeadByIdAndThrowIfNotFound(leadId);
+            dto.Id = leadId;
             _leadRepository.UpdateLead(dto);
-            return _leadRepository.GetLeadById(id);
+            return _leadRepository.GetLeadById(leadId);
         }
 
         public List<LeadDto> GetAllLeads()
@@ -49,15 +50,17 @@ namespace CRM.Business.Services
             return _leadRepository.GetAllLeads();
         }
 
-        public LeadDto GetLeadById(int id)
+        public LeadDto GetLeadById(int leadId, LeadIdentityInfo leadInfo)
         {
-            return _leadValidationHelper.GetLeadByIdAndThrowIfNotFound(id);
+            var dto= _leadValidationHelper.GetLeadByIdAndThrowIfNotFound(leadId);
+            _leadValidationHelper.CheckAccessToLead(leadId,leadInfo);
+            return dto;
         }
 
-        public void DeleteLeadById(int id)
+        public void DeleteLeadById(int leadId)
         {
-            _leadValidationHelper.GetLeadByIdAndThrowIfNotFound(id);
-            _leadRepository.DeleteLeadById(id);
+            _leadValidationHelper.GetLeadByIdAndThrowIfNotFound(leadId);
+            _leadRepository.DeleteLeadById(leadId);
         }
     }
 }

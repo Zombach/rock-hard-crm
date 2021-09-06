@@ -57,7 +57,8 @@ namespace CRM.API.Controllers
         [ProducesResponseType(typeof(LeadOutputModel), StatusCodes.Status200OK)]
         public LeadOutputModel GetLeadById(int id)
         {
-            var dto = _leadService.GetLeadById(id);
+            var leadInfo = this.GetLeadIdAndRoles();
+            var dto = _leadService.GetLeadById(id, leadInfo);
             var outPut = _mapper.Map<LeadOutputModel>(dto);
             return outPut;
         }
