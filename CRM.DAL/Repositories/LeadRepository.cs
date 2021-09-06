@@ -60,7 +60,6 @@ namespace CRM.DAL.Repositories
 
         public List<LeadDto> GetAllLeads()
         {
-            var leadDictionary = new Dictionary<int, LeadDto>();
             return _connection
                 .Query<LeadDto, CityDto, Role, LeadDto>(
                 _getAllLeadsProcedure,

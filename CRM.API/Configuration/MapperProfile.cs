@@ -19,6 +19,7 @@ namespace CRM.API.Configuration
         private void CreateMappingToDto()
         {
             CreateMap<CityInputModel, CityDto>();
+            CreateMap<TimeBasedAcquisitionInputModel, TimeBasedAcquisitionDto>();
             CreateMap<AccountInputModel, AccountDto>();
             CreateMap<LeadSignInModel, LeadDto>();
             CreateMap<LeadInputModel, LeadDto>()
@@ -29,6 +30,7 @@ namespace CRM.API.Configuration
         private void CreateMappingFromDto()
         {
             CreateMap<CityDto, CityOutputModel>();
+            CreateMap<CommissionFeeDto, CommissionFeeOutputModel>();
             CreateMap<AccountDto, AccountOutputModel>()
                 .ForMember(dest => dest.CreatedOn, opt => opt.MapFrom(src => src.CreatedOn.ToString(_dateFormat)));
             CreateMap<LeadDto, LeadOutputModel>()

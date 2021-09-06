@@ -60,11 +60,13 @@ namespace CRM.API.Configuration.Middleware.ExceptionResponses
                 ValidationMessage.CityIdRequired => 1013,
                 ValidationMessage.WrongFormatCityId => 1014,
                 ValidationMessage.BirthDateRequired => 1015,
-                ValidationMessage.WrongFormatBirthDate => 1016,
+                ValidationMessage.WrongFormatDate => 1016,
                 ValidationMessage.PhoneNumberRequired => 1017,
                 ValidationMessage.WrongFormatRecipientAccount => 1018,
                 ValidationMessage.WrongFormatAmount => 1019,
                 ValidationMessage.WrongFormatAccount => 1020,
+                ValidationMessage.DateToRequired => 1021,
+                ValidationMessage.DateFromRequired => 1022,
                 _ => 1500
             };
         }

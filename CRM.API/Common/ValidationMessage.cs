@@ -20,7 +20,9 @@
         public const string CityIdRequired = "CityId must be provided";
         public const string WrongFormatCityId = "CityId must be integer from 1 to int.MaxValue";
         public const string BirthDateRequired = "BirthDate must be provided";
-        public const string WrongFormatBirthDate = "BirthDate must be format 'dd.MM.yyyy'";
+        public const string WrongFormatDate = "Date must be format 'dd.MM.yyyy'";
         public const string PhoneNumberRequired = "PhoneNumber must be provided";
+        public const string DateToRequired = "Date must be provided";
+        public const string DateFromRequired = "From Date must be provided";
     }
 }

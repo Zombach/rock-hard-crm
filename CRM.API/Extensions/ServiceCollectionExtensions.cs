@@ -61,6 +61,7 @@ namespace CRM.API.Extensions
             services.AddScoped<IAccountRepository, AccountRepository>();
             services.AddScoped<ILeadRepository, LeadRepository>();
             services.AddScoped<ICityRepository, CityRepository>();
+            services.AddScoped<ICommissionFeeRepository, CommissionFeeRepository>();
 
             return services;
         }
@@ -72,6 +73,7 @@ namespace CRM.API.Extensions
             services.AddScoped<ICityService, CityService>();
             services.AddScoped<IAuthenticationService, AuthenticationService>();
             services.AddScoped<ITransactionService, TransactionService>();
+            services.AddScoped<ICommissionFeeService, CommissionFeeService>();
 
             return services;
         }
