@@ -6,9 +6,11 @@ using CRM.Business.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CRM.API.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class TransactionController : Controller

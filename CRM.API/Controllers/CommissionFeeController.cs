@@ -35,8 +35,9 @@ namespace CRM.API.Controllers
             return _mapper.Map<List<CommissionFeeOutputModel>>(listDto);
         }
 
-        // api/CommissionFee
-        [HttpGet("{accountId}")]
+        // api/CommissionFee/by-account/1
+        [HttpGet("by-account/{accountId}")]
+        [Description("Return all commission fees by accountId")]
         [ProducesResponseType(typeof(List<CommissionFeeOutputModel>), StatusCodes.Status200OK)]
         public List<CommissionFeeOutputModel> GetCommissionFeesByAccountId(int accountId)
         {
@@ -44,8 +45,9 @@ namespace CRM.API.Controllers
             return _mapper.Map<List<CommissionFeeOutputModel>>(listDto);
         }
 
-        // api/CommissionFee
-        [HttpGet("{leadId}")]
+        // api/CommissionFee/by-lead/1
+        [HttpGet("by-lead/{leadId}")]
+        [Description("Return all commission fees by leadId")]
         [ProducesResponseType(typeof(List<CommissionFeeOutputModel>), StatusCodes.Status200OK)]
         public List<CommissionFeeOutputModel> GetCommissionFeesByLeadId(int leadId)
         {
@@ -55,7 +57,7 @@ namespace CRM.API.Controllers
 
         // api/CommissionFee/by-period
         [HttpPost("by-period")]
-        [Description("Return all commission fees")]
+        [Description("Return all commission fees by period")]
         [ProducesResponseType(typeof(List<CommissionFeeOutputModel>), StatusCodes.Status200OK)]
         public List<CommissionFeeOutputModel> GetCommissionFeesByPeriod([FromBody] TimeBasedAcquisitionInputModel model)
         {
@@ -64,9 +66,9 @@ namespace CRM.API.Controllers
             return _mapper.Map<List<CommissionFeeOutputModel>>(listDto);
         }
 
-        // api/CommissionFee
-        [HttpGet("{role}")]
-        [Description("Return all commission fees")]
+        // api/CommissionFee/by-role
+        [HttpGet("by-role/{role}")]
+        [Description("Return all commission fees by role")]
         [ProducesResponseType(typeof(List<CommissionFeeOutputModel>), StatusCodes.Status200OK)]
         public List<CommissionFeeOutputModel> GetCommissionFeesByRole(Role role)
         {

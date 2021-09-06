@@ -3,8 +3,7 @@
 	@AccountId		INT,
 	@TransactionId	BIGINT,
 	@Amount 		DECIMAL (14,3),
-	@Role			INT,
-	@Date			datetime2
+	@Role			INT
 AS
 BEGIN
 	INSERT INTO dbo.[CommissionFee] 

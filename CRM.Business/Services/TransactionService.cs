@@ -18,8 +18,9 @@ namespace CRM.Business.Services
         private readonly RequestHelper _requestHelper;
         private readonly IAccountValidationHelper _accountValidationHelper;
         private readonly IAccountService _accountService;
-        private readonly double _commission;
-        private readonly double _vipCommission;
+        private readonly ICommissionFeeService _commissionFeeService;
+        private readonly decimal _commission;
+        private readonly decimal _vipCommission;
         private const double _commissionModifier = 1.5;
 
         public TransactionService
@@ -27,41 +28,61 @@ namespace CRM.Business.Services
             IOptions<ConnectionUrl> connectionOptions,
             IOptions<CommissionSettings> commissionOptions,
             IAccountValidationHelper accountValidationHelper,
-            IAccountService accountService
+            IAccountService accountService, 
+            ICommissionFeeService commissionFeeService
         )
         {
             _client = new RestClient(connectionOptions.Value.TstoreUrl);
-            _commission = commissionOptions.Value.Commission;
+            _commission = commissionOptions.Value.Commission; 
             _vipCommission = commissionOptions.Value.VipCommission;
             _requestHelper = new RequestHelper();
             _accountValidationHelper = accountValidationHelper;
             _accountService = accountService;
+            _commissionFeeService = commissionFeeService;
         }
 
         public long AddDeposit(TransactionBusinessModel model, LeadIdentityInfo leadInfo)
         {
             var account = CheckAccessAndReturnAccount(model.AccountId, leadInfo);
             _accountValidationHelper.CheckForVipAccess(account.Currency, leadInfo);
+            var commission = CalculateCommission(model.Amount, leadInfo);
 
+            //if (account.Currency is not Currency.RUB)
+            //{
+            //    var rate = 1;
+            //    commission *= rate;
+            //}
+
+            model.Amount -= commission;
             model.AccountId = account.Id;
             model.Currency = account.Currency;
 
             var request = _requestHelper.CreatePostRequest(AddDepositEndpoint, model);
             var result = _client.Execute<long>(request);
-            return result.Data;
+            var transactionId = result.Data;
+
+            AddCommissionFee(leadInfo,transactionId,model, commission);
+
+            return transactionId;
         }
 
         public long AddWithdraw(TransactionBusinessModel model, LeadIdentityInfo leadInfo)
         {
             var account = CheckAccessAndReturnAccount(model.AccountId, leadInfo);
             _accountValidationHelper.CheckForVipAccess(account.Currency, leadInfo);
+            var commission= CalculateCommission(model.Amount, leadInfo);
 
+            model.Amount -= commission;
             model.AccountId = account.Id;
             model.Currency = account.Currency;
 
             var request = _requestHelper.CreatePostRequest(AddWithdrawEndpoint, model);
             var result = _client.Execute<long>(request);
-            return result.Data;
+            var transactionId = result.Data;
+
+            AddCommissionFee(leadInfo, transactionId, model, commission);
+
+            return transactionId;
         }
 
         public string AddTransfer(TransferBusinessModel model, LeadIdentityInfo leadInfo)
@@ -78,6 +99,7 @@ namespace CRM.Business.Services
                 }
             }
 
+            model.Amount = CalculateCommission(model.Amount, leadInfo);
             model.Currency = account.Currency;
             model.RecipientCurrency = recipientAccount.Currency;
             var request = _requestHelper.CreatePostRequest(AddTransferEndpoint, model);
@@ -89,8 +111,20 @@ namespace CRM.Business.Services
         {
             var account = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(accountId);
             _accountValidationHelper.CheckLeadAccessToAccount(account.LeadId, leadInfo.LeadId);
-            //_accountValidationHelper.CheckForVipAccess(account.Currency, leadInfo);
             return account;
+        }
+
+        private void AddCommissionFee(LeadIdentityInfo leadInfo, long transactionId, TransactionBusinessModel model, decimal commission)
+        {
+            var role = leadInfo.IsVip() ? Role.Vip : Role.Regular;
+            var dto = new CommissionFeeDto
+                {LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = role, Amount = commission };
+            _commissionFeeService.AddCommissionFee(dto);
+        }
+
+        private decimal CalculateCommission(decimal amount, LeadIdentityInfo leadInfo)
+        {
+            return leadInfo.IsVip() ? amount * _vipCommission : amount * _commission;
         }
     }
 }

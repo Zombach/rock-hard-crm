@@ -30,7 +30,6 @@ namespace CRM.DAL.Repositories
                     dto.AccountId,
                     dto.TransactionId,
                     dto.Role,
-                    dto.Date,
                     dto.Amount
                 },
                 commandType: CommandType.StoredProcedure

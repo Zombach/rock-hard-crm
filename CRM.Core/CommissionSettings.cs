@@ -2,7 +2,7 @@
 {
     public class CommissionSettings
     {
-        public int Commission { get; set; }
-        public int VipCommission { get; set; }
+        public decimal Commission { get; set; }
+        public decimal VipCommission { get; set; }
     }
 }
