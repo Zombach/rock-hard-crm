@@ -1,10 +1,10 @@
 ﻿using CRM.Business.Constants;
 using CRM.Business.Exceptions;
+using CRM.Business.IdentityInfo;
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
 using System.Linq;
-using CRM.Business.IdentityInfo;
 
 namespace DevEdu.Business.ValidationHelpers
 {

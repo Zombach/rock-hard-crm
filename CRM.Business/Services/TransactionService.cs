@@ -1,6 +1,4 @@
-﻿using System;
-using System.Text;
-using CRM.Business.IdentityInfo;
+﻿using CRM.Business.IdentityInfo;
 using CRM.Business.Models;
 using CRM.Business.Requests;
 using CRM.Core;
@@ -9,6 +7,7 @@ using CRM.DAL.Models;
 using DevEdu.Business.ValidationHelpers;
 using Microsoft.Extensions.Options;
 using RestSharp;
+using System;
 using static CRM.Business.TransactionEndpoint;
 
 namespace CRM.Business.Services
@@ -68,12 +67,12 @@ namespace CRM.Business.Services
         public string AddTransfer(TransferBusinessModel model, LeadIdentityInfo leadInfo)
         {
             var account = CheckAccessAndReturnAccount(model.AccountId, leadInfo);
-            var recipientAccount = CheckAccessAndReturnAccount(model.RecipientAccountId,leadInfo);
+            var recipientAccount = CheckAccessAndReturnAccount(model.RecipientAccountId, leadInfo);
 
             if (account.Currency is not (Currency.RUB or Currency.USD) && !leadInfo.IsVip())
             {
-                var balance=_accountService.GetAccountWithTransactions(account.Id, leadInfo).Balance;
-                if (balance!=model.Amount)
+                var balance = _accountService.GetAccountWithTransactions(account.Id, leadInfo).Balance;
+                if (balance != model.Amount)
                 {
                     throw new Exception("снять можно только все бабки простак");
                 }

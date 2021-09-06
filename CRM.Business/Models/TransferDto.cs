@@ -1,5 +1,5 @@
-﻿using System.Runtime.Serialization;
-using CRM.DAL.Enums;
+﻿using CRM.DAL.Enums;
+using System.Runtime.Serialization;
 
 namespace CRM.Business.Models
 {

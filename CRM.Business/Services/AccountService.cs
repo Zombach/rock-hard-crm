@@ -42,7 +42,7 @@ namespace CRM.Business.Services
         {
             var lead = _leadRepository.GetLeadById(leadInfo.LeadId);
             _accountValidationHelper.CheckForDuplicateCurrencies(lead, dto.Currency);
-            _accountValidationHelper.CheckForVipAccess(dto.Currency,leadInfo);
+            _accountValidationHelper.CheckForVipAccess(dto.Currency, leadInfo);
             dto.LeadId = lead.Id;
             var accountId = _accountRepository.AddAccount(dto);
             return accountId;

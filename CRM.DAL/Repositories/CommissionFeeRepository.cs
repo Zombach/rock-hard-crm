@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using CRM.Core;
+﻿using CRM.Core;
+using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using Dapper;
 using Microsoft.Extensions.Options;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using CRM.DAL.Enums;
 
 namespace CRM.DAL.Repositories
 {
@@ -111,7 +110,7 @@ namespace CRM.DAL.Repositories
                         commissionFee.Role = role;
                         return commissionFee;
                     },
-                    new {role = requiredRole },
+                    new { role = requiredRole },
                     commandType: CommandType.StoredProcedure)
                 .ToList();
         }

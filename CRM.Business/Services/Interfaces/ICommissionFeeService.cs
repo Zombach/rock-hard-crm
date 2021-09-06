@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using CRM.DAL.Enums;
+﻿using CRM.DAL.Enums;
 using CRM.DAL.Models;
+using System.Collections.Generic;
 
 namespace CRM.Business.Services
 {

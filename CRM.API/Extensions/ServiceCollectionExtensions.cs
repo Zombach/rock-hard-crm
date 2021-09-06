@@ -1,5 +1,4 @@
-﻿using System.Text.Json.Serialization;
-using CRM.API.Configuration.Middleware.ExceptionResponses;
+﻿using CRM.API.Configuration.Middleware.ExceptionResponses;
 using CRM.Business.Options;
 using CRM.Business.Services;
 using CRM.Core;
@@ -11,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using NSwag.Generation.Processors.Security;
+using System.Text.Json.Serialization;
 
 namespace CRM.API.Extensions
 {

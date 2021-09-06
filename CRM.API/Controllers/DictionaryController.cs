@@ -1,11 +1,11 @@
 ﻿using AutoMapper;
 using CRM.API.Models;
 using CRM.Business.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.ComponentModel;
-using Microsoft.AspNetCore.Authorization;
 
 namespace CRM.API.Controllers
 {

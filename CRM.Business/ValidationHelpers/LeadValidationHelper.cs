@@ -26,7 +26,7 @@ namespace DevEdu.Business.ValidationHelpers
         public void CheckAccessToLead(int leadId, LeadIdentityInfo leadInfo)
         {
             if (leadInfo.IsAdmin()) return;
-            if (leadInfo.LeadId!=leadId)
+            if (leadInfo.LeadId != leadId)
                 throw new EntityNotFoundException(string.Format(ServiceMessages.LeadHasNoAccessMessageToLead, leadId));
         }
     }

@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using CRM.DAL.Models;
+﻿using CRM.DAL.Models;
+using System.Collections.Generic;
 
 namespace CRM.DAL.Repositories
 {

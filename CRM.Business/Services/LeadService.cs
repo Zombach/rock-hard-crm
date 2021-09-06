@@ -1,9 +1,9 @@
-﻿using CRM.DAL.Enums;
+﻿using CRM.Business.IdentityInfo;
+using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
 using DevEdu.Business.ValidationHelpers;
 using System.Collections.Generic;
-using CRM.Business.IdentityInfo;
 
 namespace CRM.Business.Services
 {
@@ -52,8 +52,8 @@ namespace CRM.Business.Services
 
         public LeadDto GetLeadById(int leadId, LeadIdentityInfo leadInfo)
         {
-            var dto= _leadValidationHelper.GetLeadByIdAndThrowIfNotFound(leadId);
-            _leadValidationHelper.CheckAccessToLead(leadId,leadInfo);
+            var dto = _leadValidationHelper.GetLeadByIdAndThrowIfNotFound(leadId);
+            _leadValidationHelper.CheckAccessToLead(leadId, leadInfo);
             return dto;
         }
 

@@ -1,13 +1,13 @@
 ﻿using AutoMapper;
+using CRM.API.Common;
 using CRM.API.Models;
 using CRM.Business.Services;
+using CRM.DAL.Enums;
+using CRM.DAL.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.ComponentModel;
-using CRM.API.Common;
-using CRM.DAL.Enums;
-using CRM.DAL.Models;
 
 namespace CRM.API.Controllers
 {
