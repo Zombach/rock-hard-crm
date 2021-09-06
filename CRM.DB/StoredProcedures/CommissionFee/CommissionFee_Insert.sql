@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE dbo.CommissionFee_Insert
 	@LeadId			INT,
 	@AccountId		INT,
-	@TransactionId	INT,
+	@TransactionId	BIGINT,
 	@Amount 		DECIMAL (14,3),
 	@Role			INT,
 	@Date			datetime2

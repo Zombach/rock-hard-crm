@@ -3,7 +3,7 @@
 	[Id]               INT            NOT NULL IDENTITY (1, 1),
     [LeadId]           INT            NOT NULL,
     [AccountId]        INT            NOT NULL,
-    [TransactionId]    INT            NOT NULL,
+    [TransactionId]    BIGINT         NOT NULL,
     [Role]             INT            NOT NULL,
     [Date]             DATETIME2 (7)  NOT NULL,
     [Amount]           DECIMAL (14,3) NOT NULL,
