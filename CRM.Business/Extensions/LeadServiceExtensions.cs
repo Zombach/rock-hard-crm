@@ -25,7 +25,7 @@ namespace CRM.Business.Extensions
 
         public static Query FilterByCity(this LeadService service, Query query, LeadFiltersDto filter)
         {
-            return filter.City is null && filter.City.Count == 0 ? query : query.WhereIn("City.Id", filter.City);
+            return filter.City is null || filter.City.Count == 0 ? query : query.WhereIn("City.Id", filter.City);
         }
 
         public static Query FilterByBirthDate(this LeadService service, Query query, LeadFiltersDto filter)
