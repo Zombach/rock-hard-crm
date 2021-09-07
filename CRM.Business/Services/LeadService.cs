@@ -74,10 +74,10 @@ namespace CRM.Business.Services
                                                  "l.Patronymic",
                                                  "l.Email",
                                                  "l.BirthDate",
+                                                 "l.RegistrationDate",
                                                  "City.Id",
                                                  "City.Name",
-                                                 "l.Role as Id",
-                                                 "l.RegistrationDate");
+                                                 "l.Role as Id");
 
             query = this.FilterByName(query, filter.FirstName, filter.SearchTypeForFirstName, "FirstName");
             query = this.FilterByName(query, filter.LastName, filter.SearchTypeForLastName, "LastName");

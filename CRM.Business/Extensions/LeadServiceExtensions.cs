@@ -2,6 +2,7 @@
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using SqlKata;
+using System.Globalization;
 
 namespace CRM.Business.Extensions
 {
@@ -30,8 +31,8 @@ namespace CRM.Business.Extensions
 
         public static Query FilterByBirthDate(this LeadService service, Query query, LeadFiltersDto filter)
         {
-            query = filter.BirthDateFrom is null ? query : query.WhereDate("l.BirthDate", ">", filter.BirthDateFrom.ToString());
-            query = filter.BirthDateTo is null ? query : query.WhereDate("l.BirthDate", "<", filter.BirthDateTo.ToString());
+            query = filter.BirthDateFrom is null ? query : query.WhereDate("l.BirthDate", ">=", filter.BirthDateFrom.Value.ToString("d", CultureInfo.InvariantCulture));
+            query = filter.BirthDateTo is null ? query : query.WhereDate("l.BirthDate", "<=", filter.BirthDateTo.Value.ToString("d", CultureInfo.InvariantCulture));
             return query;
         }
 
