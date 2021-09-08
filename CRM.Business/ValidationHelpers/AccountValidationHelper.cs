@@ -1,9 +1,9 @@
-﻿using System.Linq;
-using CRM.Business.Constants;
+﻿using CRM.Business.Constants;
 using CRM.Business.Exceptions;
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
+using System.Linq;
 
 namespace DevEdu.Business.ValidationHelpers
 {
@@ -32,9 +32,9 @@ namespace DevEdu.Business.ValidationHelpers
 
         public void CheckForDuplicateCurrencies(LeadDto lead, Currency currency)
         {
-            var account = lead.Accounts.FirstOrDefault(ac=>ac.Currency==currency);
+            var account = lead.Accounts.FirstOrDefault(ac => ac.Currency == currency);
             if (account != default)
-                throw new ValidationException(nameof(account),string.Format(ServiceMessages.LeadHasThisCurrencyMessage, lead.Id));
+                throw new ValidationException(nameof(account), string.Format(ServiceMessages.LeadHasThisCurrencyMessage, lead.Id));
         }
     }
 }

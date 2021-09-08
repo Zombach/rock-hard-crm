@@ -1,7 +1,6 @@
 ﻿using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
-using System.Collections.Generic;
 using DevEdu.Business.ValidationHelpers;
 using SqlKata.Compilers;
 using SqlKata;

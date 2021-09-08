@@ -1,4 +1,5 @@
 using CRM.API.Configuration.Middleware;
+using CRM.API.Configuration.Middleware.ExceptionResponses;
 using CRM.API.Extensions;
 using CRM.Business.Configuration;
 using CRM.Business.Options;
@@ -8,10 +9,12 @@ using CRM.DAL.Repositories;
 using DevEdu.Business.ValidationHelpers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NSwag.Generation.Processors.Security;
+using System.Text.Json.Serialization;
 
 namespace CRM.API
 {
@@ -71,6 +74,22 @@ namespace CRM.API
                     }));
                 document.OperationProcessors.Add(new OperationSecurityScopeProcessor("JWT token"));
             });
+
+            services
+                .AddMvc()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                })
+
+                .ConfigureApiBehaviorOptions(options =>
+                {
+                    options.InvalidModelStateResponseFactory = context =>
+                    {
+                        var exc = new ValidationExceptionResponse(context.ModelState);
+                        return new UnprocessableEntityObjectResult(exc);
+                    };
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

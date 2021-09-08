@@ -1,6 +1,8 @@
-﻿using CRM.Business.Exceptions;
+﻿using CRM.API.Common;
+using CRM.Business.Exceptions;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.Collections.Generic;
+
 namespace CRM.API.Configuration.Middleware.ExceptionResponses
 {
     public class ValidationExceptionResponse
@@ -17,9 +19,10 @@ namespace CRM.API.Configuration.Middleware.ExceptionResponses
         {
             Errors = new List<ValidationError>
             {
-                new ValidationError {Code = ValidationStatusCode, Field = exception.FieldOfError, Message = exception.Message}
+                new() {Code = ValidationStatusCode, Field = exception.FieldOfError, Message = exception.Message}
             };
         }
+
         public ValidationExceptionResponse(ModelStateDictionary modelState)
         {
             Code = ValidationCode;
@@ -27,13 +30,40 @@ namespace CRM.API.Configuration.Middleware.ExceptionResponses
             Errors = new List<ValidationError>();
             foreach (var state in modelState)
             {
+                if (state.Value.Errors.Count == 0)
+                    continue;
                 Errors.Add(new ValidationError
                 {
-                    Code = ValidationStatusCode,
+                    Code = GetValidationCode(state.Value.Errors[0].ErrorMessage),
                     Field = state.Key,
                     Message = state.Value.Errors[0].ErrorMessage
                 });
             }
+        }
+
+        private static int GetValidationCode(string exception)
+        {
+            return exception switch
+            {
+                ValidationMessage.FirstNameRequired => 1001,
+                ValidationMessage.LastNameRequired => 1002,
+                ValidationMessage.PatronymicRequired => 1003,
+                ValidationMessage.EmailRequired => 1004,
+                ValidationMessage.WrongEmailFormat => 1005,
+                ValidationMessage.NameRequired => 1006,
+                ValidationMessage.AmountRequired => 1007,
+                ValidationMessage.AccountRequired => 1008,
+                ValidationMessage.RecipientAccountRequired => 1009,
+                ValidationMessage.CurrencyRequired => 1010,
+                ValidationMessage.PasswordRequired => 1011,
+                ValidationMessage.WrongFormatPassword => 1012,
+                ValidationMessage.CityIdRequired => 1013,
+                ValidationMessage.WrongFormatCityId => 1014,
+                ValidationMessage.BirthDateRequired => 1015,
+                ValidationMessage.WrongFormatBirthDate => 1016,
+                ValidationMessage.PhoneNumberRequired => 1017,
+                _ => 1500
+            };
         }
     }
 }

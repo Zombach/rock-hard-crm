@@ -50,7 +50,7 @@ namespace CRM.Business.Services
         public string AddTransfer(TransferBusinessModel model)
         {
             var account = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(model.AccountId);
-            var recipientAccount= _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(model.RecipientAccountId);
+            var recipientAccount = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(model.RecipientAccountId);
 
             model.Currency = account.Currency;
             model.RecipientCurrency = recipientAccount.Currency;

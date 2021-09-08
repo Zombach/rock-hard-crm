@@ -55,8 +55,8 @@ namespace CRM.API.Controllers
         [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
         public ActionResult<List<TransactionBusinessModel>> GetAccountWithTransactions(int accountId)
         {
-            var leadId = this.GetLeadId();
-            var output = _accountService.GetAccountWithTransactions(accountId, leadId);
+            var leadInfo = this.GetLeadIdAndRoles();
+            var output = _accountService.GetAccountWithTransactions(accountId, leadInfo);
             return StatusCode(201, output);
         }
     }
