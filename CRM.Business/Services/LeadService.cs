@@ -6,6 +6,7 @@ using SqlKata.Compilers;
 using SqlKata;
 using System;
 using CRM.Business.Extensions;
+using System.Collections.Generic;
 
 namespace CRM.Business.Services
 {
