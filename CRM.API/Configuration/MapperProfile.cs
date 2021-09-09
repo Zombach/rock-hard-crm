@@ -43,6 +43,7 @@ namespace CRM.API.Configuration
         {
             CreateMap<TransactionInputModel, TransactionBusinessModel>();
             CreateMap<TransactionInputModel, TransferBusinessModel>();
+            CreateMap<TimeBasedAcquisitionInputModel, TimeBasedAcquisitionBusinessModel>();
         }
     }
 }

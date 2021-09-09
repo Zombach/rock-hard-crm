@@ -92,7 +92,7 @@ namespace CRM.Business.Services
                 if (!leadInfo.IsAdmin())
                     _accountValidationHelper.CheckLeadAccessToAccount(dto.LeadId, leadInfo.LeadId);
                 var accountModel = _mapper.Map<AccountBusinessModel>(dto);
-                var request = _requestHelper.CreateGetRequest($"{GetTransactionsByPeriodEndpoint}");
+                var request = _requestHelper.CreatePostRequest($"{GetTransactionsByPeriodEndpoint}", model);
                 var response = _client.Execute<string>(request);
 
                 accountModel.AddDeserializedTransactions(response.Data);
@@ -104,12 +104,11 @@ namespace CRM.Business.Services
             {
                 if (!leadInfo.IsAdmin()) throw new Exception("nah");
 
-                var request = _requestHelper.CreateGetRequest($"{GetTransactionsByPeriodEndpoint}");
+
+                var request = _requestHelper.CreatePostRequest($"{GetTransactionsByPeriodEndpoint}", model);
                 var response = _client.Execute<string>(request);
-
-
+                list.AddDeserializedTransactions(response.Data);
             }
-
 
             return list;
         }

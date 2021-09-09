@@ -77,12 +77,12 @@ namespace CRM.API.Controllers
         [HttpPost("by-period")]
         [Description("Get transactions by period or period and account id")]
         [ProducesResponseType(typeof(List<TransactionOutputModel>), StatusCodes.Status200OK)]
-        public List<TransactionOutputModel> GetTransactionsByPeriodAndPossiblyAccountId([FromBody] TimeBasedAcquisitionInputModel model)
+        public List<AccountBusinessModel> GetTransactionsByPeriodAndPossiblyAccountId([FromBody] TimeBasedAcquisitionInputModel model)
         {
             var leadInfo = this.GetLeadIdAndRoles();
             var dto = _mapper.Map<TimeBasedAcquisitionBusinessModel>(model);
             var output = _accountService.GetTransactionsByPeriodAndPossiblyAccountId(dto, leadInfo);
-            return _mapper.Map<List<TransactionOutputModel>>(output);
+            return _mapper.Map<List<AccountBusinessModel>>(output);
         }
 
         //balance
