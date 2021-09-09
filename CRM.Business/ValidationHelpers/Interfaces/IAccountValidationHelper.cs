@@ -2,7 +2,7 @@
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
 
-namespace DevEdu.Business.ValidationHelpers
+namespace CRM.Business.ValidationHelpers
 {
     public interface IAccountValidationHelper
     {

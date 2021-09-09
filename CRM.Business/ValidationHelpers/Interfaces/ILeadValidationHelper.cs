@@ -1,7 +1,7 @@
 ﻿using CRM.Business.IdentityInfo;
 using CRM.DAL.Models;
 
-namespace DevEdu.Business.ValidationHelpers
+namespace CRM.Business.ValidationHelpers
 {
     public interface ILeadValidationHelper
     {

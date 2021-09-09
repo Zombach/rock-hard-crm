@@ -3,7 +3,6 @@ using CRM.Business.Options;
 using CRM.Business.Services;
 using CRM.Core;
 using CRM.DAL.Repositories;
-using DevEdu.Business.ValidationHelpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -11,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using NSwag.Generation.Processors.Security;
 using System.Text.Json.Serialization;
+using CRM.Business.ValidationHelpers;
 
 namespace CRM.API.Extensions
 {
@@ -24,8 +24,8 @@ namespace CRM.API.Extensions
             services.AddOptions<AuthSettings>()
                 .Bind(configuration.GetSection(nameof(AuthSettings)))
                 .ValidateDataAnnotations();
-            services.AddOptions<ConnectionUrl>()
-               .Bind(configuration.GetSection(nameof(ConnectionUrl)))
+            services.AddOptions<ConnectionSettings>()
+               .Bind(configuration.GetSection(nameof(ConnectionSettings)))
                .ValidateDataAnnotations();
             services.AddOptions<CommissionSettings>()
                 .Bind(configuration.GetSection(nameof(CommissionSettings)))

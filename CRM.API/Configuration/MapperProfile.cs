@@ -20,6 +20,7 @@ namespace CRM.API.Configuration
         {
             CreateMap<CityInputModel, CityDto>();
             CreateMap<TimeBasedAcquisitionInputModel, TimeBasedAcquisitionDto>();
+            CreateMap<TimeBasedAcquisitionSearchingInputModes, TimeBasedAcquisitionDto>();
             CreateMap<AccountInputModel, AccountDto>();
             CreateMap<LeadSignInModel, LeadDto>();
             CreateMap<LeadInputModel, LeadDto>()

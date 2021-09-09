@@ -9,7 +9,7 @@ namespace CRM.DAL.Repositories
         List<CommissionFeeDto> GetAllCommissionFees();
         List<CommissionFeeDto> GetCommissionFeesByAccountId(int accountId);
         List<CommissionFeeDto> GetCommissionFeesByLeadId(int leadId);
-        List<CommissionFeeDto> GetCommissionFeesByPeriod(TimeBasedAcquisitionDto dto);
+        List<CommissionFeeDto> SearchingCommissionFeesForThePeriod(TimeBasedAcquisitionDto dto);
         List<CommissionFeeDto> GetCommissionFeesByRole(int requiredRole);
     }
 }

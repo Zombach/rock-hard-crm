@@ -6,6 +6,7 @@ namespace CRM.DAL.Repositories
     {
         int AddAccount(AccountDto dto);
         void DeleteAccount(int id);
+        void RestoreAccount(int id);
         AccountDto GetAccountById(int id);
     }
 }

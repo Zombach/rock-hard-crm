@@ -34,9 +34,9 @@ namespace CRM.Business.Services
             return _commissionFeeRepository.GetCommissionFeesByLeadId(leadId);
         }
 
-        public List<CommissionFeeDto> GetCommissionFeesByPeriod(TimeBasedAcquisitionDto dto)
+        public List<CommissionFeeDto> SearchingCommissionFeesForThePeriod(TimeBasedAcquisitionDto dto)
         {
-            return _commissionFeeRepository.GetCommissionFeesByPeriod(dto);
+            return _commissionFeeRepository.SearchingCommissionFeesForThePeriod(dto);
         }
 
         public List<CommissionFeeDto> GetCommissionFeesByRole(Role role)

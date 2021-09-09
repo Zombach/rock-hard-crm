@@ -6,7 +6,7 @@ using CRM.DAL.Models;
 using CRM.DAL.Repositories;
 using System.Linq;
 
-namespace DevEdu.Business.ValidationHelpers
+namespace CRM.Business.ValidationHelpers
 {
     public class AccountValidationHelper : IAccountValidationHelper
     {

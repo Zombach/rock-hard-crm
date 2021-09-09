@@ -1,14 +1,16 @@
-﻿using AutoMapper;
+﻿using System;
+using System.Collections.Generic;
+using AutoMapper;
 using CRM.Business.IdentityInfo;
 using CRM.Business.Models;
 using CRM.Business.Requests;
+using CRM.Business.ValidationHelpers;
 using CRM.Core;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
-using DevEdu.Business.ValidationHelpers;
 using Microsoft.Extensions.Options;
 using RestSharp;
-using static CRM.Business.TransactionEndpoint;
+using static CRM.Business.Constants.TransactionEndpoint;
 
 namespace CRM.Business.Services
 {
@@ -25,7 +27,7 @@ namespace CRM.Business.Services
         (
             IAccountRepository accountRepository,
             ILeadRepository leadRepository,
-            IOptions<ConnectionUrl> options,
+            IOptions<ConnectionSettings> options,
             IMapper mapper,
             IAccountValidationHelper accountValidationHelper
         )
@@ -33,7 +35,7 @@ namespace CRM.Business.Services
             _accountRepository = accountRepository;
             _leadRepository = leadRepository;
             _mapper = mapper;
-            _client = new RestClient(options.Value.TstoreUrl);
+            _client = new RestClient(options.Value.TransactionStoreUrl);
             _requestHelper = new RequestHelper();
             _accountValidationHelper = accountValidationHelper;
         }
@@ -48,12 +50,20 @@ namespace CRM.Business.Services
             return accountId;
         }
 
-        public void DeleteAccount(int id, int leadId)
+        public void DeleteAccount(int accountId, int leadId)
         {
-            var dto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(id);
+            var dto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(accountId);
             _accountValidationHelper.CheckLeadAccessToAccount(dto.LeadId, leadId);
 
-            _accountRepository.DeleteAccount(id);
+            _accountRepository.DeleteAccount(accountId);
+        }
+
+        public void RestoreAccount(int accountId, int leadId)
+        {
+            var dto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(accountId);
+            _accountValidationHelper.CheckLeadAccessToAccount(dto.LeadId, leadId);
+
+            _accountRepository.RestoreAccount(accountId);
         }
 
         public AccountBusinessModel GetAccountWithTransactions(int accountId, LeadIdentityInfo leadInfo)
@@ -71,6 +81,37 @@ namespace CRM.Business.Services
             accountModel.BalanceCalculation(accountId);
 
             return accountModel;
+        }
+
+        public List<AccountBusinessModel> GetTransactionsByPeriodAndPossiblyAccountId(TimeBasedAcquisitionBusinessModel model, LeadIdentityInfo leadInfo)
+        {
+            var list = new List<AccountBusinessModel>();
+            if (model.AccountId!=null)
+            {
+                var dto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound((int)model.AccountId);
+                if (!leadInfo.IsAdmin())
+                    _accountValidationHelper.CheckLeadAccessToAccount(dto.LeadId, leadInfo.LeadId);
+                var accountModel = _mapper.Map<AccountBusinessModel>(dto);
+                var request = _requestHelper.CreateGetRequest($"{GetTransactionsByPeriodEndpoint}");
+                var response = _client.Execute<string>(request);
+
+                accountModel.AddDeserializedTransactions(response.Data);
+                accountModel.BalanceCalculation((int)model.AccountId);
+                list.Add(accountModel);
+            }
+
+            else
+            {
+                if (!leadInfo.IsAdmin()) throw new Exception("nah");
+
+                var request = _requestHelper.CreateGetRequest($"{GetTransactionsByPeriodEndpoint}");
+                var response = _client.Execute<string>(request);
+
+
+            }
+
+
+            return list;
         }
     }
 }

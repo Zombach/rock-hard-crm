@@ -4,11 +4,11 @@ using CRM.Business.Requests;
 using CRM.Core;
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
-using DevEdu.Business.ValidationHelpers;
 using Microsoft.Extensions.Options;
 using RestSharp;
 using System;
-using static CRM.Business.TransactionEndpoint;
+using CRM.Business.ValidationHelpers;
+using static CRM.Business.Constants.TransactionEndpoint;
 
 namespace CRM.Business.Services
 {
@@ -21,20 +21,21 @@ namespace CRM.Business.Services
         private readonly ICommissionFeeService _commissionFeeService;
         private readonly decimal _commission;
         private readonly decimal _vipCommission;
-        private const double _commissionModifier = 1.5;
+        private readonly decimal _commissionModifier;
 
         public TransactionService
         (
-            IOptions<ConnectionUrl> connectionOptions,
+            IOptions<ConnectionSettings> connectionOptions,
             IOptions<CommissionSettings> commissionOptions,
             IAccountValidationHelper accountValidationHelper,
             IAccountService accountService, 
             ICommissionFeeService commissionFeeService
         )
         {
-            _client = new RestClient(connectionOptions.Value.TstoreUrl);
+            _client = new RestClient(connectionOptions.Value.TransactionStoreUrl);
             _commission = commissionOptions.Value.Commission; 
             _vipCommission = commissionOptions.Value.VipCommission;
+            _commissionModifier = commissionOptions.Value.CommissionModifier;
             _requestHelper = new RequestHelper();
             _accountValidationHelper = accountValidationHelper;
             _accountService = accountService;
@@ -47,11 +48,13 @@ namespace CRM.Business.Services
             _accountValidationHelper.CheckForVipAccess(account.Currency, leadInfo);
             var commission = CalculateCommission(model.Amount, leadInfo);
 
-            //if (account.Currency is not Currency.RUB)
+            //if (account.Currency is not Currency.USD)
             //{
             //    var rate = 1;
             //    commission *= rate;
             //}
+
+            //добавить в модель комиссию
 
             model.Amount -= commission;
             model.AccountId = account.Id;
@@ -68,6 +71,7 @@ namespace CRM.Business.Services
 
         public long AddWithdraw(TransactionBusinessModel model, LeadIdentityInfo leadInfo)
         {
+            //проверка баланса
             var account = CheckAccessAndReturnAccount(model.AccountId, leadInfo);
             _accountValidationHelper.CheckForVipAccess(account.Currency, leadInfo);
             var commission= CalculateCommission(model.Amount, leadInfo);
@@ -90,7 +94,7 @@ namespace CRM.Business.Services
             var account = CheckAccessAndReturnAccount(model.AccountId, leadInfo);
             var recipientAccount = CheckAccessAndReturnAccount(model.RecipientAccountId, leadInfo);
 
-            if (account.Currency is not (Currency.RUB or Currency.USD) && !leadInfo.IsVip())
+            if (account.Currency != Currency.RUB && account.Currency != Currency.USD && !leadInfo.IsVip())
             {
                 var balance = _accountService.GetAccountWithTransactions(account.Id, leadInfo).Balance;
                 if (balance != model.Amount)

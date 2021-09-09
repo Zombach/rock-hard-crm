@@ -25,6 +25,17 @@ namespace CRM.API.Controllers
             _commissionFeeService = commissionFeeService;
         }
 
+        // api/CommissionFee/by-period
+        [HttpPost("by-period")]
+        [Description("Return all commission fees for the period with or without lead id and account id")]
+        [ProducesResponseType(typeof(List<CommissionFeeOutputModel>), StatusCodes.Status200OK)]
+        public List<CommissionFeeOutputModel> SearchingCommissionFeesForThePeriod([FromBody] TimeBasedAcquisitionSearchingInputModes model)
+        {
+            var dto = _mapper.Map<TimeBasedAcquisitionDto>(model);
+            var listDto = _commissionFeeService.SearchingCommissionFeesForThePeriod(dto);
+            return _mapper.Map<List<CommissionFeeOutputModel>>(listDto);
+        }
+
         // api/CommissionFee
         [HttpGet]
         [Description("Return all commission fees")]
@@ -52,17 +63,6 @@ namespace CRM.API.Controllers
         public List<CommissionFeeOutputModel> GetCommissionFeesByLeadId(int leadId)
         {
             var listDto = _commissionFeeService.GetCommissionFeesByLeadId(leadId);
-            return _mapper.Map<List<CommissionFeeOutputModel>>(listDto);
-        }
-
-        // api/CommissionFee/by-period
-        [HttpPost("by-period")]
-        [Description("Return all commission fees by period")]
-        [ProducesResponseType(typeof(List<CommissionFeeOutputModel>), StatusCodes.Status200OK)]
-        public List<CommissionFeeOutputModel> GetCommissionFeesByPeriod([FromBody] TimeBasedAcquisitionInputModel model)
-        {
-            var dto = _mapper.Map<TimeBasedAcquisitionDto>(model);
-            var listDto = _commissionFeeService.GetCommissionFeesByPeriod(dto);
             return _mapper.Map<List<CommissionFeeOutputModel>>(listDto);
         }
 

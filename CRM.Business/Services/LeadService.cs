@@ -2,8 +2,8 @@
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
-using DevEdu.Business.ValidationHelpers;
 using System.Collections.Generic;
+using CRM.Business.ValidationHelpers;
 
 namespace CRM.Business.Services
 {
@@ -45,9 +45,19 @@ namespace CRM.Business.Services
             return _leadRepository.GetLeadById(leadId);
         }
 
-        public List<LeadDto> GetAllLeads()
+        public LeadDto UpdateLeadRole(int leadId, Role role)
         {
-            return _leadRepository.GetAllLeads();
+            var dto = _leadValidationHelper.GetLeadByIdAndThrowIfNotFound(leadId);
+            dto.Role = role;
+            _leadRepository.UpdateLeadRole(dto);
+            return _leadRepository.GetLeadById(leadId);
+        }
+
+        public void DeleteLead(int leadId)
+        {
+            //проверка баланса 0
+            _leadValidationHelper.GetLeadByIdAndThrowIfNotFound(leadId);
+            _leadRepository.DeleteLead(leadId);
         }
 
         public LeadDto GetLeadById(int leadId, LeadIdentityInfo leadInfo)
@@ -57,10 +67,9 @@ namespace CRM.Business.Services
             return dto;
         }
 
-        public void DeleteLeadById(int leadId)
+        public List<LeadDto> GetAllLeads()
         {
-            _leadValidationHelper.GetLeadByIdAndThrowIfNotFound(leadId);
-            _leadRepository.DeleteLeadById(leadId);
+            return _leadRepository.GetAllLeads();
         }
     }
 }

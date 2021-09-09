@@ -83,8 +83,10 @@
     <Build Include="StoredProcedures\CommissionFee\CommissionFee_SelectAll.sql" />
     <Build Include="StoredProcedures\CommissionFee\CommissionFee_SelectByAccountId.sql" />
     <Build Include="StoredProcedures\CommissionFee\CommissionFee_SelectByLeadId.sql" />
-    <Build Include="StoredProcedures\CommissionFee\CommissionFee_SelectByPeriod.sql" />
+    <Build Include="StoredProcedures\CommissionFee\CommissionFee_SeatchingByPeriod.sql" />
     <Build Include="StoredProcedures\CommissionFee\CommissionFee_SelectByRole.sql" />
     <Build Include="StoredProcedures\CommissionFee\CommissionFee_Insert.sql" />
+    <Build Include="StoredProcedures\Lead\Lead_UpdateRole.sql" />
+    <Build Include="StoredProcedures\Account\Account_Restore.sql" />
   </ItemGroup>
 </Project>

@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Collections.Generic;
+using AutoMapper;
 using CRM.API.Extensions;
 using CRM.API.Models;
 using CRM.Business.Models;
@@ -7,8 +8,8 @@ using CRM.DAL.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
 using System.ComponentModel;
+using CRM.API.Models.OutputModels;
 
 namespace CRM.API.Controllers
 {
@@ -39,25 +40,61 @@ namespace CRM.API.Controllers
         }
 
         // api/account/3
-        [HttpDelete("account/{id}")]
+        [HttpDelete("account/{accountId}")]
         [Description("Delete lead account")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult DeleteAccountById(int id)
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public ActionResult DeleteAccount(int accountId)
         {
             var leadId = this.GetLeadId();
-            _accountService.DeleteAccount(id, leadId);
+            _accountService.DeleteAccount(accountId, leadId);
+            return NoContent();
+        }
+
+        // api/account/{accountId}
+        [HttpPut("{accountId}")]
+        [Description("Restore account")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public ActionResult RestoreAccount(int accountId)
+        {
+            var leadInfo = this.GetLeadIdAndRoles();
+            /*var output =*/
+            _accountService.RestoreAccount(accountId, leadInfo.LeadId);
+            //return StatusCode(201, output);
             return NoContent();
         }
 
         // api/account/{accountId}
         [HttpGet("{accountId}")]
         [Description("Get account with transactions")]
-        [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
-        public ActionResult<List<TransactionBusinessModel>> GetAccountWithTransactions(int accountId)
+        [ProducesResponseType(typeof(AccountBusinessModel), StatusCodes.Status200OK)]
+        public AccountBusinessModel GetAccountWithTransactions(int accountId)
         {
             var leadInfo = this.GetLeadIdAndRoles();
-            var output = _accountService.GetAccountWithTransactions(accountId, leadInfo);
-            return StatusCode(201, output);
+            return _accountService.GetAccountWithTransactions(accountId, leadInfo);
         }
+
+        // api/account/by-period
+        [HttpPost("by-period")]
+        [Description("Get transactions by period or period and account id")]
+        [ProducesResponseType(typeof(List<TransactionOutputModel>), StatusCodes.Status200OK)]
+        public List<TransactionOutputModel> GetTransactionsByPeriodAndPossiblyAccountId([FromBody] TimeBasedAcquisitionInputModel model)
+        {
+            var leadInfo = this.GetLeadIdAndRoles();
+            var dto = _mapper.Map<TimeBasedAcquisitionBusinessModel>(model);
+            var output = _accountService.GetTransactionsByPeriodAndPossiblyAccountId(dto, leadInfo);
+            return _mapper.Map<List<TransactionOutputModel>>(output);
+        }
+
+        //balance
+        //// api/account/{accountId}
+        //[HttpGet("{accountId}")]
+        //[Description("Get account with transactions")]
+        //[ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
+        //public ActionResult<List<TransactionBusinessModel>> GetAccountWithTransactions(int accountId)
+        //{
+        //    var leadInfo = this.GetLeadIdAndRoles();
+        //    var output = _accountService.GetAccountWithTransactions(accountId, leadInfo);
+        //    return StatusCode(201, output);
+        //}
     }
 }

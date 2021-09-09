@@ -4,7 +4,7 @@ using CRM.Business.IdentityInfo;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
 
-namespace DevEdu.Business.ValidationHelpers
+namespace CRM.Business.ValidationHelpers
 {
     public class LeadValidationHelper : ILeadValidationHelper
     {
