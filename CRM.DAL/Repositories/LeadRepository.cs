@@ -34,7 +34,10 @@ namespace CRM.DAL.Repositories
                     lead.Password,
                     role = (int)lead.Role,
                     cityId = lead.City.Id,
-                    lead.BirthDate
+                    lead.BirthDate,
+                    lead.BirthYear,
+                    lead.BirthMonth,
+                    lead.BirthDay
                 },
                 commandType: CommandType.StoredProcedure
             );

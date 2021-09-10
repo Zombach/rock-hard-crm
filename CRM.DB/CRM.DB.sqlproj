@@ -79,4 +79,7 @@
     <Build Include="StoredProcedures\City\City_SelectAll.sql" />
     <Build Include="StoredProcedures\Lead\Lead_Insert.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="CRM.DB.refactorlog" />
+  </ItemGroup>
 </Project>
