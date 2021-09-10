@@ -7,6 +7,6 @@ namespace CRM.API.Models
     {
         [Required(ErrorMessage = RecipientAccountRequired)]
         [Range(minimum: 1, maximum: int.MaxValue, ErrorMessage = WrongFormatRecipientAccount)]
-        public int RecipientId { get; set; }
+        public int RecipientAccountId { get; set; }
     }
 }

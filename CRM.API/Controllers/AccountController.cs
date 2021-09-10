@@ -85,16 +85,15 @@ namespace CRM.API.Controllers
             return _mapper.Map<List<AccountBusinessModel>>(output);
         }
 
-        //balance
-        //// api/account/{accountId}
-        //[HttpGet("{accountId}")]
-        //[Description("Get account with transactions")]
-        //[ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
-        //public ActionResult<List<TransactionBusinessModel>> GetAccountWithTransactions(int accountId)
-        //{
-        //    var leadInfo = this.GetLeadIdAndRoles();
-        //    var output = _accountService.GetAccountWithTransactions(accountId, leadInfo);
-        //    return StatusCode(201, output);
-        //}
+        // api/account/lead/{leadId}
+        [HttpGet("lead/{leadId}")]
+        [Description("Get account with transactions")]
+        [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+        public ActionResult<AccountBusinessModel> GetLeadBalance(int leadId)
+        {
+            var leadInfo = this.GetLeadIdAndRoles();
+            var output = _accountService.GetLeadBalance(leadId, leadInfo);
+            return StatusCode(200, output);
+        }
     }
 }

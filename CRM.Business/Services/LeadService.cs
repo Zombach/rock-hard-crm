@@ -55,7 +55,6 @@ namespace CRM.Business.Services
 
         public void DeleteLead(int leadId)
         {
-            //проверка баланса 0
             _leadValidationHelper.GetLeadByIdAndThrowIfNotFound(leadId);
             _leadRepository.DeleteLead(leadId);
         }

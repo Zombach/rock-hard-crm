@@ -39,6 +39,7 @@ namespace CRM.Business.ValidationHelpers
 
         public void CheckForDuplicateCurrencies(LeadDto lead, Currency currency)
         {
+            //нужна ли проверка на аккаунт нал?
             var account = lead.Accounts.FirstOrDefault(ac => ac.Currency == currency);
             if (account != default)
                 throw new ValidationException(nameof(account), string.Format(ServiceMessages.LeadHasThisCurrencyMessage, lead.Id));

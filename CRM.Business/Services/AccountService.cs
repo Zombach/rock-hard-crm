@@ -112,5 +112,10 @@ namespace CRM.Business.Services
 
             return list;
         }
+
+        public AccountBusinessModel GetLeadBalance(int leadId, LeadIdentityInfo leadInfo)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

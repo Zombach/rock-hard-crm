@@ -22,7 +22,7 @@
         public const string WrongFormatAccount = "Account id must be integer from 1 to int.MaxValue";
         public const string WrongFormatCityId = "CityId must be integer from 1 to int.MaxValue";
         public const string WrongFormatLeadId = "LeadId must be integer from 1 to int.MaxValue";
-        public const string WrongFormatRecipientAccount = "Recipient id must be integer from 1 to int.MaxValue";
+        public const string WrongFormatRecipientAccount = "Recipient account id must be integer from 1 to int.MaxValue";
 
         public const string WrongEmailFormat = "You've got to use the correct email format";
 

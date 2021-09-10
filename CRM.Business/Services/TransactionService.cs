@@ -7,6 +7,8 @@ using CRM.DAL.Models;
 using Microsoft.Extensions.Options;
 using RestSharp;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using CRM.Business.ValidationHelpers;
 using static CRM.Business.Constants.TransactionEndpoint;
 
@@ -42,19 +44,11 @@ namespace CRM.Business.Services
             _commissionFeeService = commissionFeeService;
         }
 
-        public long AddDeposit(TransactionBusinessModel model, LeadIdentityInfo leadInfo)
+        public TransactionBusinessModel AddDeposit(TransactionBusinessModel model, LeadIdentityInfo leadInfo)
         {
             var account = CheckAccessAndReturnAccount(model.AccountId, leadInfo);
             _accountValidationHelper.CheckForVipAccess(account.Currency, leadInfo);
             var commission = CalculateCommission(model.Amount, leadInfo);
-
-            //if (account.Currency is not Currency.USD)
-            //{
-            //    var rate = 1;
-            //    commission *= rate;
-            //}
-
-            //добавить в модель комиссию
 
             model.Amount -= commission;
             model.AccountId = account.Id;
@@ -64,14 +58,24 @@ namespace CRM.Business.Services
             var result = _client.Execute<long>(request);
             var transactionId = result.Data;
 
+            var transaction = new TransactionBusinessModel
+            {
+                AccountId = account.Id,
+                Amount = model.Amount,
+                CommissionFee = commission,
+                Currency = account.Currency,
+                Id = transactionId,
+                TransactionType = TransactionType.Withdraw,
+                Date = null
+            };
+
             AddCommissionFee(leadInfo,transactionId,model, commission);
 
-            return transactionId;
+            return transaction;
         }
 
-        public long AddWithdraw(TransactionBusinessModel model, LeadIdentityInfo leadInfo)
+        public TransactionBusinessModel AddWithdraw(TransactionBusinessModel model, LeadIdentityInfo leadInfo)
         {
-            //проверка баланса
             var account = CheckAccessAndReturnAccount(model.AccountId, leadInfo);
             _accountValidationHelper.CheckForVipAccess(account.Currency, leadInfo);
             var commission= CalculateCommission(model.Amount, leadInfo);
@@ -84,31 +88,62 @@ namespace CRM.Business.Services
             var result = _client.Execute<long>(request);
             var transactionId = result.Data;
 
+            var transaction = new TransactionBusinessModel
+            {
+                AccountId = account.Id,
+                Amount = model.Amount,
+                CommissionFee = commission,
+                Currency = account.Currency,
+                Id = transactionId,
+                TransactionType = TransactionType.Withdraw,
+                Date = null
+            };
+
             AddCommissionFee(leadInfo, transactionId, model, commission);
 
-            return transactionId;
+            return transaction;
         }
 
-        public string AddTransfer(TransferBusinessModel model, LeadIdentityInfo leadInfo)
+        public TransferBusinessModel AddTransfer(TransferBusinessModel model, LeadIdentityInfo leadInfo)
         {
             var account = CheckAccessAndReturnAccount(model.AccountId, leadInfo);
             var recipientAccount = CheckAccessAndReturnAccount(model.RecipientAccountId, leadInfo);
-
+            var commission = CalculateCommission(model.Amount, leadInfo);
             if (account.Currency != Currency.RUB && account.Currency != Currency.USD && !leadInfo.IsVip())
             {
-                var balance = _accountService.GetAccountWithTransactions(account.Id, leadInfo).Balance;
-                if (balance != model.Amount)
-                {
-                    throw new Exception("снять можно только все бабки простак");
-                }
+                commission *= _commissionModifier;
+                //var balance = _accountService.GetAccountWithTransactions(account.Id, leadInfo).Balance;
+                //if (balance != model.Amount)
+                //{
+                //    throw new Exception("снять можно только все бабки простак");
+                //}
             }
-
-            model.Amount = CalculateCommission(model.Amount, leadInfo);
+            
+            model.Amount -= commission;
             model.Currency = account.Currency;
             model.RecipientCurrency = recipientAccount.Currency;
             var request = _requestHelper.CreatePostRequest(AddTransferEndpoint, model);
-            var result = _client.Execute<string>(request);
-            return result.Data;
+            var result = _client.Execute<List<long>>(request);
+
+            var transactionId = result.Data.First();
+            var recipientTransactionId = result.Data.Last();
+
+            AddCommissionFee(leadInfo, transactionId, model, commission);
+
+            var transaction = new TransferBusinessModel
+            {
+                AccountId = account.Id,
+                Amount = model.Amount,
+                CommissionFee = commission,
+                Currency = account.Currency,
+                Id = transactionId,
+                TransactionType = TransactionType.Transfer,
+                RecipientTransactionId=recipientTransactionId,
+                RecipientAccountId = model.RecipientAccountId,
+                Date = null,
+            };
+
+            return transaction;
         }
 
         private AccountDto CheckAccessAndReturnAccount(int accountId, LeadIdentityInfo leadInfo)
@@ -121,6 +156,7 @@ namespace CRM.Business.Services
         private void AddCommissionFee(LeadIdentityInfo leadInfo, long transactionId, TransactionBusinessModel model, decimal commission)
         {
             var role = leadInfo.IsVip() ? Role.Vip : Role.Regular;
+            //var role = leadInfo.Roles.First();
             var dto = new CommissionFeeDto
                 {LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = role, Amount = commission };
             _commissionFeeService.AddCommissionFee(dto);

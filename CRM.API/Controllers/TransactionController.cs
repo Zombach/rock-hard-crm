@@ -57,7 +57,7 @@ namespace CRM.API.Controllers
         [HttpPost("transfer")]
         [Description("Add transfer")]
         [ProducesResponseType(typeof(string), StatusCodes.Status201Created)]
-        public ActionResult<string> AddTransfer([FromBody] TransactionInputModel inputModel)
+        public ActionResult<TransferBusinessModel> AddTransfer([FromBody] TransferInputModel inputModel)
         {
             var leadInfo = this.GetLeadIdAndRoles();
             var model = _mapper.Map<TransferBusinessModel>(inputModel);

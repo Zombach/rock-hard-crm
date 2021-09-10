@@ -12,5 +12,6 @@ namespace CRM.Business.Services
         void RestoreAccount(int accountId, int leadId);
         AccountBusinessModel GetAccountWithTransactions(int accountId, LeadIdentityInfo leadInfo);
         List<AccountBusinessModel> GetTransactionsByPeriodAndPossiblyAccountId(TimeBasedAcquisitionBusinessModel model, LeadIdentityInfo leadInfo);
+        AccountBusinessModel GetLeadBalance(int leadId, LeadIdentityInfo leadInfo);
     }
 }
