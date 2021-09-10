@@ -8,7 +8,7 @@ namespace CRM.Business.Models
         public static List<TransferBusinessModel> Transfers { get; set; }
         public static List<TransactionBusinessModel> Transactions { get; set; }
 
-        public static T AddDeserializedTransactions<T>(T model, string json)
+        public static T AddDeserializedTransactions<T>(this T model, string json)
         {
             AccountBusinessModel.GetListModels(json);
 
