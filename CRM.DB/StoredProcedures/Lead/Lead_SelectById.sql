@@ -21,5 +21,5 @@ BEGIN
 	FROM dbo.[Lead] l
 	left join dbo.Account a on a.LeadId = l.Id
 	inner join dbo.City c on c.Id = l.CityId
-	WHERE l.Id = @Id 
+	WHERE l.Id = @Id
 END

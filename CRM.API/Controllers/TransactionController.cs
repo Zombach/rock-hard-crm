@@ -1,13 +1,19 @@
-﻿using AutoMapper;
+﻿using System.Collections.Generic;
+using AutoMapper;
+using CRM.API.Extensions;
 using CRM.API.Models;
 using CRM.Business.Models;
 using CRM.Business.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel;
+using CRM.API.Models.OutputModels;
+using Microsoft.AspNetCore.Authorization;
+using Newtonsoft.Json;
 
 namespace CRM.API.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class TransactionController : Controller
@@ -27,8 +33,9 @@ namespace CRM.API.Controllers
         [ProducesResponseType(typeof(long), StatusCodes.Status201Created)]
         public ActionResult<long> AddDeposit([FromBody] TransactionInputModel inputModel)
         {
+            var leadInfo = this.GetLeadIdAndRoles();
             var model = _mapper.Map<TransactionBusinessModel>(inputModel);
-            var output = _transactionService.AddDeposit(model);
+            var output = _transactionService.AddDeposit(model, leadInfo);
 
             return StatusCode(201, output);
         }
@@ -39,8 +46,9 @@ namespace CRM.API.Controllers
         [ProducesResponseType(typeof(long), StatusCodes.Status201Created)]
         public ActionResult<long> AddWithdraw([FromBody] TransactionInputModel inputModel)
         {
+            var leadInfo = this.GetLeadIdAndRoles();
             var model = _mapper.Map<TransactionBusinessModel>(inputModel);
-            var output = _transactionService.AddWithdraw(model);
+            var output = _transactionService.AddWithdraw(model, leadInfo);
 
             return StatusCode(201, output);
         }
@@ -49,10 +57,11 @@ namespace CRM.API.Controllers
         [HttpPost("transfer")]
         [Description("Add transfer")]
         [ProducesResponseType(typeof(string), StatusCodes.Status201Created)]
-        public ActionResult<string> AddTransfer([FromBody] TransactionInputModel inputModel)
+        public ActionResult<TransferBusinessModel> AddTransfer([FromBody] TransferInputModel inputModel)
         {
+            var leadInfo = this.GetLeadIdAndRoles();
             var model = _mapper.Map<TransferBusinessModel>(inputModel);
-            var output = _transactionService.AddTransfer(model);
+            var output = _transactionService.AddTransfer(model, leadInfo);
 
             return StatusCode(201, output);
         }

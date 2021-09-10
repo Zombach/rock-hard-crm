@@ -15,5 +15,10 @@ namespace CRM.Business.Configuration
         {
             CreateMap<AccountDto, AccountBusinessModel>();
         }
+
+        private void CreateMappingToBusinessModel()
+        {
+            CreateMap<AccountDto, AccountBusinessModel>();
+        }
     }
 }

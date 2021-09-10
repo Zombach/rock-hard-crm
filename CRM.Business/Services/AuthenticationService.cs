@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using CRM.Business.Constants;
+using CRM.Business.Exceptions;
 
 namespace CRM.Business.Services
 {
@@ -28,8 +30,7 @@ namespace CRM.Business.Services
             var hashBytes = new byte[36];
             Array.Copy(salt, 0, hashBytes, 0, 16);
             Array.Copy(hash, 0, hashBytes, 16, 20);
-            var hashedPassword = Convert.ToBase64String(hashBytes);
-            return hashedPassword;
+            return Convert.ToBase64String(hashBytes);
         }
 
         public string SignIn(LeadDto dto)
@@ -48,9 +49,7 @@ namespace CRM.Business.Services
                 expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(_options.Lifetime)),
                 signingCredentials: new SigningCredentials(_options.GetSymmetricSecurityKey(),
                     SecurityAlgorithms.HmacSha256));
-            var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
-
-            return encodedJwt;
+            return new JwtSecurityTokenHandler().WriteToken(jwt);
         }
 
         public byte[] GetSalt()
@@ -72,17 +71,15 @@ namespace CRM.Business.Services
         private ClaimsIdentity GetIdentity(string email, string password)
         {
             var lead = _leadRepository.GetLeadByEmail(email);
+            if (lead == null)
+                throw new AuthorizationException(ServiceMessages.EntityNotFound);
 
             var claims = new List<Claim>();
-            if (lead == default || !Verify(lead.Password, password)) return default;
+            if (!Verify(lead.Password, password)) throw new AuthorizationException(ServiceMessages.WrongPassword);
             claims.Add(new Claim(JwtRegisteredClaimNames.NameId, lead.Id.ToString()));
-            claims.Add(new Claim(ClaimsIdentity.DefaultNameClaimType, lead.Email));
             claims.Add(new Claim(ClaimsIdentity.DefaultRoleClaimType, lead.Role.ToString()));
 
-            ClaimsIdentity claimsIdentity =
-                new(claims, "Token", ClaimsIdentity.DefaultNameClaimType,
-                    ClaimsIdentity.DefaultRoleClaimType);
-            return claimsIdentity;
+            return new ClaimsIdentity(claims, "Token", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
         }
     }
 }

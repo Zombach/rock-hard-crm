@@ -6,10 +6,11 @@ namespace CRM.DAL.Repositories
     public interface ILeadRepository
     {
         int AddLead(LeadDto lead);
-        int DeleteLeadById(int id);
-        List<LeadDto> GetAllLeads();
-        LeadDto GetLeadByEmail(string email);
-        LeadDto GetLeadById(int id);
         void UpdateLead(LeadDto lead);
+        void UpdateLeadRole(LeadDto lead);
+        int DeleteLead(int id);
+        LeadDto GetLeadById(int id);
+        LeadDto GetLeadByEmail(string email);
+        List<LeadDto> GetAllLeads();
     }
 }
