@@ -7,32 +7,15 @@ namespace CRM.Business.Models
 {
     public static class AccountBusinessModelExtension
     {
-        private const string _recipientId = "$..RecipientAccountId";
-        private const string _recipientIds = "$...RecipientAccountId";
+        private const string _recipientId = @"$.[?(@.RecipientAccountId)]";
 
-        public static AccountBusinessModel AddDeserializedTransactions(this AccountBusinessModel model, string json)
-        {
-            return aaa(model, json,_recipientId);
-        }
-
-        public static List<AccountBusinessModel> AddDeserializedTransactions(this List<AccountBusinessModel> model, string json)
-        {
-            return aaa(model, json, _recipientIds);
-        }
-
-        public static T aaa<T>(T model, string json, string a)
+        public static T AddDeserializedTransactions<T>(T model, string json)
         {
             var jArray = JArray.Parse(json);
-            var _transfersJson = jArray.SelectTokens(@"$.[?(@.RecipientAccountId)]").ToList();
-            var _transactionsJson = jArray.ToList();
-
-            foreach (var item in _transfersJson)
-            {
-                _transactionsJson.Remove(item);
-            }
-
-            var transactions = _transactionsJson.Select(item => item.ToObject<TransactionBusinessModel>()).ToList();
-            var transfers = _transfersJson.Select(item => item.ToObject<TransferBusinessModel>()).ToList();
+            var transfers = jArray.Where(j => j.SelectToken(_recipientId) != null)
+                .Select(t => t.ToObject<TransferBusinessModel>()).ToList();
+            var transactions = jArray.Where(j => j.SelectToken(_recipientId) == null)
+                .Select(t => t.ToObject<TransactionBusinessModel>()).ToList();
 
             if (model is List<AccountBusinessModel> d)
             {
