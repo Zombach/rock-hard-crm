@@ -32,9 +32,13 @@ namespace CRM.Business.Services
         {
             dto.Password = _authenticationService.HashPassword(dto.Password);
             dto.Role = Role.Regular;
-            var leadId = _leadRepository.AddLead(dto);
-            _accountRepository.AddAccount(new AccountDto { LeadId = leadId, Currency = Currency.RUB });
-            return _leadRepository.GetLeadById(leadId);
+            dto.BirthYear = dto.BirthDate.Year;
+            dto.BirthMonth = dto.BirthDate.Month;
+            dto.BirthDay = dto.BirthDate.Day;
+            var id = _leadRepository.AddLead(dto);
+
+            _accountRepository.AddAccount(new AccountDto { LeadId = id, Currency = Currency.RUB });
+            return _leadRepository.GetLeadById(id);
         }
 
         public LeadDto UpdateLead(int leadId, LeadDto dto)

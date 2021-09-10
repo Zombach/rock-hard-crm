@@ -89,4 +89,7 @@
     <Build Include="StoredProcedures\Lead\Lead_UpdateRole.sql" />
     <Build Include="StoredProcedures\Account\Account_Restore.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="CRM.DB.refactorlog" />
+  </ItemGroup>
 </Project>
