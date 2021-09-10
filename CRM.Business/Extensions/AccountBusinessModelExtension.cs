@@ -1,41 +1,36 @@
-﻿using Newtonsoft.Json;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using Newtonsoft.Json.Linq;
 
 namespace CRM.Business.Models
 {
     public static class AccountBusinessModelExtension
     {
-        private const string _recipientId = @"$.[?(@.RecipientAccountId)]";
+        public static List<TransferBusinessModel> Transfers { get; set; }
+        public static List<TransactionBusinessModel> Transactions { get; set; }
 
         public static T AddDeserializedTransactions<T>(T model, string json)
         {
-            var jArray = JArray.Parse(json);
-            var transfers = jArray.Where(j => j.SelectToken(_recipientId) != null)
-                .Select(t => t.ToObject<TransferBusinessModel>()).ToList();
-            var transactions = jArray.Where(j => j.SelectToken(_recipientId) == null)
-                .Select(t => t.ToObject<TransactionBusinessModel>()).ToList();
+            AccountBusinessModel.GetListModels(json);
 
-            if (model is List<AccountBusinessModel> d)
+            if (model is List<AccountBusinessModel> businessModels)
             {
                 var listIds = new List<int>();
-                if (transactions != null) listIds.AddRange(transactions.Select(item => item.AccountId).Distinct());
+                if (Transactions != null) listIds.AddRange(Transactions.Select(item => item.AccountId).Distinct());
                 //if (transactions != null) listIds.AddRange(transactions.Select(item => item.AccountId).Distinct());
-                if (transfers != null) listIds.AddRange(transfers.Select(item => item.AccountId).Distinct());
-                d.AddRange(listIds.Select(item => new AccountBusinessModel { Id = item }));
+                if (Transfers != null) listIds.AddRange(Transfers.Select(item => item.AccountId).Distinct());
+                businessModels.AddRange(listIds.Select(item => new AccountBusinessModel { Id = item }));
 
-                foreach (var item in d)
+                foreach (var item in businessModels)
                 {
-                    if (transactions != null) item.Transactions = transactions.FindAll(t => t.AccountId == item.Id);
-                    if (transfers != null) item.Transfers = transfers.FindAll(t => t.AccountId == item.Id);
+                    if (Transactions != null) item.Transactions = Transactions.FindAll(t => t.AccountId == item.Id);
+                    if (Transfers != null) item.Transfers = Transfers.FindAll(t => t.AccountId == item.Id);
                 }
             }
 
-            if (model is AccountBusinessModel b)
+            if (model is AccountBusinessModel businessModel)
             {
-                b.Transactions = transactions;
-                b.Transfers = transfers;
+                businessModel.Transactions = Transactions;
+                businessModel.Transfers = Transfers;
             }
             
             return model;
