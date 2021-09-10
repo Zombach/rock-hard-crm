@@ -35,10 +35,10 @@ namespace CRM.Business.Services
             dto.BirthYear = dto.BirthDate.Year;
             dto.BirthMonth = dto.BirthDate.Month;
             dto.BirthDay = dto.BirthDate.Day;
-            var id = _leadRepository.AddLead(dto);
+            var leadId = _leadRepository.AddLead(dto);
 
-            _accountRepository.AddAccount(new AccountDto { LeadId = id, Currency = Currency.RUB });
-            return _leadRepository.GetLeadById(id);
+            _accountRepository.AddAccount(new AccountDto { LeadId = leadId, Currency = Currency.RUB });
+            return _leadRepository.GetLeadById(leadId);
         }
 
         public LeadDto UpdateLead(int leadId, LeadDto dto)

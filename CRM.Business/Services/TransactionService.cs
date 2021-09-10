@@ -80,6 +80,12 @@ namespace CRM.Business.Services
             _accountValidationHelper.CheckForVipAccess(account.Currency, leadInfo);
             var commission= CalculateCommission(model.Amount, leadInfo);
 
+            var balance = _accountService.GetAccountWithTransactions(account.Id, leadInfo).Balance;
+            if (balance - model.Amount < 0)
+            {
+                throw new Exception("недостаточно денег");
+            }
+
             model.Amount -= commission;
             model.AccountId = account.Id;
             model.Currency = account.Currency;
@@ -109,14 +115,20 @@ namespace CRM.Business.Services
             var account = CheckAccessAndReturnAccount(model.AccountId, leadInfo);
             var recipientAccount = CheckAccessAndReturnAccount(model.RecipientAccountId, leadInfo);
             var commission = CalculateCommission(model.Amount, leadInfo);
+
+            var balance = _accountService.GetAccountWithTransactions(account.Id, leadInfo).Balance;
+            if (balance - model.Amount < 0)
+            {
+                throw new Exception("недостаточно денег");
+            }
+
             if (account.Currency != Currency.RUB && account.Currency != Currency.USD && !leadInfo.IsVip())
             {
                 commission *= _commissionModifier;
-                //var balance = _accountService.GetAccountWithTransactions(account.Id, leadInfo).Balance;
-                //if (balance != model.Amount)
-                //{
-                //    throw new Exception("снять можно только все бабки простак");
-                //}
+                if (balance != model.Amount)
+                {
+                    throw new Exception("снять можно только все бабки простак");
+                }
             }
             
             model.Amount -= commission;

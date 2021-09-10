@@ -25,18 +25,17 @@ namespace CRM.Business.Models
             var jArray = JArray.Parse(json);
             var _transfersJson = jArray.SelectTokens(@"$.[?(@.RecipientAccountId)]").ToList();
             var _transactionsJson = jArray.ToList();
-            var asdaf = _transfersJson[0].ToObject<TransferBusinessModel>();
-            var asdasf = _transactionsJson[0].ToObject<TransactionBusinessModel>();
+
             foreach (var item in _transfersJson)
             {
                 _transactionsJson.Remove(item);
             }
 
+            var transactions = _transactionsJson.Select(item => item.ToObject<TransactionBusinessModel>()).ToList();
+            var transfers = _transfersJson.Select(item => item.ToObject<TransferBusinessModel>()).ToList();
+
             if (model is List<AccountBusinessModel> d)
             {
-                var transactions = JsonConvert.DeserializeObject<List<TransactionBusinessModel>>(JsonConvert.SerializeObject(_transactionsJson));
-                var transfers = JsonConvert.DeserializeObject<List<TransferBusinessModel>>(JsonConvert.SerializeObject(_transfersJson));
-
                 var listIds = new List<int>();
                 if (transactions != null) listIds.AddRange(transactions.Select(item => item.AccountId).Distinct());
                 //if (transactions != null) listIds.AddRange(transactions.Select(item => item.AccountId).Distinct());
@@ -52,8 +51,8 @@ namespace CRM.Business.Models
 
             if (model is AccountBusinessModel b)
             {
-                b.Transactions = JsonConvert.DeserializeObject<List<TransactionBusinessModel>>(_transactionsJson.ToString());
-                b.Transfers = JsonConvert.DeserializeObject<List<TransferBusinessModel>>(_transfersJson.ToString());
+                b.Transactions = transactions;
+                b.Transfers = transfers;
             }
             
             return model;

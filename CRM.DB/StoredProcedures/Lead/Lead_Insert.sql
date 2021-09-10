@@ -21,9 +21,9 @@ BEGIN
 		[Email],
 		[PhoneNumber],
 		[Password],
-		[Role],
-		[BirthDate],
+		[Role],		
 		[CityId],
+		[BirthDate],
 		[BirthYear],
 		[BirthMonth],
 		[BirthDay])
@@ -36,8 +36,8 @@ BEGIN
 		@PhoneNumber,
 		@Password,
 		@Role,
-		@BirthDate,
 		@CityId,
+		@BirthDate,
 		@BirthYear,
 		@BirthMonth,
 		@BirthDay)

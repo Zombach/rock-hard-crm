@@ -32,8 +32,9 @@ namespace CRM.API.Controllers
         public ActionResult<LeadOutputModel> Register([FromBody] LeadInputModel model)
         {
             var dto = _mapper.Map<LeadDto>(model);
-            var addedLead = _mapper.Map<LeadOutputModel>(_leadService.AddLead(dto));
-            return StatusCode(201, addedLead);
+            var createLeadDto = _leadService.AddLead(dto);
+            var output = _mapper.Map<LeadOutputModel>(createLeadDto);
+            return StatusCode(201, output);
         }
 
         [HttpPost("sign-in")]
@@ -41,8 +42,7 @@ namespace CRM.API.Controllers
         public string SignIn(LeadSignInModel model)
         {
             var dto = _mapper.Map<LeadDto>(model);
-            var token = _authService.SignIn(dto);
-            return token;
+            return _authService.SignIn(dto);
         }
     }
 }
