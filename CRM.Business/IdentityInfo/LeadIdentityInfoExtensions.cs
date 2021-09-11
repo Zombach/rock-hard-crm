@@ -18,11 +18,5 @@ namespace CRM.Business.IdentityInfo
         {
             return leadInfo.Role.Equals(Role.Vip);
         }
-        
-        public static string GetName(this LeadIdentityInfo leadInfo)
-        {
-            leadInfo.UserName = "Тимур добавь получение мыла юзера";
-            return leadInfo.UserName;
-        }
     }
 }

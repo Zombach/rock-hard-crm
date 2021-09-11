@@ -94,14 +94,9 @@ namespace CRM.Business.Services
                     _accountValidationHelper.CheckLeadAccessToAccount(dto.LeadId, leadInfo.LeadId);
                 var accountModel = _mapper.Map<AccountBusinessModel>(dto);
                 var request = _requestHelper.CreatePostRequest($"{GetTransactionsByPeriodEndpoint}", model);
-                request.AddHeader("UserName", leadInfo.UserName);
 
-                do
-                {                    
-                    var response = _client.Execute<string>(request);
-                    accountModel.AddDeserializedTransactions(response.Data);
-                }
-                while (AccountBusinessModelExtension.IsPart);
+                var response = _client.Execute<string>(request);
+                accountModel.AddDeserializedTransactions(response.Data);
 
 
                 accountModel.BalanceCalculation((int)model.AccountId);
@@ -112,10 +107,15 @@ namespace CRM.Business.Services
             {
                 if (!leadInfo.IsAdmin()) throw new Exception("n背a葉h");
 
-
                 var request = _requestHelper.CreatePostRequest($"{GetTransactionsByPeriodEndpoint}", model);
-                var response = _client.Execute<string>(request);
-                list.AddDeserializedTransactions(response.Data);
+                request.AddHeader("LeadId", leadInfo.LeadId.ToString());
+
+                do
+                {
+                    var response = _client.Execute<string>(request);
+                    list.AddDeserializedTransactions(response.Data);
+                }
+                while (AccountBusinessModelExtension.IsPart);
             }
 
             foreach (var item in list)

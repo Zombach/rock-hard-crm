@@ -7,8 +7,8 @@ namespace CRM.Business.Models
     public static class AccountBusinessModelExtension
     {
         private const string _recipientId = @"$.[?(@.RecipientAccountId)]";
-        private static List<TransferBusinessModel> _transfers;
-        private static List<TransactionBusinessModel> _transactions;
+        private static List<TransferBusinessModel> _transfers = new();
+        private static List<TransactionBusinessModel> _transactions = new();
         public static bool IsPart { get; set; }
 
         public static T AddDeserializedTransactions<T>(this T model, string json)
@@ -65,8 +65,9 @@ namespace CRM.Business.Models
         private static JToken CheckStatusGetJToken(string json)
         {
             var jObject = JObject.Parse(json);
-            IsPart = jObject.SelectToken(@"$.Status").ToObject<bool>();
-            return jObject.SelectToken(@"$.List");            
+            var boolToken = jObject.SelectToken(@"$.Status");
+            if (boolToken != null) IsPart = boolToken.ToObject<bool>();
+            return jObject.SelectToken(@"$.List");
         }
         
         private static JToken GetJToken(string json)
@@ -81,16 +82,8 @@ namespace CRM.Business.Models
             var transactions = jToken.Where(j => j.SelectToken(_recipientId) == null)
                 .Select(t => t.ToObject<TransactionBusinessModel>()).ToList();
 
-            if(!IsPart)
-            {
-                _transfers = transfers;
-                _transactions = transactions;
-            }
-            else
-            {
-                _transfers.AddRange(transfers);
-                _transactions.AddRange(transactions);                
-            }
+            _transfers.AddRange(transfers);
+            _transactions.AddRange(transactions);
         }
 
         private static AccountBusinessModel GetBalanceModel(AccountBusinessModel model, int accountId)
