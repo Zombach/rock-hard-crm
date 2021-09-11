@@ -6,7 +6,7 @@ namespace CRM.Business.Models
 {
     public static class AccountBusinessModelExtension
     {
-        private const string _recipientId = @"$.[?(@.RecipientAccountId)]";
+        private static readonly string _recipientRegex = @"$.[?(@.RecipientAccountId)]";
         private static List<TransferBusinessModel> _transfers = new();
         private static List<TransactionBusinessModel> _transactions = new();
         public static bool IsPart { get; set; }
@@ -65,8 +65,8 @@ namespace CRM.Business.Models
         private static JToken CheckStatusGetJToken(string json)
         {
             var jObject = JObject.Parse(json);
-            var boolToken = jObject.SelectToken(@"$.Status");
-            if (boolToken != null) IsPart = boolToken.ToObject<bool>();
+            var status = jObject.SelectToken(@"$.Status");
+            if (status != null) IsPart = status.ToObject<bool>();
             return jObject.SelectToken(@"$.List");
         }
         
@@ -76,10 +76,10 @@ namespace CRM.Business.Models
         }
 
         private static void GetListModels(JToken jToken)
-        {            
-            var transfers = jToken.Where(j => j.SelectToken(_recipientId) != null)
+        {
+            var transfers = jToken.Where(j => j.SelectToken(_recipientRegex) != null)
                 .Select(t => t.ToObject<TransferBusinessModel>()).ToList();
-            var transactions = jToken.Where(j => j.SelectToken(_recipientId) == null)
+            var transactions = jToken.Where(j => j.SelectToken(_recipientRegex) == null)
                 .Select(t => t.ToObject<TransactionBusinessModel>()).ToList();
 
             _transfers.AddRange(transfers);
