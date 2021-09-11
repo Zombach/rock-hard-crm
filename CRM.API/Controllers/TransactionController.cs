@@ -30,8 +30,8 @@ namespace CRM.API.Controllers
         // api/transaction/deposit
         [HttpPost("deposit")]
         [Description("Add deposit")]
-        [ProducesResponseType(typeof(long), StatusCodes.Status201Created)]
-        public ActionResult<long> AddDeposit([FromBody] TransactionInputModel inputModel)
+        [ProducesResponseType(typeof(CommissionFeeOutputModel), StatusCodes.Status201Created)]
+        public ActionResult<CommissionFeeOutputModel> AddDeposit([FromBody] TransactionInputModel inputModel)
         {
             var leadInfo = this.GetLeadIdAndRoles();
             var model = _mapper.Map<TransactionBusinessModel>(inputModel);
@@ -43,8 +43,8 @@ namespace CRM.API.Controllers
         // api/transaction/withdraw
         [HttpPost("withdraw")]
         [Description("Add withdraw")]
-        [ProducesResponseType(typeof(long), StatusCodes.Status201Created)]
-        public ActionResult<long> AddWithdraw([FromBody] TransactionInputModel inputModel)
+        [ProducesResponseType(typeof(CommissionFeeOutputModel), StatusCodes.Status201Created)]
+        public ActionResult<CommissionFeeOutputModel> AddWithdraw([FromBody] TransactionInputModel inputModel)
         {
             var leadInfo = this.GetLeadIdAndRoles();
             var model = _mapper.Map<TransactionBusinessModel>(inputModel);
@@ -56,8 +56,8 @@ namespace CRM.API.Controllers
         // api/transaction/transfer
         [HttpPost("transfer")]
         [Description("Add transfer")]
-        [ProducesResponseType(typeof(string), StatusCodes.Status201Created)]
-        public ActionResult<TransferBusinessModel> AddTransfer([FromBody] TransferInputModel inputModel)
+        [ProducesResponseType(typeof(CommissionFeeOutputModel), StatusCodes.Status201Created)]
+        public ActionResult<CommissionFeeOutputModel> AddTransfer([FromBody] TransferInputModel inputModel)
         {
             var leadInfo = this.GetLeadIdAndRoles();
             var model = _mapper.Map<TransferBusinessModel>(inputModel);

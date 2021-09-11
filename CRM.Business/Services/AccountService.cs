@@ -76,8 +76,9 @@ namespace CRM.Business.Services
             var request = _requestHelper.CreateGetRequest($"{GetTransactionsByAccountIdEndpoint}{accountId}");
 
             var response = _client.Execute<string>(request);
-
+            
             accountModel.AddDeserializedTransactions(response.Data);
+
             accountModel.BalanceCalculation(accountId);
 
             return accountModel;
@@ -115,6 +116,15 @@ namespace CRM.Business.Services
                 var request = _requestHelper.CreatePostRequest($"{GetTransactionsByPeriodEndpoint}", model);
                 var response = _client.Execute<string>(request);
                 list.AddDeserializedTransactions(response.Data);
+            }
+
+            foreach (var item in list)
+            {
+                var a = list.FindAll(t => t.Id==item.Id);
+                if (a.Count > 1)
+                {
+                    var b = a;
+                }
             }
 
             return list;

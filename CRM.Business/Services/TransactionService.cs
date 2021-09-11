@@ -44,7 +44,7 @@ namespace CRM.Business.Services
             _commissionFeeService = commissionFeeService;
         }
 
-        public TransactionBusinessModel AddDeposit(TransactionBusinessModel model, LeadIdentityInfo leadInfo)
+        public CommissionFeeDto AddDeposit(TransactionBusinessModel model, LeadIdentityInfo leadInfo)
         {
             var account = CheckAccessAndReturnAccount(model.AccountId, leadInfo);
             _accountValidationHelper.CheckForVipAccess(account.Currency, leadInfo);
@@ -58,23 +58,15 @@ namespace CRM.Business.Services
             var result = _client.Execute<long>(request);
             var transactionId = result.Data;
 
-            var transaction = new TransactionBusinessModel
-            {
-                AccountId = account.Id,
-                Amount = model.Amount,
-                CommissionFee = commission,
-                Currency = account.Currency,
-                Id = transactionId,
-                TransactionType = TransactionType.Withdraw,
-                Date = null
-            };
+            var dto = new CommissionFeeDto
+                { LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = leadInfo.Role, Amount = commission };
 
-            AddCommissionFee(leadInfo,transactionId,model, commission);
+            AddCommissionFee(dto);
 
-            return transaction;
+            return dto;
         }
 
-        public TransactionBusinessModel AddWithdraw(TransactionBusinessModel model, LeadIdentityInfo leadInfo)
+        public CommissionFeeDto AddWithdraw(TransactionBusinessModel model, LeadIdentityInfo leadInfo)
         {
             var account = CheckAccessAndReturnAccount(model.AccountId, leadInfo);
             _accountValidationHelper.CheckForVipAccess(account.Currency, leadInfo);
@@ -94,23 +86,15 @@ namespace CRM.Business.Services
             var result = _client.Execute<long>(request);
             var transactionId = result.Data;
 
-            var transaction = new TransactionBusinessModel
-            {
-                AccountId = account.Id,
-                Amount = model.Amount,
-                CommissionFee = commission,
-                Currency = account.Currency,
-                Id = transactionId,
-                TransactionType = TransactionType.Withdraw,
-                Date = null
-            };
+            var dto = new CommissionFeeDto
+                { LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = leadInfo.Role, Amount = commission };
 
-            AddCommissionFee(leadInfo, transactionId, model, commission);
+            AddCommissionFee(dto);
 
-            return transaction;
+            return dto;
         }
 
-        public TransferBusinessModel AddTransfer(TransferBusinessModel model, LeadIdentityInfo leadInfo)
+        public CommissionFeeDto AddTransfer(TransferBusinessModel model, LeadIdentityInfo leadInfo)
         {
             var account = CheckAccessAndReturnAccount(model.AccountId, leadInfo);
             var recipientAccount = CheckAccessAndReturnAccount(model.RecipientAccountId, leadInfo);
@@ -138,24 +122,13 @@ namespace CRM.Business.Services
             var result = _client.Execute<List<long>>(request);
 
             var transactionId = result.Data.First();
-            var recipientTransactionId = result.Data.Last();
 
-            AddCommissionFee(leadInfo, transactionId, model, commission);
+            var dto = new CommissionFeeDto
+                { LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = leadInfo.Role, Amount = commission };
 
-            var transaction = new TransferBusinessModel
-            {
-                AccountId = account.Id,
-                Amount = model.Amount,
-                CommissionFee = commission,
-                Currency = account.Currency,
-                Id = transactionId,
-                TransactionType = TransactionType.Transfer,
-                RecipientTransactionId=recipientTransactionId,
-                RecipientAccountId = model.RecipientAccountId,
-                Date = null,
-            };
+            AddCommissionFee(dto);
 
-            return transaction;
+            return dto;
         }
 
         private AccountDto CheckAccessAndReturnAccount(int accountId, LeadIdentityInfo leadInfo)
@@ -165,12 +138,8 @@ namespace CRM.Business.Services
             return account;
         }
 
-        private void AddCommissionFee(LeadIdentityInfo leadInfo, long transactionId, TransactionBusinessModel model, decimal commission)
+        private void AddCommissionFee(CommissionFeeDto dto)
         {
-            var role = leadInfo.IsVip() ? Role.Vip : Role.Regular;
-            //var role = leadInfo.Roles.First();
-            var dto = new CommissionFeeDto
-                {LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = role, Amount = commission };
             _commissionFeeService.AddCommissionFee(dto);
         }
 

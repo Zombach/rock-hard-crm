@@ -6,17 +6,17 @@ namespace CRM.Business.IdentityInfo
     {
         public static bool IsAdmin(this LeadIdentityInfo leadInfo)
         {
-            return leadInfo.Roles.Contains(Role.Admin);
+            return leadInfo.Role.Equals(Role.Admin);
         }
 
         public static bool IsRegular(this LeadIdentityInfo leadInfo)
         {
-            return leadInfo.Roles.Contains(Role.Regular);
+            return leadInfo.Role.Equals(Role.Regular);
         }
 
         public static bool IsVip(this LeadIdentityInfo leadInfo)
         {
-            return leadInfo.Roles.Contains(Role.Vip);
+            return leadInfo.Role.Equals(Role.Vip);
         }
         
         public static string GetName(this LeadIdentityInfo leadInfo)
