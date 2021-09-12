@@ -132,16 +132,30 @@ namespace CRM.DAL.Repositories
         }
         public List<LeadDto> GetAllLeads()
         {
+            var leadDictionary = new Dictionary<int, LeadDto>();
+            LeadDto leadEntry = default;
+
             return _connection
-                .Query<LeadDto, CityDto, Role, LeadDto>(
+                .Query<LeadDto, AccountDto, CityDto, Role, LeadDto>(
                     _getAllLeadsProcedure,
-                    (lead, city, role) =>
+                (lead, account, city, role) =>
+                {
+
+                    if (!leadDictionary.TryGetValue(lead.Id, out leadEntry))
                     {
-                        lead.Role = role;
-                        lead.City = city;
-                        return lead;
-                    },
-                    commandType: CommandType.StoredProcedure)
+                        leadEntry = lead;
+                        leadEntry.City = city;
+                        leadEntry.Role = role;
+                        leadEntry.Accounts = new List<AccountDto>();
+                        leadDictionary.Add(lead.Id, leadEntry);
+                    }
+                    leadEntry.Accounts.Add(account);
+
+                    return leadEntry;
+                },
+                splitOn: "id",
+                commandType: CommandType.StoredProcedure)
+                .Distinct()
                 .ToList();
         }
     }
