@@ -6,6 +6,8 @@ BEGIN
 		l.FirstName,
 		l.LastName,
 		l.Patronymic,
+		l.BirthDate,
+		l.RegistrationDate,
 		l.Email,
 		c.Id,
 		c.Name,
