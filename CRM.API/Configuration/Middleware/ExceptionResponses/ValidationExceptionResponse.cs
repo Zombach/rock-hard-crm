@@ -3,7 +3,6 @@ using CRM.Business.Exceptions;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.Collections.Generic;
 using System.Linq;
-using CRM.Core;
 
 namespace CRM.API.Configuration.Middleware.ExceptionResponses
 {

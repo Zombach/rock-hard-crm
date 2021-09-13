@@ -9,6 +9,7 @@ using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using Microsoft.Extensions.Options;
 using RestSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using static CRM.Business.Constants.TransactionEndpoint;
@@ -57,6 +58,10 @@ namespace CRM.Business.Services
 
             var request = _requestHelper.CreatePostRequest(AddDepositEndpoint, model);
             var result = _client.Execute<long>(request);
+            if (!result.IsSuccessful)
+            {
+                throw new Exception($"{result.ErrorMessage} {_client.BaseUrl}");
+            }
             var transactionId = result.Data;
 
             var dto = new CommissionFeeDto

@@ -3,12 +3,12 @@ using System.IO;
 
 namespace CRM.Core
 {
-    public static class Writer
+    public static class Logger
     {
         private const string path = "../Logs/";
         private const string log = "log.txt";
 
-        public static void Logger(string message)
+        public static void Writer(string message)
         {
             if (!Directory.Exists(path))
             {
@@ -27,6 +27,6 @@ namespace CRM.Core
             {
                 sWriter.WriteLine(DateTime.Now + " " + message);
             }
-        }
+        }   
     }
 }

@@ -1,5 +1,5 @@
-﻿using System;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -18,7 +18,7 @@ namespace CRM.Business.Models
             if (model is List<AccountBusinessModel> businessModels)
             {
                 jToken = CheckStatusGetJToken(json);
-                if (jToken ==null)
+                if (jToken == null)
                 {
                     throw new Exception("tstore slomalsya");
                 }

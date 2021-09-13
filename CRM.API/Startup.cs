@@ -49,6 +49,7 @@ namespace CRM.API
             {
                 app.UseDeveloperExceptionPage();
             }
+            app.UseMiddleware<ServicePointManagerMiddleware>();
 
             app.UseOpenApi();
             app.UseSwaggerUi3();
