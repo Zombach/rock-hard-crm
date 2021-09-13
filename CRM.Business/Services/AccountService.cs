@@ -118,10 +118,25 @@ namespace CRM.Business.Services
                     list.AddDeserializedTransactions(response.Data);
                 }
                 while (AccountBusinessModelExtension.IsPart);
+
+                GetAccountsInfoAndBalance(list);
             }
 
-
             return list;
+        }
+
+        private void GetAccountsInfoAndBalance(List<AccountBusinessModel> list)
+        {
+            foreach (var item in list)
+            {
+                var account = _accountRepository.GetAccountById(item.Id);
+                item.LeadId = account.LeadId;
+                item.Currency = account.Currency;
+                item.CreatedOn = account.CreatedOn;
+                item.IsDeleted = account.IsDeleted;
+                item.Closed = account.Closed;
+                item.BalanceCalculation(item.Id);
+            }
         }
 
         public AccountBusinessModel GetLeadBalance(int leadId, LeadIdentityInfo leadInfo)

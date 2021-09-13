@@ -48,9 +48,10 @@ namespace CRM.API
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseOpenApi();
-                app.UseSwaggerUi3();
             }
+
+            app.UseOpenApi();
+            app.UseSwaggerUi3();
 
             app.UseMiddleware<CustomExceptionMiddleware>();
             app.UseDefaultFiles();
