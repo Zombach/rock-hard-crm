@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using AutoMapper;
+﻿using AutoMapper;
 using CRM.Business.IdentityInfo;
 using CRM.Business.Models;
 using CRM.Business.Requests;
@@ -10,6 +8,8 @@ using CRM.DAL.Models;
 using CRM.DAL.Repositories;
 using Microsoft.Extensions.Options;
 using RestSharp;
+using System;
+using System.Collections.Generic;
 using static CRM.Business.Constants.TransactionEndpoint;
 
 namespace CRM.Business.Services
@@ -76,7 +76,7 @@ namespace CRM.Business.Services
             var request = _requestHelper.CreateGetRequest($"{GetTransactionsByAccountIdEndpoint}{accountId}");
 
             var response = _client.Execute<string>(request);
-            
+
             accountModel.AddDeserializedTransactions(response.Data);
 
             accountModel.BalanceCalculation(accountId);
@@ -87,7 +87,7 @@ namespace CRM.Business.Services
         public List<AccountBusinessModel> GetTransactionsByPeriodAndPossiblyAccountId(TimeBasedAcquisitionBusinessModel model, LeadIdentityInfo leadInfo)
         {
             var list = new List<AccountBusinessModel>();
-            if (model.AccountId!=null)
+            if (model.AccountId != null)
             {
                 var dto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound((int)model.AccountId);
                 if (!leadInfo.IsAdmin())
@@ -118,14 +118,6 @@ namespace CRM.Business.Services
                 while (AccountBusinessModelExtension.IsPart);
             }
 
-            foreach (var item in list)
-            {
-                var a = list.FindAll(t => t.Id==item.Id);
-                if (a.Count > 1)
-                {
-                    var b = a;
-                }
-            }
 
             return list;
         }

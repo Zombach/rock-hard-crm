@@ -1,6 +1,7 @@
 ﻿using CRM.Business.IdentityInfo;
 using CRM.Business.Models;
 using CRM.Business.Requests;
+using CRM.Business.ValidationHelpers;
 using CRM.Core;
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
@@ -9,7 +10,6 @@ using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using CRM.Business.ValidationHelpers;
 using static CRM.Business.Constants.TransactionEndpoint;
 
 namespace CRM.Business.Services
@@ -30,12 +30,12 @@ namespace CRM.Business.Services
             IOptions<ConnectionSettings> connectionOptions,
             IOptions<CommissionSettings> commissionOptions,
             IAccountValidationHelper accountValidationHelper,
-            IAccountService accountService, 
+            IAccountService accountService,
             ICommissionFeeService commissionFeeService
         )
         {
             _client = new RestClient(connectionOptions.Value.TransactionStoreUrl);
-            _commission = commissionOptions.Value.Commission; 
+            _commission = commissionOptions.Value.Commission;
             _vipCommission = commissionOptions.Value.VipCommission;
             _commissionModifier = commissionOptions.Value.CommissionModifier;
             _requestHelper = new RequestHelper();
@@ -59,7 +59,7 @@ namespace CRM.Business.Services
             var transactionId = result.Data;
 
             var dto = new CommissionFeeDto
-                { LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = leadInfo.Role, Amount = commission };
+            { LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = leadInfo.Role, Amount = commission };
 
             AddCommissionFee(dto);
 
@@ -70,7 +70,7 @@ namespace CRM.Business.Services
         {
             var account = CheckAccessAndReturnAccount(model.AccountId, leadInfo);
             _accountValidationHelper.CheckForVipAccess(account.Currency, leadInfo);
-            var commission= CalculateCommission(model.Amount, leadInfo);
+            var commission = CalculateCommission(model.Amount, leadInfo);
 
             var balance = _accountService.GetAccountWithTransactions(account.Id, leadInfo).Balance;
             if (balance - model.Amount < 0)
@@ -87,7 +87,7 @@ namespace CRM.Business.Services
             var transactionId = result.Data;
 
             var dto = new CommissionFeeDto
-                { LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = leadInfo.Role, Amount = commission };
+            { LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = leadInfo.Role, Amount = commission };
 
             AddCommissionFee(dto);
 
@@ -114,7 +114,7 @@ namespace CRM.Business.Services
                     throw new Exception("снять можно только все бабки простак");
                 }
             }
-            
+
             model.Amount -= commission;
             model.Currency = account.Currency;
             model.RecipientCurrency = recipientAccount.Currency;
@@ -124,7 +124,7 @@ namespace CRM.Business.Services
             var transactionId = result.Data.First();
 
             var dto = new CommissionFeeDto
-                { LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = leadInfo.Role, Amount = commission };
+            { LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = leadInfo.Role, Amount = commission };
 
             AddCommissionFee(dto);
 

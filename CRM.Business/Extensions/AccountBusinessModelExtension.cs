@@ -41,7 +41,7 @@ namespace CRM.Business.Models
                 businessModel.Transactions = _transactions;
                 businessModel.Transfers = _transfers;
             }
-            
+
             return model;
         }
 
@@ -57,7 +57,7 @@ namespace CRM.Business.Models
             if (model is AccountBusinessModel businessModel)
             {
                 GetBalanceModel(businessModel, accountId);
-            }            
+            }
 
             return model;
         }
@@ -69,7 +69,7 @@ namespace CRM.Business.Models
             if (status != null) IsPart = status.ToObject<bool>();
             return jObject.SelectToken(@"$.List");
         }
-        
+
         private static JToken GetJToken(string json)
         {
             return JArray.Parse(json);

@@ -14,6 +14,6 @@ namespace CRM.Business.Models
         public bool IsDeleted { get; set; }
         public List<TransactionBusinessModel> Transactions { get; set; }
         public List<TransferBusinessModel> Transfers { get; set; }
-        public decimal Balance { get; set; }        
+        public decimal Balance { get; set; }
     }
 }

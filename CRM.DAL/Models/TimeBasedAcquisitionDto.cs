@@ -1,5 +1,5 @@
-﻿using System;
-using CRM.DAL.Enums;
+﻿using CRM.DAL.Enums;
+using System;
 
 namespace CRM.DAL.Models
 {
