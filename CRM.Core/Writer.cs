@@ -5,7 +5,7 @@ namespace CRM.Core
 {
     public static class Writer
     {
-        private const string path = "./Logs/";
+        private const string path = "../Logs/";
         private const string log = "log.txt";
 
         public static void Logger(string message)
