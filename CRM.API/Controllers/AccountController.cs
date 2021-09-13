@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using CRM.API.Extensions;
 using CRM.API.Models;
-using CRM.API.Models.OutputModels;
 using CRM.Business.Models;
 using CRM.Business.Services;
 using CRM.DAL.Models;

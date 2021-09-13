@@ -1,7 +1,7 @@
 ﻿using CRM.DAL.Enums;
 using System;
 
-namespace CRM.API.Models.OutputModels
+namespace CRM.API.Models
 {
     public class TransactionOutputModel
     {

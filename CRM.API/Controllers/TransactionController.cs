@@ -27,25 +27,26 @@ namespace CRM.API.Controllers
         // api/transaction/deposit
         [HttpPost("deposit")]
         [Description("Add deposit")]
-        [ProducesResponseType(typeof(CommissionFeeOutputModel), StatusCodes.Status201Created)]
-        public ActionResult<CommissionFeeOutputModel> AddDeposit([FromBody] TransactionInputModel inputModel)
+        [ProducesResponseType(typeof(CommissionFeeShortOutputModel), StatusCodes.Status201Created)]
+        public ActionResult<CommissionFeeShortOutputModel> AddDeposit([FromBody] TransactionInputModel inputModel)
         {
             var leadInfo = this.GetLeadIdAndRoles();
             var model = _mapper.Map<TransactionBusinessModel>(inputModel);
-            var output = _transactionService.AddDeposit(model, leadInfo);
-
+            var commissionModel = _transactionService.AddDeposit(model, leadInfo);
+            var output = _mapper.Map<CommissionFeeShortOutputModel>(commissionModel);
             return StatusCode(201, output);
         }
 
         // api/transaction/withdraw
         [HttpPost("withdraw")]
         [Description("Add withdraw")]
-        [ProducesResponseType(typeof(CommissionFeeOutputModel), StatusCodes.Status201Created)]
-        public ActionResult<CommissionFeeOutputModel> AddWithdraw([FromBody] TransactionInputModel inputModel)
+        [ProducesResponseType(typeof(CommissionFeeShortOutputModel), StatusCodes.Status201Created)]
+        public ActionResult<CommissionFeeShortOutputModel> AddWithdraw([FromBody] TransactionInputModel inputModel)
         {
             var leadInfo = this.GetLeadIdAndRoles();
             var model = _mapper.Map<TransactionBusinessModel>(inputModel);
-            var output = _transactionService.AddWithdraw(model, leadInfo);
+            var commissionModel = _transactionService.AddWithdraw(model, leadInfo);
+            var output = _mapper.Map<CommissionFeeShortOutputModel>(commissionModel);
 
             return StatusCode(201, output);
         }
@@ -53,12 +54,13 @@ namespace CRM.API.Controllers
         // api/transaction/transfer
         [HttpPost("transfer")]
         [Description("Add transfer")]
-        [ProducesResponseType(typeof(CommissionFeeOutputModel), StatusCodes.Status201Created)]
-        public ActionResult<CommissionFeeOutputModel> AddTransfer([FromBody] TransferInputModel inputModel)
+        [ProducesResponseType(typeof(CommissionFeeShortOutputModel), StatusCodes.Status201Created)]
+        public ActionResult<CommissionFeeShortOutputModel> AddTransfer([FromBody] TransferInputModel inputModel)
         {
             var leadInfo = this.GetLeadIdAndRoles();
             var model = _mapper.Map<TransferBusinessModel>(inputModel);
-            var output = _transactionService.AddTransfer(model, leadInfo);
+            var commissionModel = _transactionService.AddTransfer(model, leadInfo);
+            var output = _mapper.Map<CommissionFeeShortOutputModel>(commissionModel);
 
             return StatusCode(201, output);
         }

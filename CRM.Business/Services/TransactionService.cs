@@ -60,7 +60,7 @@ namespace CRM.Business.Services
             var transactionId = result.Data;
 
             var dto = new CommissionFeeDto
-            { LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = leadInfo.Role, Amount = commission };
+            { LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = leadInfo.Role, Amount = commission, TransactionType = TransactionType.Deposit };
 
             AddCommissionFee(dto);
 
@@ -84,7 +84,7 @@ namespace CRM.Business.Services
             var transactionId = result.Data;
 
             var dto = new CommissionFeeDto
-            { LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = leadInfo.Role, Amount = commission };
+            { LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = leadInfo.Role, Amount = commission, TransactionType = TransactionType.Withdraw };
 
             AddCommissionFee(dto);
 
@@ -117,7 +117,7 @@ namespace CRM.Business.Services
             var transactionId = result.Data.First();
 
             var dto = new CommissionFeeDto
-            { LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = leadInfo.Role, Amount = commission };
+            { LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = leadInfo.Role, Amount = commission, TransactionType = TransactionType.Transfer };
 
             AddCommissionFee(dto);
 
