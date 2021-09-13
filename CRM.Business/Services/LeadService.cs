@@ -1,9 +1,9 @@
 ﻿using CRM.Business.IdentityInfo;
+using CRM.Business.ValidationHelpers;
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
 using System.Collections.Generic;
-using CRM.Business.ValidationHelpers;
 
 namespace CRM.Business.Services
 {

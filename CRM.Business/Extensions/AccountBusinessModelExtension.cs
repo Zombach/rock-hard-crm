@@ -6,9 +6,9 @@ namespace CRM.Business.Models
 {
     public static class AccountBusinessModelExtension
     {
-        private const string _recipientId = @"$.[?(@.RecipientAccountId)]";
-        private static List<TransferBusinessModel> _transfers;
-        private static List<TransactionBusinessModel> _transactions;
+        private static readonly string _recipientRegex = @"$.[?(@.RecipientAccountId)]";
+        private static List<TransferBusinessModel> _transfers = new();
+        private static List<TransactionBusinessModel> _transactions = new();
         public static bool IsPart { get; set; }
 
         public static T AddDeserializedTransactions<T>(this T model, string json)
@@ -41,7 +41,7 @@ namespace CRM.Business.Models
                 businessModel.Transactions = _transactions;
                 businessModel.Transfers = _transfers;
             }
-            
+
             return model;
         }
 
@@ -57,7 +57,7 @@ namespace CRM.Business.Models
             if (model is AccountBusinessModel businessModel)
             {
                 GetBalanceModel(businessModel, accountId);
-            }            
+            }
 
             return model;
         }
@@ -65,32 +65,25 @@ namespace CRM.Business.Models
         private static JToken CheckStatusGetJToken(string json)
         {
             var jObject = JObject.Parse(json);
-            IsPart = jObject.SelectToken(@"$.Status").ToObject<bool>();
-            return jObject.SelectToken(@"$.List");            
+            var status = jObject.SelectToken(@"$.Status");
+            if (status != null) IsPart = status.ToObject<bool>();
+            return jObject.SelectToken(@"$.List");
         }
-        
+
         private static JToken GetJToken(string json)
         {
             return JArray.Parse(json);
         }
 
         private static void GetListModels(JToken jToken)
-        {            
-            var transfers = jToken.Where(j => j.SelectToken(_recipientId) != null)
+        {
+            var transfers = jToken.Where(j => j.SelectToken(_recipientRegex) != null)
                 .Select(t => t.ToObject<TransferBusinessModel>()).ToList();
-            var transactions = jToken.Where(j => j.SelectToken(_recipientId) == null)
+            var transactions = jToken.Where(j => j.SelectToken(_recipientRegex) == null)
                 .Select(t => t.ToObject<TransactionBusinessModel>()).ToList();
 
-            if(!IsPart)
-            {
-                _transfers = transfers;
-                _transactions = transactions;
-            }
-            else
-            {
-                _transfers.AddRange(transfers);
-                _transactions.AddRange(transactions);                
-            }
+            _transfers.AddRange(transfers);
+            _transactions.AddRange(transactions);
         }
 
         private static AccountBusinessModel GetBalanceModel(AccountBusinessModel model, int accountId)

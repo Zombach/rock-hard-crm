@@ -11,6 +11,5 @@ namespace CRM.Business.Models
         public TransactionType TransactionType { get; set; }
         public DateTime? Date { get; set; }
         public decimal Amount { get; set; }
-        public decimal CommissionFee { get; set; }
     }
 }
