@@ -2,6 +2,8 @@
 using CRM.Business.Exceptions;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.Collections.Generic;
+using System.Linq;
+using CRM.Core;
 
 namespace CRM.API.Configuration.Middleware.ExceptionResponses
 {
@@ -28,10 +30,8 @@ namespace CRM.API.Configuration.Middleware.ExceptionResponses
             Code = ValidationCode;
             Message = MessageValidation;
             Errors = new List<ValidationError>();
-            foreach (var state in modelState)
+            foreach (var state in modelState.Where(state => state.Value.Errors.Count != 0))
             {
-                if (state.Value.Errors.Count == 0)
-                    continue;
                 Errors.Add(new ValidationError
                 {
                     Code = GetValidationCode(state.Value.Errors[0].ErrorMessage),

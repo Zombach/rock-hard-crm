@@ -121,6 +121,7 @@ namespace CRM.API.Extensions
                     options.InvalidModelStateResponseFactory = context =>
                     {
                         var exc = new ValidationExceptionResponse(context.ModelState);
+                        Writer.Logger("exc");
                         return new UnprocessableEntityObjectResult(exc);
                     };
                 });

@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System;
 using System.Net;
 using System.Threading.Tasks;
+using CRM.Core;
 
 namespace CRM.API.Configuration.Middleware
 {
@@ -51,18 +52,22 @@ namespace CRM.API.Configuration.Middleware
                         Code = _validationCode,
                         Message = _messageValidation
                     };
+                    Writer.Logger(exception.Message);
                     break;
                 case InvalidArgumentException:
                     code = HttpStatusCode.BadRequest;
                     error = GenerateExceptionResponse(_invalidCode, _messageInvalidArgument, exception);
+                    Writer.Logger(exception.Message);
                     break;
                 case EntityNotFoundException _:
                     code = HttpStatusCode.NotFound;
                     error = GenerateExceptionResponse(_entityCode, _messageEntity, exception);
+                    Writer.Logger(exception.Message);
                     break;
                 case AuthorizationException _:
                     code = HttpStatusCode.Forbidden;
                     error = GenerateExceptionResponse(_authorizationCode, _messageAuthorization, exception);
+                    Writer.Logger(exception.Message);
                     break;
                 default:
                     code = HttpStatusCode.InternalServerError;
@@ -72,6 +77,7 @@ namespace CRM.API.Configuration.Middleware
                         message = _messageUnknownError,
                         description = exception.Message
                     };
+                    Writer.Logger(exception.Message);
                     break;
             }
 
