@@ -1,7 +1,7 @@
 using CRM.Business.Options;
 using CRM.Business.Services;
 using CRM.DAL.Repositories;
-using DevEdu.Business.ValidationHelpers;
+using CRM.Business.ValidationHelpers;
 using Moq;
 using NUnit.Framework;
 

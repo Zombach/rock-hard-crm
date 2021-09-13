@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
+using CRM.API.Common;
 using CRM.API.Extensions;
 using CRM.API.Models;
 using CRM.Business.Services;
+using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -36,16 +38,15 @@ namespace CRM.API.Controllers
             return _mapper.Map<LeadOutputModel>(dto);
         }
 
-        // api/lead
-        //[AuthorizeRoles(Role.Admin)]
-        [HttpGet]
-        [Description("Get all Leads")]
-        [ProducesResponseType(typeof(List<LeadOutputModel>), StatusCodes.Status200OK)]
-        public List<LeadOutputModel> GetAllLeads()
+        // api/lead/5/role/role
+        [AuthorizeRoles(Role.Admin)]
+        [HttpPut("{id}/role/{role}")]
+        [Description("Update lead role")]
+        [ProducesResponseType(typeof(LeadOutputModel), StatusCodes.Status200OK)]
+        public LeadOutputModel UpdateLeadRole(int id, Role role)
         {
-            var listDto = _leadService.GetAllLeads();
-            var listOutPut = _mapper.Map<List<LeadOutputModel>>(listDto);
-            return listOutPut;
+            var dto = _leadService.UpdateLeadRole(id, role);
+            return _mapper.Map<LeadOutputModel>(dto);
         }
 
         // api/lead/filter
@@ -62,26 +63,39 @@ namespace CRM.API.Controllers
             return result;
         }
 
+        // api/lead
+        [HttpDelete]
+        [Description("Delete lead")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public ActionResult DeleteLead()
+        {
+            var leadId = this.GetLeadId();
+            _leadService.DeleteLead(leadId);
+            return NoContent();
+        }
+
         // api/lead/3
         [HttpGet("{id}")]
         [Description("Return lead by id")]
         [ProducesResponseType(typeof(LeadOutputModel), StatusCodes.Status200OK)]
         public LeadOutputModel GetLeadById(int id)
         {
-            var dto = _leadService.GetLeadById(id);
+            var leadInfo = this.GetLeadIdAndRoles();
+            var dto = _leadService.GetLeadById(id, leadInfo);
             var outPut = _mapper.Map<LeadOutputModel>(dto);
             return outPut;
         }
 
         // api/lead
-        [HttpDelete]
-        [Description("Delete lead by id")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public ActionResult DeleteLeadById()
+        [AuthorizeRoles(Role.Admin)]
+        [HttpGet]
+        [Description("Get all Leads")]
+        [ProducesResponseType(typeof(List<LeadOutputModel>), StatusCodes.Status200OK)]
+        public List<LeadOutputModel> GetAllLeads()
         {
-            var id = this.GetLeadId();
-            _leadService.DeleteLeadById(id);
-            return NoContent();
+            var listDto = _leadService.GetAllLeads();
+            var listOutPut = _mapper.Map<List<LeadOutputModel>>(listDto);
+            return listOutPut;
         }
     }
 }

@@ -16,10 +16,10 @@ namespace CRM.API.Models
         public int? Role { get; set; } // Nastya
         public List<int> City { get; set; } // Masha
 
-        [CustomDateFormat(ErrorMessage = WrongDateFormat)]
+        [CustomDateFormat(ErrorMessage = WrongFormatDate)]
         public string BirthDateFrom { get; set; } // Nastya
 
-        [CustomDateFormat(ErrorMessage = WrongDateFormat)]
+        [CustomDateFormat(ErrorMessage = WrongFormatDate)]
         public string BirthDateTo { get; set; } // Nasta
     }
 }

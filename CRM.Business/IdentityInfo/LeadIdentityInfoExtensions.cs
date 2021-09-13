@@ -9,14 +9,20 @@ namespace CRM.Business.IdentityInfo
             return leadInfo.Roles.Contains(Role.Admin);
         }
 
-        public static bool IsManager(this LeadIdentityInfo leadInfo)
+        public static bool IsRegular(this LeadIdentityInfo leadInfo)
         {
             return leadInfo.Roles.Contains(Role.Regular);
         }
 
-        public static bool IsMethodist(this LeadIdentityInfo leadInfo)
+        public static bool IsVip(this LeadIdentityInfo leadInfo)
         {
             return leadInfo.Roles.Contains(Role.Vip);
+        }
+        
+        public static string GetName(this LeadIdentityInfo leadInfo)
+        {
+            leadInfo.UserName = "Тимур добавь получение мыла юзера";
+            return leadInfo.UserName;
         }
     }
 }

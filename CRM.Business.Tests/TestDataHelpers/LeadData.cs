@@ -11,7 +11,7 @@ namespace CRM.Business.Tests.Data
             yield return new LeadFiltersDto { 
                 SearchTypeForLastName = SearchType.StartsWith,
                 LastName = "Ma"            
-            }, ;
+            };
             
         }
     }

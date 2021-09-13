@@ -6,6 +6,7 @@ namespace CRM.API.Models
     public class TransferInputModel : TransactionInputModel
     {
         [Required(ErrorMessage = RecipientAccountRequired)]
-        public int RecipientId { get; set; }
+        [Range(minimum: 1, maximum: int.MaxValue, ErrorMessage = WrongFormatRecipientAccount)]
+        public int RecipientAccountId { get; set; }
     }
 }

@@ -7,11 +7,11 @@ namespace CRM.Business.Options
 {
     public class AuthOptions : IAuthOptions
     {
-        private readonly string _key;   // key for encoding last part of the token
+        private readonly string _key;
 
-        public string Issuer => "TheBestCrmEver"; // for example auth.myserver.com
-        public string Audience => "CrmClient"; // for example myserver.com
-        public int Lifetime { get; set; } // 5 minutes
+        public string Issuer => "TheBestCrmEver";
+        public string Audience => "CrmClient";
+        public int Lifetime { get; set; }
 
         public AuthOptions(IOptions<AuthSettings> options)
         {

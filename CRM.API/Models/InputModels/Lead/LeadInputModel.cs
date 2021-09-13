@@ -27,7 +27,7 @@ namespace CRM.API.Models
         public string Password { get; set; }
 
         [Required(ErrorMessage = BirthDateRequired)]
-        [CustomDateFormat(ErrorMessage = WrongDateFormat)]
+        [CustomDateFormat(ErrorMessage = WrongFormatDate)]
         public string BirthDate { get; set; }
 
         [Required(ErrorMessage = CityIdRequired)]

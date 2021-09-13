@@ -1,16 +1,16 @@
-﻿using AutoMapper;
+﻿using System;
+using System.Collections.Generic;
+using AutoMapper;
 using CRM.Business.IdentityInfo;
 using CRM.Business.Models;
 using CRM.Business.Requests;
+using CRM.Business.ValidationHelpers;
 using CRM.Core;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
-using DevEdu.Business.ValidationHelpers;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using RestSharp;
-using System.Collections.Generic;
-using static CRM.Business.TransactionEndpoint;
+using static CRM.Business.Constants.TransactionEndpoint;
 
 namespace CRM.Business.Services
 {
@@ -27,7 +27,7 @@ namespace CRM.Business.Services
         (
             IAccountRepository accountRepository,
             ILeadRepository leadRepository,
-            IOptions<ConnectionUrl> options,
+            IOptions<ConnectionSettings> options,
             IMapper mapper,
             IAccountValidationHelper accountValidationHelper
         )
@@ -35,60 +35,94 @@ namespace CRM.Business.Services
             _accountRepository = accountRepository;
             _leadRepository = leadRepository;
             _mapper = mapper;
-            _client = new RestClient(options.Value.TstoreUrl);
+            _client = new RestClient(options.Value.TransactionStoreUrl);
             _requestHelper = new RequestHelper();
             _accountValidationHelper = accountValidationHelper;
         }
 
-        public int AddAccount(AccountDto dto, int leadId)
+        public int AddAccount(AccountDto dto, LeadIdentityInfo leadInfo)
         {
-            var lead = _leadRepository.GetLeadById(leadId);
+            var lead = _leadRepository.GetLeadById(leadInfo.LeadId);
             _accountValidationHelper.CheckForDuplicateCurrencies(lead, dto.Currency);
+            _accountValidationHelper.CheckForVipAccess(dto.Currency, leadInfo);
             dto.LeadId = lead.Id;
             var accountId = _accountRepository.AddAccount(dto);
             return accountId;
         }
 
-        public void DeleteAccount(int id, int leadId)
+        public void DeleteAccount(int accountId, int leadId)
         {
-            var dto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(id);
+            var dto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(accountId);
             _accountValidationHelper.CheckLeadAccessToAccount(dto.LeadId, leadId);
 
-            _accountRepository.DeleteAccount(id);
+            _accountRepository.DeleteAccount(accountId);
         }
 
-        public AccountBusinessModel GetAccountWithTransactions(int id, LeadIdentityInfo leadInfo)
+        public void RestoreAccount(int accountId, int leadId)
         {
-            var dto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(id);
+            var dto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(accountId);
+            _accountValidationHelper.CheckLeadAccessToAccount(dto.LeadId, leadId);
+
+            _accountRepository.RestoreAccount(accountId);
+        }
+
+        public AccountBusinessModel GetAccountWithTransactions(int accountId, LeadIdentityInfo leadInfo)
+        {
+            var dto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(accountId);
             if (!leadInfo.IsAdmin())
                 _accountValidationHelper.CheckLeadAccessToAccount(dto.LeadId, leadInfo.LeadId);
 
             var accountModel = _mapper.Map<AccountBusinessModel>(dto);
-            var request = _requestHelper.CreateGetRequest($"{GetTransactionsByAccountIdEndpoint}{id}");
+            var request = _requestHelper.CreateGetRequest($"{GetTransactionsByAccountIdEndpoint}{accountId}");
 
             var response = _client.Execute<string>(request);
-            var transfers = new List<TransferBusinessModel>();
-            var transactions = new List<TransactionBusinessModel>();
-            var result = JsonConvert.DeserializeObject<List<TransferBusinessModel>>(response.Data);
 
-            if (result != null)
-                foreach (var obj in result)
-                {
-                    if (obj.RecipientAccountId != default)
-                    {
-                        transfers.Add(obj);
-                    }
-                    else
-                    {
-                        transactions.Add(obj);
-                    }
-                    accountModel.Balance += obj.Amount;
-                }
-
-            accountModel.Transactions = transactions;
-            accountModel.Transfers = transfers;
+            accountModel.AddDeserializedTransactions(response.Data);
+            accountModel.BalanceCalculation(accountId);
 
             return accountModel;
+        }
+
+        public List<AccountBusinessModel> GetTransactionsByPeriodAndPossiblyAccountId(TimeBasedAcquisitionBusinessModel model, LeadIdentityInfo leadInfo)
+        {
+            var list = new List<AccountBusinessModel>();
+            if (model.AccountId!=null)
+            {
+                var dto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound((int)model.AccountId);
+                if (!leadInfo.IsAdmin())
+                    _accountValidationHelper.CheckLeadAccessToAccount(dto.LeadId, leadInfo.LeadId);
+                var accountModel = _mapper.Map<AccountBusinessModel>(dto);
+                var request = _requestHelper.CreatePostRequest($"{GetTransactionsByPeriodEndpoint}", model);
+                request.AddHeader("UserName", leadInfo.UserName);
+
+                do
+                {                    
+                    var response = _client.Execute<string>(request);
+                    accountModel.AddDeserializedTransactions(response.Data);
+                }
+                while (AccountBusinessModelExtension.IsPart);
+
+
+                accountModel.BalanceCalculation((int)model.AccountId);
+                list.Add(accountModel);
+            }
+
+            else
+            {
+                if (!leadInfo.IsAdmin()) throw new Exception("n背a葉h");
+
+
+                var request = _requestHelper.CreatePostRequest($"{GetTransactionsByPeriodEndpoint}", model);
+                var response = _client.Execute<string>(request);
+                list.AddDeserializedTransactions(response.Data);
+            }
+
+            return list;
+        }
+
+        public AccountBusinessModel GetLeadBalance(int leadId, LeadIdentityInfo leadInfo)
+        {
+            throw new NotImplementedException();
         }
     }
 }
