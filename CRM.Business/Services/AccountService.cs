@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using CRM.Business.Constants;
+using CRM.Business.Exceptions;
 using CRM.Business.IdentityInfo;
 using CRM.Business.Models;
 using CRM.Business.Requests;
@@ -10,8 +12,6 @@ using Microsoft.Extensions.Options;
 using RestSharp;
 using System;
 using System.Collections.Generic;
-using CRM.Business.Constants;
-using CRM.Business.Exceptions;
 using static CRM.Business.Constants.TransactionEndpoint;
 
 namespace CRM.Business.Services

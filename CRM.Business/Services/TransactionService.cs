@@ -1,4 +1,6 @@
-﻿using CRM.Business.IdentityInfo;
+﻿using CRM.Business.Constants;
+using CRM.Business.Exceptions;
+using CRM.Business.IdentityInfo;
 using CRM.Business.Models;
 using CRM.Business.Requests;
 using CRM.Business.ValidationHelpers;
@@ -7,11 +9,8 @@ using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using Microsoft.Extensions.Options;
 using RestSharp;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using CRM.Business.Constants;
-using CRM.Business.Exceptions;
 using static CRM.Business.Constants.TransactionEndpoint;
 
 namespace CRM.Business.Services
