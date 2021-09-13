@@ -10,6 +10,8 @@ using Microsoft.Extensions.Options;
 using RestSharp;
 using System;
 using System.Collections.Generic;
+using CRM.Business.Constants;
+using CRM.Business.Exceptions;
 using static CRM.Business.Constants.TransactionEndpoint;
 
 namespace CRM.Business.Services
@@ -105,7 +107,7 @@ namespace CRM.Business.Services
 
             else
             {
-                if (!leadInfo.IsAdmin()) throw new Exception("n背a葉h");
+                if (!leadInfo.IsAdmin()) throw new AuthorizationException($"{ServiceMessages.NoAdminRights}");
 
                 var request = _requestHelper.CreatePostRequest($"{GetTransactionsByPeriodEndpoint}", model);
                 request.AddHeader("LeadId", leadInfo.LeadId.ToString());

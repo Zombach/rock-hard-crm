@@ -10,6 +10,8 @@ using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using CRM.Business.Constants;
+using CRM.Business.Exceptions;
 using static CRM.Business.Constants.TransactionEndpoint;
 
 namespace CRM.Business.Services
@@ -68,15 +70,11 @@ namespace CRM.Business.Services
 
         public CommissionFeeDto AddWithdraw(TransactionBusinessModel model, LeadIdentityInfo leadInfo)
         {
-            var account = CheckAccessAndReturnAccount(model.AccountId, leadInfo);
+            var account = _accountService.GetAccountWithTransactions(model.AccountId, leadInfo);
             _accountValidationHelper.CheckForVipAccess(account.Currency, leadInfo);
             var commission = CalculateCommission(model.Amount, leadInfo);
 
-            var balance = _accountService.GetAccountWithTransactions(account.Id, leadInfo).Balance;
-            if (balance - model.Amount < 0)
-            {
-                throw new Exception("недостаточно денег");
-            }
+            CheckBalance(account, model.Amount);
 
             model.Amount -= commission;
             model.AccountId = account.Id;
@@ -96,22 +94,18 @@ namespace CRM.Business.Services
 
         public CommissionFeeDto AddTransfer(TransferBusinessModel model, LeadIdentityInfo leadInfo)
         {
-            var account = CheckAccessAndReturnAccount(model.AccountId, leadInfo);
+            var account = _accountService.GetAccountWithTransactions(model.AccountId, leadInfo);
             var recipientAccount = CheckAccessAndReturnAccount(model.RecipientAccountId, leadInfo);
             var commission = CalculateCommission(model.Amount, leadInfo);
 
-            var balance = _accountService.GetAccountWithTransactions(account.Id, leadInfo).Balance;
-            if (balance - model.Amount < 0)
-            {
-                throw new Exception("недостаточно денег");
-            }
+            CheckBalance(account, model.Amount);
 
             if (account.Currency != Currency.RUB && account.Currency != Currency.USD && !leadInfo.IsVip())
             {
                 commission *= _commissionModifier;
-                if (balance != model.Amount)
+                if (account.Balance != model.Amount)
                 {
-                    throw new Exception("снять можно только все бабки простак");
+                    throw new ValidationException(nameof(model.Amount), $"{ServiceMessages.IncompleteTransfer}");
                 }
             }
 
@@ -146,6 +140,14 @@ namespace CRM.Business.Services
         private decimal CalculateCommission(decimal amount, LeadIdentityInfo leadInfo)
         {
             return leadInfo.IsVip() ? amount * _vipCommission : amount * _commission;
+        }
+
+        private static void CheckBalance(AccountBusinessModel account, decimal amount)
+        {
+            if (account.Balance - amount < 0)
+            {
+                throw new ValidationException(nameof(amount), string.Format(ServiceMessages.DoesNotHaveEnoughMoney, account.Id, account.Balance));
+            }
         }
     }
 }
