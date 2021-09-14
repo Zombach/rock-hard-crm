@@ -85,6 +85,9 @@ namespace CRM.Business.Services
                                                  "l.Email",
                                                  "l.BirthDate",
                                                  "l.RegistrationDate",
+                                                 "Account.Id",
+                                                 "Account.Currency",
+                                                 "Account.CreatedOn",
                                                  "City.Id",
                                                  "City.Name",
                                                  "l.Role as Id");
@@ -98,7 +101,8 @@ namespace CRM.Business.Services
 
             query = query
                 .Where("l.IsDeleted", 0)
-                .Join("City", "City.Id", "l.CityId");
+                .Join("City", "City.Id", "l.CityId")
+                .Join("Account", "Account.LeadId", "l.Id");
 
             SqlResult sqlResult = compiler.Compile(query);
 

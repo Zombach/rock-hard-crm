@@ -13,7 +13,7 @@ namespace CRM.API.Models
         public string LastName { get; set; } // Nastya
         public SearchType? SearchTypeForPatronymic { get; set; }
         public string Patronymic { get; set; } // Masha
-        public int? Role { get; set; } // Nastya
+        public List<int> Role { get; set; } // Nastya
         public List<int> City { get; set; } // Masha
 
         [CustomDateFormat(ErrorMessage = WrongFormatDate)]

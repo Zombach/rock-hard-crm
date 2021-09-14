@@ -5,6 +5,7 @@ using CRM.API.Models;
 using CRM.Business.Services;
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ using System.ComponentModel;
 
 namespace CRM.API.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class LeadController : Controller
@@ -50,16 +51,16 @@ namespace CRM.API.Controllers
         }
 
         // api/lead/filter
-        //[AuthorizeRoles(Role.Admin)]
-        [HttpPost("/filter")]
+        [AuthorizeRoles(Role.Admin)]
+        [HttpPost("by-filters")]
         [Description("Get all Leads by filters")]
-        [ProducesResponseType(typeof(List<LeadByFiltersOutputModel>), StatusCodes.Status200OK)]
-        public List<LeadByFiltersOutputModel> GetAllLeadsByFilters(
+        [ProducesResponseType(typeof(List<LeadOutputModel>), StatusCodes.Status200OK)]
+        public List<LeadOutputModel> GetAllLeadsByFilters(
             [FromBody] LeadFiltersInputModel leadFilter)
         {            
             var filter = _mapper.Map<LeadFiltersDto>(leadFilter);
             var leads = _leadService.GetLeadsByFilters(filter); 
-            var result = _mapper.Map<List<LeadByFiltersOutputModel>>(leads);
+            var result = _mapper.Map<List<LeadOutputModel>>(leads);
             return result;
         }
 

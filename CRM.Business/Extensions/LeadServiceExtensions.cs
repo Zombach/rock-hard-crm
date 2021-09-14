@@ -21,7 +21,7 @@ namespace CRM.Business.Extensions
 
         public static Query FilterByRole(this LeadService service, Query query, LeadFiltersDto filter)
         {
-            return filter.Role is null ? query : query.Where("l.Role", filter.Role);
+            return filter.Role is null || filter.Role.Count == 0 ? query : query.WhereIn("l.Role", filter.Role);
         }
 
         public static Query FilterByCity(this LeadService service, Query query, LeadFiltersDto filter)
