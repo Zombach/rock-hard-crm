@@ -15,6 +15,11 @@ namespace CRM.Business.Models
             List<TransactionBusinessModel> _transactions = new();
             JToken jToken;
 
+            if (json==string.Empty)
+            {
+                throw new Exception();
+            }
+
             if (model is List<AccountBusinessModel> businessModels)
             {
                 jToken = CheckStatusGetJToken(json);
@@ -82,7 +87,14 @@ namespace CRM.Business.Models
 
         private static JToken GetJToken(string json)
         {
-            return JArray.Parse(json);
+            try
+            {
+                return JObject.Parse(json);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
         }
 
         private static void GetListModels(JToken jToken, List<TransferBusinessModel> transfers, List<TransactionBusinessModel> transactions)
@@ -96,7 +108,7 @@ namespace CRM.Business.Models
             transactions.AddRange(transactionsJToken);
         }
 
-        private static AccountBusinessModel GetBalanceModel(AccountBusinessModel model, int accountId)
+        private static void GetBalanceModel(AccountBusinessModel model, int accountId)
         {
             if (model.Transactions != null)
             {
@@ -113,7 +125,6 @@ namespace CRM.Business.Models
                     model.Balance += obj.Amount;
                 }
             }
-            return model;
         }
     }
 }
