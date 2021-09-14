@@ -28,7 +28,7 @@ namespace CRM.Business.ValidationHelpers
         public void CheckLeadAccessToAccount(int verifiableId, int leadId)
         {
             if (verifiableId != leadId)
-                throw new AuthorizationException(string.Format(ServiceMessages.LeadHasNoAccessMessageToAccount, leadId));
+                throw new AuthorizationException(string.Format(ServiceMessages.LeadHasNoAccessMessageToAccount, leadId, verifiableId));
         }
 
         public void CheckForVipAccess(Currency currency, LeadIdentityInfo leadInfo)
@@ -39,7 +39,6 @@ namespace CRM.Business.ValidationHelpers
 
         public void CheckForDuplicateCurrencies(LeadDto lead, Currency currency)
         {
-            //нужна ли проверка на аккаунт нал?
             var account = lead.Accounts.FirstOrDefault(ac => ac.Currency == currency);
             if (account != default)
                 throw new ValidationException(nameof(account), string.Format(ServiceMessages.LeadHasThisCurrencyMessage, lead.Id));

@@ -96,6 +96,7 @@ namespace CRM.Business.Services
                     _accountValidationHelper.CheckLeadAccessToAccount(dto.LeadId, leadInfo.LeadId);
                 var accountModel = _mapper.Map<AccountBusinessModel>(dto);
                 var request = _requestHelper.CreatePostRequest($"{GetTransactionsByPeriodEndpoint}", model);
+                request.AddHeader("LeadId", leadInfo.LeadId.ToString());
 
                 var response = _client.Execute<string>(request);
                 accountModel.AddDeserializedTransactions(response.Data);
