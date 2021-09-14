@@ -12,6 +12,5 @@ namespace CRM.API.Models
         public string Email { get; set; }
         public Role Role { get; set; }
         public CityOutputModel City { get; set; }
-        public string RegistrationDate { get; set; }
     }
 }

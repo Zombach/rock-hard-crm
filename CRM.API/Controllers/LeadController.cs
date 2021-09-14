@@ -54,13 +54,13 @@ namespace CRM.API.Controllers
         [AuthorizeRoles(Role.Admin)]
         [HttpPost("by-filters")]
         [Description("Get all Leads by filters")]
-        [ProducesResponseType(typeof(List<LeadOutputModel>), StatusCodes.Status200OK)]
-        public List<LeadOutputModel> GetAllLeadsByFilters(
+        [ProducesResponseType(typeof(List<LeadByFiltersOutputModel>), StatusCodes.Status200OK)]
+        public List<LeadByFiltersOutputModel> GetAllLeadsByFilters(
             [FromBody] LeadFiltersInputModel leadFilter)
         {            
             var filter = _mapper.Map<LeadFiltersDto>(leadFilter);
             var leads = _leadService.GetLeadsByFilters(filter); 
-            var result = _mapper.Map<List<LeadOutputModel>>(leads);
+            var result = _mapper.Map<List<LeadByFiltersOutputModel>>(leads);
             return result;
         }
 
