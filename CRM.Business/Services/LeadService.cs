@@ -108,5 +108,10 @@ namespace CRM.Business.Services
         {
             return _leadRepository.GetAllLeads();
         }
+
+        public List<LeadDto> GetAllLeadsByBatches(int cursorId)
+        {
+            return _leadRepository.GetAllLeadsByBatches(cursorId);
+        }
     }
 }

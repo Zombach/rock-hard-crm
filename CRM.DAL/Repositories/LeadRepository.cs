@@ -19,6 +19,7 @@ namespace CRM.DAL.Repositories
         private const string _deleteLeadByIdProcedure = "dbo.Lead_Delete";
         private const string _getLeadByEmailProcedure = "dbo.Lead_SelectByEmail";
         private const string _getAllLeadsProcedure = "dbo.Lead_SelectAll";
+        private const string _getAllLeadsByBathesProcedure = "dbo.Lead_SelectAllByBathes";
         private const string _updateLeadRoleProcedure = "dbo.Lead_UpdateRole";
 
         public LeadRepository(IOptions<DatabaseSettings> options) : base(options) { }
@@ -177,6 +178,34 @@ namespace CRM.DAL.Repositories
                 commandType: CommandType.Text)
                 .ToList();
             return result;
+        }
+
+        public List<LeadDto> GetAllLeadsByBatches(int cursorId)
+        {
+            var leadDictionary = new Dictionary<int, LeadDto>();
+
+            return _connection
+                .Query<LeadDto, AccountDto, Role, LeadDto>(
+                    _getAllLeadsByBathesProcedure,
+                    (lead, account, role) =>
+                    {
+
+                        if (!leadDictionary.TryGetValue(lead.Id, out var leadEntry))
+                        {
+                            leadEntry = lead;
+                            leadEntry.Role = role;
+                            leadEntry.Accounts = new List<AccountDto>();
+                            leadDictionary.Add(lead.Id, leadEntry);
+                        }
+                        leadEntry.Accounts.Add(account);
+
+                        return leadEntry;
+                    },
+                    new { cursorId },
+                    splitOn: "id",
+                    commandType: CommandType.StoredProcedure)
+                .Distinct()
+                .ToList();
         }
     }
 }

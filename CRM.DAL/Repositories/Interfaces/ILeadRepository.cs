@@ -14,5 +14,6 @@ namespace CRM.DAL.Repositories
         LeadDto GetLeadByEmail(string email);
         List<LeadDto> GetAllLeads();
         List<LeadDto> GetLeadsByFilters(SqlResult sqlResult);
+        List<LeadDto> GetAllLeadsByBatches(int cursorId);
     }
 }

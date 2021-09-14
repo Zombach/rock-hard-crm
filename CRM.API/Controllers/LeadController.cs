@@ -50,7 +50,7 @@ namespace CRM.API.Controllers
             return _mapper.Map<LeadOutputModel>(dto);
         }
 
-        // api/lead/filter
+        // api/lead/by-filters
         [AuthorizeRoles(Role.Admin)]
         [HttpPost("by-filters")]
         [Description("Get all Leads by filters")]
@@ -61,6 +61,18 @@ namespace CRM.API.Controllers
             var filter = _mapper.Map<LeadFiltersDto>(leadFilter);
             var leads = _leadService.GetLeadsByFilters(filter); 
             var result = _mapper.Map<List<LeadByFiltersOutputModel>>(leads);
+            return result;
+        }
+
+        // api/lead/by-bathes
+        [AuthorizeRoles(Role.Admin)]
+        [HttpPost("by-bathes/cursorId/{cursorId}")]
+        [Description("Get all Leads by bathes")]
+        [ProducesResponseType(typeof(List<LeadByBathesOutputModel>), StatusCodes.Status200OK)]
+        public List<LeadByBathesOutputModel> GetAllLeadsByBathes(int cursorId)
+        {            
+            var leads = _leadService.GetAllLeadsByBatches(cursorId); 
+            var result = _mapper.Map<List<LeadByBathesOutputModel>>(leads);
             return result;
         }
 

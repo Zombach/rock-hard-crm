@@ -14,5 +14,6 @@ namespace CRM.Business.Services
         LeadDto GetLeadById(int leadId, LeadIdentityInfo leadInfo);
         List<LeadDto> GetAllLeads();
         List<LeadDto> GetLeadsByFilters(LeadFiltersDto filter);
+        List<LeadDto> GetAllLeadsByBatches(int cursorId);
     }
 }
