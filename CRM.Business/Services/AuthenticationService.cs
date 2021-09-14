@@ -1,4 +1,6 @@
-﻿using CRM.Business.Options;
+﻿using CRM.Business.Constants;
+using CRM.Business.Exceptions;
+using CRM.Business.Options;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
 using Microsoft.IdentityModel.Tokens;
@@ -7,8 +9,6 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
-using CRM.Business.Constants;
-using CRM.Business.Exceptions;
 
 namespace CRM.Business.Services
 {

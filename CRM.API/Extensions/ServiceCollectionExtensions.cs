@@ -1,6 +1,7 @@
 ﻿using CRM.API.Configuration.Middleware.ExceptionResponses;
 using CRM.Business.Options;
 using CRM.Business.Services;
+using CRM.Business.ValidationHelpers;
 using CRM.Core;
 using CRM.DAL.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -10,7 +11,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using NSwag.Generation.Processors.Security;
 using System.Text.Json.Serialization;
-using CRM.Business.ValidationHelpers;
 
 namespace CRM.API.Extensions
 {
@@ -121,6 +121,7 @@ namespace CRM.API.Extensions
                     options.InvalidModelStateResponseFactory = context =>
                     {
                         var exc = new ValidationExceptionResponse(context.ModelState);
+                        Logger.Writer($"{exc.Message} {exc.Code} {exc.Errors}");
                         return new UnprocessableEntityObjectResult(exc);
                     };
                 });

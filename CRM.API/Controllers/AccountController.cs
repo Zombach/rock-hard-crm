@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using AutoMapper;
+﻿using AutoMapper;
 using CRM.API.Extensions;
 using CRM.API.Models;
 using CRM.Business.Models;
@@ -8,8 +7,8 @@ using CRM.DAL.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using System.ComponentModel;
-using CRM.API.Models.OutputModels;
 
 namespace CRM.API.Controllers
 {

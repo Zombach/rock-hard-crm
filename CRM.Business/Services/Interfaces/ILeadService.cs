@@ -1,7 +1,7 @@
 ﻿using CRM.Business.IdentityInfo;
+using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using System.Collections.Generic;
-using CRM.DAL.Enums;
 
 namespace CRM.Business.Services
 {

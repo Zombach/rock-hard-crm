@@ -1,6 +1,9 @@
-﻿using CRM.Business.IdentityInfo;
+﻿using CRM.Business.Constants;
+using CRM.Business.Exceptions;
+using CRM.Business.IdentityInfo;
 using CRM.Business.Models;
 using CRM.Business.Requests;
+using CRM.Business.ValidationHelpers;
 using CRM.Core;
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
@@ -9,7 +12,6 @@ using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using CRM.Business.ValidationHelpers;
 using static CRM.Business.Constants.TransactionEndpoint;
 
 namespace CRM.Business.Services
@@ -30,12 +32,12 @@ namespace CRM.Business.Services
             IOptions<ConnectionSettings> connectionOptions,
             IOptions<CommissionSettings> commissionOptions,
             IAccountValidationHelper accountValidationHelper,
-            IAccountService accountService, 
+            IAccountService accountService,
             ICommissionFeeService commissionFeeService
         )
         {
             _client = new RestClient(connectionOptions.Value.TransactionStoreUrl);
-            _commission = commissionOptions.Value.Commission; 
+            _commission = commissionOptions.Value.Commission;
             _vipCommission = commissionOptions.Value.VipCommission;
             _commissionModifier = commissionOptions.Value.CommissionModifier;
             _requestHelper = new RequestHelper();
@@ -44,7 +46,7 @@ namespace CRM.Business.Services
             _commissionFeeService = commissionFeeService;
         }
 
-        public TransactionBusinessModel AddDeposit(TransactionBusinessModel model, LeadIdentityInfo leadInfo)
+        public CommissionFeeDto AddDeposit(TransactionBusinessModel model, LeadIdentityInfo leadInfo)
         {
             var account = CheckAccessAndReturnAccount(model.AccountId, leadInfo);
             _accountValidationHelper.CheckForVipAccess(account.Currency, leadInfo);
@@ -56,35 +58,27 @@ namespace CRM.Business.Services
 
             var request = _requestHelper.CreatePostRequest(AddDepositEndpoint, model);
             var result = _client.Execute<long>(request);
+            if (!result.IsSuccessful)
+            {
+                throw new Exception($"{result.ErrorMessage} {_client.BaseUrl}");
+            }
             var transactionId = result.Data;
 
-            var transaction = new TransactionBusinessModel
-            {
-                AccountId = account.Id,
-                Amount = model.Amount,
-                CommissionFee = commission,
-                Currency = account.Currency,
-                Id = transactionId,
-                TransactionType = TransactionType.Withdraw,
-                Date = null
-            };
+            var dto = new CommissionFeeDto
+            { LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = leadInfo.Role, Amount = commission, TransactionType = TransactionType.Deposit };
 
-            AddCommissionFee(leadInfo,transactionId,model, commission);
+            AddCommissionFee(dto);
 
-            return transaction;
+            return dto;
         }
 
-        public TransactionBusinessModel AddWithdraw(TransactionBusinessModel model, LeadIdentityInfo leadInfo)
+        public CommissionFeeDto AddWithdraw(TransactionBusinessModel model, LeadIdentityInfo leadInfo)
         {
-            var account = CheckAccessAndReturnAccount(model.AccountId, leadInfo);
+            var account = _accountService.GetAccountWithTransactions(model.AccountId, leadInfo);
             _accountValidationHelper.CheckForVipAccess(account.Currency, leadInfo);
-            var commission= CalculateCommission(model.Amount, leadInfo);
+            var commission = CalculateCommission(model.Amount, leadInfo);
 
-            var balance = _accountService.GetAccountWithTransactions(account.Id, leadInfo).Balance;
-            if (balance - model.Amount < 0)
-            {
-                throw new Exception("недостаточно денег");
-            }
+            CheckBalance(account, model.Amount);
 
             model.Amount -= commission;
             model.AccountId = account.Id;
@@ -94,43 +88,31 @@ namespace CRM.Business.Services
             var result = _client.Execute<long>(request);
             var transactionId = result.Data;
 
-            var transaction = new TransactionBusinessModel
-            {
-                AccountId = account.Id,
-                Amount = model.Amount,
-                CommissionFee = commission,
-                Currency = account.Currency,
-                Id = transactionId,
-                TransactionType = TransactionType.Withdraw,
-                Date = null
-            };
+            var dto = new CommissionFeeDto
+            { LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = leadInfo.Role, Amount = commission, TransactionType = TransactionType.Withdraw };
 
-            AddCommissionFee(leadInfo, transactionId, model, commission);
+            AddCommissionFee(dto);
 
-            return transaction;
+            return dto;
         }
 
-        public TransferBusinessModel AddTransfer(TransferBusinessModel model, LeadIdentityInfo leadInfo)
+        public CommissionFeeDto AddTransfer(TransferBusinessModel model, LeadIdentityInfo leadInfo)
         {
-            var account = CheckAccessAndReturnAccount(model.AccountId, leadInfo);
+            var account = _accountService.GetAccountWithTransactions(model.AccountId, leadInfo);
             var recipientAccount = CheckAccessAndReturnAccount(model.RecipientAccountId, leadInfo);
             var commission = CalculateCommission(model.Amount, leadInfo);
 
-            var balance = _accountService.GetAccountWithTransactions(account.Id, leadInfo).Balance;
-            if (balance - model.Amount < 0)
-            {
-                throw new Exception("недостаточно денег");
-            }
+            CheckBalance(account, model.Amount);
 
             if (account.Currency != Currency.RUB && account.Currency != Currency.USD && !leadInfo.IsVip())
             {
                 commission *= _commissionModifier;
-                if (balance != model.Amount)
+                if (account.Balance != model.Amount)
                 {
-                    throw new Exception("снять можно только все бабки простак");
+                    throw new ValidationException(nameof(model.Amount), $"{ServiceMessages.IncompleteTransfer}");
                 }
             }
-            
+
             model.Amount -= commission;
             model.Currency = account.Currency;
             model.RecipientCurrency = recipientAccount.Currency;
@@ -138,24 +120,13 @@ namespace CRM.Business.Services
             var result = _client.Execute<List<long>>(request);
 
             var transactionId = result.Data.First();
-            var recipientTransactionId = result.Data.Last();
 
-            AddCommissionFee(leadInfo, transactionId, model, commission);
+            var dto = new CommissionFeeDto
+            { LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = leadInfo.Role, Amount = commission, TransactionType = TransactionType.Transfer };
 
-            var transaction = new TransferBusinessModel
-            {
-                AccountId = account.Id,
-                Amount = model.Amount,
-                CommissionFee = commission,
-                Currency = account.Currency,
-                Id = transactionId,
-                TransactionType = TransactionType.Transfer,
-                RecipientTransactionId=recipientTransactionId,
-                RecipientAccountId = model.RecipientAccountId,
-                Date = null,
-            };
+            AddCommissionFee(dto);
 
-            return transaction;
+            return dto;
         }
 
         private AccountDto CheckAccessAndReturnAccount(int accountId, LeadIdentityInfo leadInfo)
@@ -165,18 +136,22 @@ namespace CRM.Business.Services
             return account;
         }
 
-        private void AddCommissionFee(LeadIdentityInfo leadInfo, long transactionId, TransactionBusinessModel model, decimal commission)
+        private void AddCommissionFee(CommissionFeeDto dto)
         {
-            var role = leadInfo.IsVip() ? Role.Vip : Role.Regular;
-            //var role = leadInfo.Roles.First();
-            var dto = new CommissionFeeDto
-                {LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = role, Amount = commission };
             _commissionFeeService.AddCommissionFee(dto);
         }
 
         private decimal CalculateCommission(decimal amount, LeadIdentityInfo leadInfo)
         {
             return leadInfo.IsVip() ? amount * _vipCommission : amount * _commission;
+        }
+
+        private static void CheckBalance(AccountBusinessModel account, decimal amount)
+        {
+            if (account.Balance - amount < 0)
+            {
+                throw new ValidationException(nameof(amount), string.Format(ServiceMessages.DoesNotHaveEnoughMoney, account.Id, account.Balance));
+            }
         }
     }
 }

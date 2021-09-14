@@ -37,6 +37,7 @@ namespace CRM.API.Configuration
         {
             CreateMap<CityDto, CityOutputModel>();
             CreateMap<CommissionFeeDto, CommissionFeeOutputModel>();
+            CreateMap<CommissionFeeDto, CommissionFeeShortOutputModel>();
             CreateMap<AccountDto, AccountOutputModel>()
                 .ForMember(dest => dest.CreatedOn, opt => opt.MapFrom(src => src.CreatedOn.ToString(_dateFormat)));
             CreateMap<LeadDto, LeadOutputModel>()

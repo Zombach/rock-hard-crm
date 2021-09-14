@@ -1,4 +1,5 @@
 ﻿using CRM.Business.IdentityInfo;
+using CRM.Business.ValidationHelpers;
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
@@ -7,7 +8,6 @@ using SqlKata;
 using System;
 using CRM.Business.Extensions;
 using System.Collections.Generic;
-using CRM.Business.ValidationHelpers;
 
 namespace CRM.Business.Services
 {

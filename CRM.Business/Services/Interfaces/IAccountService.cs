@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using CRM.Business.IdentityInfo;
+﻿using CRM.Business.IdentityInfo;
 using CRM.Business.Models;
 using CRM.DAL.Models;
+using System.Collections.Generic;
 
 namespace CRM.Business.Services
 {

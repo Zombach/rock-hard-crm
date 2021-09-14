@@ -2,7 +2,6 @@
 using CRM.DAL.Enums;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 
@@ -15,19 +14,19 @@ namespace CRM.API.Extensions
             return Convert.ToInt32(controller.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value);
         }
 
-        public static List<Role> GetLeadRoles(this Controller controller)
+        public static Role GetLeadRoles(this Controller controller)
         {
-            return controller.User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => (Role)Enum.Parse(typeof(Role), c.Value)).ToList();
+            return (Role)Enum.Parse(typeof(Role), controller.User.Claims.First(c => c.Type == ClaimTypes.Role).Value);
         }
 
         public static LeadIdentityInfo GetLeadIdAndRoles(this Controller controller)
         {
             var leadId = Convert.ToInt32(controller.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value);
-            var roles = controller.User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => (Role)Enum.Parse(typeof(Role), c.Value)).ToList();
+            var role = (Role)Enum.Parse(typeof(Role), controller.User.Claims.First(c => c.Type == ClaimTypes.Role).Value);
             return new LeadIdentityInfo
             {
                 LeadId = leadId,
-                Roles = roles
+                Role = role
             };
         }
     }

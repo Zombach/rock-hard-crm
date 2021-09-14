@@ -76,7 +76,7 @@ namespace CRM.API.Controllers
 
         // api/lead/3
         [HttpGet("{id}")]
-        [Description("Return lead by id")]
+        [Description("Get lead by id")]
         [ProducesResponseType(typeof(LeadOutputModel), StatusCodes.Status200OK)]
         public LeadOutputModel GetLeadById(int id)
         {
