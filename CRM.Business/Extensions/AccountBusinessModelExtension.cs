@@ -89,7 +89,7 @@ namespace CRM.Business.Models
         {
             try
             {
-                return JObject.Parse(json);
+                return JArray.Parse(json);
             }
             catch (Exception e)
             {
