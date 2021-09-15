@@ -13,5 +13,6 @@ namespace CRM.Business.Services
         void DeleteLead(int leadId);
         LeadDto GetLeadById(int leadId, LeadIdentityInfo leadInfo);
         List<LeadDto> GetAllLeads();
+        void ChangeRoleForLeads(List<LeadDto> listLeadDtos);
     }
 }

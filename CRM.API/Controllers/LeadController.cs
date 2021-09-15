@@ -50,6 +50,18 @@ namespace CRM.API.Controllers
             return _mapper.Map<LeadOutputModel>(dto);
         }
 
+        // api/lead/change-role-leads
+        [AuthorizeRoles(Role.Admin)]
+        [HttpPut("change-role-leads")]
+        [Description("Change role for leads list")]
+        [ProducesResponseType(typeof(LeadOutputModel), StatusCodes.Status200OK)]
+        public ActionResult ChangeRoleForLeads([FromBody] List<LeadIdAndRoleInputModel> model)
+        {
+            var dto = _mapper.Map<List<LeadDto>>(model);
+            _leadService.ChangeRoleForLeads(dto);
+            return NoContent();
+        }
+
         // api/lead
         [HttpDelete]
         [Description("Delete lead")]
