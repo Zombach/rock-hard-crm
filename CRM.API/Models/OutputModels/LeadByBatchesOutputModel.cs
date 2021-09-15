@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace CRM.API.Models
 {
-    public class LeadByBathesOutputModel
+    public class LeadByBatchesOutputModel
     {
         public int Id { get; set; }
         public string FirstName { get; set; }

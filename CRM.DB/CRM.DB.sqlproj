@@ -89,6 +89,7 @@
     <Build Include="StoredProcedures\CommissionFee\CommissionFee_Insert.sql" />
     <Build Include="StoredProcedures\Lead\Lead_UpdateRole.sql" />
     <Build Include="StoredProcedures\Account\Account_Restore.sql" />
+    <Build Include="StoredProcedures\Lead\Lead_SelectAllByBatchesWithoutAdmins.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="CRM.DB.refactorlog" />
