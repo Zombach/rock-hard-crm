@@ -92,6 +92,7 @@
     <Build Include="StoredProcedures\Lead\Lead_UpdateRole.sql" />
     <Build Include="StoredProcedures\Account\Account_Restore.sql" />
     <Build Include="Types\User-Defined Table Types\LeadDtoType.sql" />
+    <Build Include="StoredProcedures\Lead\Lead_SelectAllByBatchesWithoutAdmins.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="StoredProcedures\Lead\LeadsList_Role_Update.sql" />

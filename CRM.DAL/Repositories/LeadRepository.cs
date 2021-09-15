@@ -85,7 +85,7 @@ namespace CRM.DAL.Repositories
 
             foreach (var lead in listLeadDtos)
             {
-                dt.Rows.Add(lead.Id, lead.Role);
+                dt.Rows.Add(lead.Id, (int)lead.Role);
             }
 
             _connection.Execute(

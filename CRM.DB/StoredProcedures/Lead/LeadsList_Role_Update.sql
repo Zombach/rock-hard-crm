@@ -1,16 +1,13 @@
 ﻿Create Procedure [dbo].[LeadsList_Role_Update]
   @tblLeadDto LeadDtoType readonly 
-As
-Begin
-  Update dbo.Lead
-  Set 
-	LeadId = src.LeadId,
+AS
+BEGIN
+  UPDATE dbo.[Lead]
+  SET 
 	Role = src.Role
 
-  From 
+  FROM 
 	@tblLeadDto src
-  Where 
+  WHERE 
 	dbo.Lead.Id = src.LeadId
-	and
-	dbo.Lead.Role = src.Role
 End
