@@ -47,36 +47,32 @@ namespace CRM.Business.Services
             _publishEndpoint = publishEndpoint;
         }
 
-        public int AddAccount(AccountDto dto, LeadIdentityInfo leadInfo)
+        public int AddAccount(AccountDto accountDto, LeadIdentityInfo leadInfo)
         {
-            var lead = _leadRepository.GetLeadById(leadInfo.LeadId);
-            _accountValidationHelper.CheckForDuplicateCurrencies(lead, dto.Currency);
-            _accountValidationHelper.CheckForVipAccess(dto.Currency, leadInfo);
-            dto.LeadId = lead.Id;
-            var accountId = _accountRepository.AddAccount(dto);
-            _publishEndpoint.Publish<IMailExchangeModel>(new
-            {
-                Subject = "",
-                Body = "",
-                DisplayName = "",
-                MailAddresses = ""
-            });
+            var leadDto = _leadRepository.GetLeadById(leadInfo.LeadId);
+            _accountValidationHelper.CheckForDuplicateCurrencies(leadDto, accountDto.Currency);
+            _accountValidationHelper.CheckForVipAccess(accountDto.Currency, leadInfo);
+            accountDto.LeadId = leadDto.Id;
+            var accountId = _accountRepository.AddAccount(accountDto);
+            EmailSender(leadDto, EmailMessages.AccountAddedSubject, EmailMessages.AccountAddedBody, accountDto);
             return accountId;
         }
 
         public void DeleteAccount(int accountId, int leadId)
         {
-            var dto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(accountId);
-            _accountValidationHelper.CheckLeadAccessToAccount(dto.LeadId, leadId);
-
+            var leadDto = _leadRepository.GetLeadById(leadId);
+            var accountDto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(accountId);
+            _accountValidationHelper.CheckLeadAccessToAccount(accountDto.LeadId, leadId);
+            EmailSender(leadDto, EmailMessages.AccountDeleteSubject, EmailMessages.AccountDeleteBody, accountDto);
             _accountRepository.DeleteAccount(accountId);
         }
 
         public void RestoreAccount(int accountId, int leadId)
         {
-            var dto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(accountId);
-            _accountValidationHelper.CheckLeadAccessToAccount(dto.LeadId, leadId);
-
+            var leadDto = _leadRepository.GetLeadById(leadId);
+            var accountDto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(accountId);
+            _accountValidationHelper.CheckLeadAccessToAccount(accountDto.LeadId, leadId);
+            EmailSender(leadDto, EmailMessages.AccountRestoreSubject, EmailMessages.AccountRestoreBody, accountDto);
             _accountRepository.RestoreAccount(accountId);
         }
 
@@ -143,6 +139,17 @@ namespace CRM.Business.Services
         public AccountBusinessModel GetLeadBalance(int leadId, LeadIdentityInfo leadInfo)
         {
             throw new NotImplementedException();
+        }
+
+        private void EmailSender(LeadDto dto, string subject, string body, AccountDto accountDto)
+        {
+            _publishEndpoint.Publish<IMailExchangeModel>(new
+            {
+                Subject = subject,
+                Body = $"{dto.LastName} {dto.FirstName} {body} {accountDto.Currency}",
+                DisplayName = "Best CRM",
+                MailAddresses = $"{dto.Email}"
+            });
         }
     }
 }

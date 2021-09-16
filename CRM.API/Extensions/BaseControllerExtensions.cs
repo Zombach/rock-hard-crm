@@ -23,12 +23,10 @@ namespace CRM.API.Extensions
         {
             var leadId = Convert.ToInt32(controller.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value);
             var role = (Role)Enum.Parse(typeof(Role), controller.User.Claims.First(c => c.Type == ClaimTypes.Role).Value);
-            var email = controller.User.Claims.First(c => c.Type == ClaimTypes.Email).Value;
             return new LeadIdentityInfo
             {
                 LeadId = leadId,
-                Role = role,
-                Email = email
+                Role = role
             };
         }
     }

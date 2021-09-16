@@ -7,7 +7,7 @@ namespace CRM.Business.Services
 {
     public interface IAccountService
     {
-        int AddAccount(AccountDto dto, LeadIdentityInfo leadInfo);
+        int AddAccount(AccountDto accountDto, LeadIdentityInfo leadInfo);
         void DeleteAccount(int accountId, int leadId);
         void RestoreAccount(int accountId, int leadId);
         AccountBusinessModel GetAccountWithTransactions(int accountId, LeadIdentityInfo leadInfo);

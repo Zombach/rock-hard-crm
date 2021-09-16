@@ -4,7 +4,6 @@ AS
 BEGIN
 	SELECT 
 		l.Id,
-		l.Email,
 		l.Password,
 		l.Role as Id
 	FROM dbo.[Lead] l

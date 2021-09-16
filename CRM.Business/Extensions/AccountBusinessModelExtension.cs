@@ -102,9 +102,9 @@ namespace CRM.Business.Models
             {
                 return JArray.Parse(json);
             }
-            catch (Exception e)
+            catch
             {
-                throw new Exception(e.Message);
+                return JObject.Parse(json);
             }
         }
 
