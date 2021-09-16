@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE dbo.Lead_SelectAllByBatchesWithoutAdmins
-@LeadId int
+@LastLeadId int
 AS
 BEGIN
   SELECT 
@@ -16,6 +16,6 @@ BEGIN
   FROM dbo.[Lead] l
   left join dbo.Account a on a.LeadId = l.Id
   Where l.IsDeleted = 0
-  AND l.Id > @LeadId
+  AND l.Id > @LastLeadId
   AND l.Role IN (2, 3)
 END

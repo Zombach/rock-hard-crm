@@ -64,14 +64,14 @@ namespace CRM.API.Controllers
             return result;
         }
 
-        // api/lead/by-batches
+        // api/lead/by-batches/0
         [AuthorizeRoles(Role.Admin)]
-        [HttpGet("by-batches/cursorId/{cursorId}")]
+        [HttpGet("by-batches/cursorId/{lastLeadId}")]
         [Description("Get all Leads by batches")]
         [ProducesResponseType(typeof(List<LeadByBatchesOutputModel>), StatusCodes.Status200OK)]
-        public List<LeadByBatchesOutputModel> GetAllLeadsByBatсhes(int cursorId)
+        public List<LeadByBatchesOutputModel> GetAllLeadsByBatсhes(int lastLeadId)
         {            
-            var leads = _leadService.GetAllLeadsByBatches(cursorId); 
+            var leads = _leadService.GetAllLeadsByBatches(lastLeadId); 
             var result = _mapper.Map<List<LeadByBatchesOutputModel>>(leads);
             return result;
         }
