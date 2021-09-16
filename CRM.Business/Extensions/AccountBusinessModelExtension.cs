@@ -57,7 +57,7 @@ namespace CRM.Business.Models
 
             if (model is AccountBusinessModel businessModel)
             {
-                jToken = CheckStatusGetJToken(json);
+                jToken = GetJToken(json);
                 if (jToken == null)
                 {
                     throw new Exception("tstore slomalsya");
@@ -100,7 +100,7 @@ namespace CRM.Business.Models
         {
             try
             {
-                return JObject.Parse(json);
+                return JArray.Parse(json);
             }
             catch (Exception e)
             {

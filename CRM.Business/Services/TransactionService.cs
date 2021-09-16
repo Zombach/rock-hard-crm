@@ -119,6 +119,10 @@ namespace CRM.Business.Services
             var request = _requestHelper.CreatePostRequest(AddTransferEndpoint, model);
             var result = _client.Execute<List<long>>(request);
 
+            if (result.Data==null)
+            {
+                throw new Exception("tstore slomalsy");
+            }
             var transactionId = result.Data.First();
 
             var dto = new CommissionFeeDto

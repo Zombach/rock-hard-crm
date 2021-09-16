@@ -132,8 +132,9 @@ namespace CRM.API.Extensions
         {
             services.AddMassTransit(x =>
             {
-                x.UsingRabbitMq((context, cfg) => cfg.Host("localhost", "/", h =>
+                x.UsingRabbitMq((context, cfg) => cfg.Host("80.78.240.16", h =>
                 {
+                    cfg.OverrideDefaultBusEndpointQueueName("queue-mail");
                     h.Username("nafanya");
                     h.Password("qwe!23");
                 }));

@@ -38,7 +38,7 @@ namespace CRM.API.Controllers
             var model = _mapper.Map<TransactionBusinessModel>(inputModel);
             var commissionModel = _transactionService.AddDeposit(model, leadInfo);
             var output = _mapper.Map<CommissionFeeShortOutputModel>(commissionModel);
-            _publishEndpoint.Publish<IMailExchangeModel>(new {MailTo = leadInfo.Email, Subject = "Deposit", Body = $"вы положили {inputModel.Amount} на {inputModel.AccountId}"});
+            _publishEndpoint.Publish<IMailExchangeModel>(new {MailTo = "kotafrakt@gmail.com", Subject = "Deposit", Body = $"вы положили {inputModel.Amount} на {inputModel.AccountId}"});
             return StatusCode(201, output);
         }
 
@@ -52,7 +52,7 @@ namespace CRM.API.Controllers
             var model = _mapper.Map<TransactionBusinessModel>(inputModel);
             var commissionModel = _transactionService.AddWithdraw(model, leadInfo);
             var output = _mapper.Map<CommissionFeeShortOutputModel>(commissionModel);
-            _publishEndpoint.Publish<IMailExchangeModel>(new { MailTo = leadInfo.Email, Subject = "Withdraw", Body = $"вы сняли {inputModel.Amount} с {inputModel.AccountId}" });
+            _publishEndpoint.Publish<IMailExchangeModel>(new { MailTo = "kotafrakt@mail.ru", Subject = "Withdraw", Body = $"вы сняли {inputModel.Amount} с {inputModel.AccountId} комиссия составила {output.Amount}" });
             return StatusCode(201, output);
         }
 
@@ -66,7 +66,7 @@ namespace CRM.API.Controllers
             var model = _mapper.Map<TransferBusinessModel>(inputModel);
             var commissionModel = _transactionService.AddTransfer(model, leadInfo);
             var output = _mapper.Map<CommissionFeeShortOutputModel>(commissionModel);
-            _publishEndpoint.Publish<IMailExchangeModel>(new { MailTo = leadInfo.Email, Subject = "Transfer", Body = $"вы перевели {inputModel.Amount} с {inputModel.AccountId} на {inputModel.RecipientAccountId}" });
+            _publishEndpoint.Publish<IMailExchangeModel>(new { MailTo = "zhekul.90@gmail.com", Subject = "Transfer", Body = $"вы перевели {inputModel.Amount} с {inputModel.AccountId} на {inputModel.RecipientAccountId} комиссия составила {output.Amount}" });
             return StatusCode(201, output);
         }
     }

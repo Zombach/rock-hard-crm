@@ -70,6 +70,8 @@ namespace CRM.Business.Services
 
         public AccountBusinessModel GetAccountWithTransactions(int accountId, LeadIdentityInfo leadInfo)
         {
+            AccountBusinessModelExtension.Transfers = new List<TransferBusinessModel>();
+            AccountBusinessModelExtension.Transactions = new List<TransactionBusinessModel>();
             var dto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(accountId);
             if (!leadInfo.IsAdmin())
                 _accountValidationHelper.CheckLeadAccessToAccount(dto.LeadId, leadInfo.LeadId);
