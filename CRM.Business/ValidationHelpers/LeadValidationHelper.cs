@@ -27,7 +27,7 @@ namespace CRM.Business.ValidationHelpers
         {
             if (leadInfo.IsAdmin()) return;
             if (leadInfo.LeadId != leadId)
-                throw new EntityNotFoundException(string.Format(ServiceMessages.LeadHasNoAccessMessageToLead, leadId));
+                throw new EntityNotFoundException(string.Format(ServiceMessages.LeadHasNoAccessMessageToLead, leadInfo.LeadId));
         }
     }
 }

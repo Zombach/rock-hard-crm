@@ -3,7 +3,10 @@ using CRM.Business.ValidationHelpers;
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
+using MailExchange;
+using MassTransit;
 using System.Collections.Generic;
+using CRM.Business.Constants;
 
 namespace CRM.Business.Services
 {
@@ -13,19 +16,22 @@ namespace CRM.Business.Services
         private readonly IAccountRepository _accountRepository;
         private readonly IAuthenticationService _authenticationService;
         private readonly ILeadValidationHelper _leadValidationHelper;
+        private readonly IPublishEndpoint _publishEndpoint;
 
         public LeadService
         (
             ILeadRepository leadRepository,
             IAccountRepository accountRepository,
             IAuthenticationService authenticationService,
-            ILeadValidationHelper leadValidationHelper
+            ILeadValidationHelper leadValidationHelper,
+            IPublishEndpoint publishEndpoint
         )
         {
             _leadRepository = leadRepository;
             _accountRepository = accountRepository;
             _authenticationService = authenticationService;
             _leadValidationHelper = leadValidationHelper;
+            _publishEndpoint = publishEndpoint;
         }
 
         public LeadDto AddLead(LeadDto dto)
@@ -36,8 +42,9 @@ namespace CRM.Business.Services
             dto.BirthMonth = dto.BirthDate.Month;
             dto.BirthDay = dto.BirthDate.Day;
             var leadId = _leadRepository.AddLead(dto);
-
             _accountRepository.AddAccount(new AccountDto { LeadId = leadId, Currency = Currency.RUB });
+            EmailSender(dto, EmailMessages.RegistrationSubject, EmailMessages.RegistrationBody);
+
             return _leadRepository.GetLeadById(leadId);
         }
 
@@ -59,7 +66,8 @@ namespace CRM.Business.Services
 
         public void DeleteLead(int leadId)
         {
-            _leadValidationHelper.GetLeadByIdAndThrowIfNotFound(leadId);
+            var dto = _leadValidationHelper.GetLeadByIdAndThrowIfNotFound(leadId);
+            EmailSender(dto, EmailMessages.DeleteLeadSubject, EmailMessages.DeleteLeadBody);
             _leadRepository.DeleteLead(leadId);
         }
 
@@ -73,6 +81,17 @@ namespace CRM.Business.Services
         public List<LeadDto> GetAllLeads()
         {
             return _leadRepository.GetAllLeads();
+        }
+
+        private void EmailSender(LeadDto dto, string subject, string body)
+        {
+            _publishEndpoint.Publish<IMailExchangeModel>(new
+            {
+                Subject = subject,
+                Body = $"{dto.LastName} {dto.FirstName} {body}",
+                DisplayName = "Best CRM",
+                MailAddresses = $"{dto.Email}"
+            });
         }
     }
 }

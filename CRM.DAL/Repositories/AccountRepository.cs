@@ -50,7 +50,7 @@ namespace CRM.DAL.Repositories
 
         public AccountDto GetAccountById(int id)
         {
-            AccountDto result = default;
+            AccountDto result;
             return _connection.Query<AccountDto, Currency, AccountDto>(
                 _selectByIdAccountProcedure,
                 (accountDto, currency) =>

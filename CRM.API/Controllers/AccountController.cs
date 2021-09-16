@@ -32,7 +32,7 @@ namespace CRM.API.Controllers
         [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
         public ActionResult<int> AddAccount([FromBody] AccountInputModel inputModel)
         {
-            var leadInfo = this.GetLeadIdAndRoles();
+            var leadInfo = this.GetLeadInfo();
             var dto = _mapper.Map<AccountDto>(inputModel);
             var accountId = _accountService.AddAccount(dto, leadInfo);
             return StatusCode(201, accountId);
@@ -55,7 +55,7 @@ namespace CRM.API.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public ActionResult RestoreAccount(int accountId)
         {
-            var leadInfo = this.GetLeadIdAndRoles();
+            var leadInfo = this.GetLeadInfo();
             /*var output =*/
             _accountService.RestoreAccount(accountId, leadInfo.LeadId);
             //return StatusCode(201, output);
@@ -68,7 +68,7 @@ namespace CRM.API.Controllers
         [ProducesResponseType(typeof(AccountBusinessModel), StatusCodes.Status200OK)]
         public AccountBusinessModel GetAccountWithTransactions(int accountId)
         {
-            var leadInfo = this.GetLeadIdAndRoles();
+            var leadInfo = this.GetLeadInfo();
             return _accountService.GetAccountWithTransactions(accountId, leadInfo);
         }
 
@@ -78,7 +78,7 @@ namespace CRM.API.Controllers
         [ProducesResponseType(typeof(List<TransactionOutputModel>), StatusCodes.Status200OK)]
         public List<AccountBusinessModel> GetTransactionsByPeriodAndPossiblyAccountId([FromBody] TimeBasedAcquisitionInputModel model)
         {
-            var leadInfo = this.GetLeadIdAndRoles();
+            var leadInfo = this.GetLeadInfo();
             var dto = _mapper.Map<TimeBasedAcquisitionBusinessModel>(model);
             var output = _accountService.GetTransactionsByPeriodAndPossiblyAccountId(dto, leadInfo);
             return _mapper.Map<List<AccountBusinessModel>>(output);
@@ -90,7 +90,7 @@ namespace CRM.API.Controllers
         [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
         public ActionResult<AccountBusinessModel> GetLeadBalance(int leadId)
         {
-            var leadInfo = this.GetLeadIdAndRoles();
+            var leadInfo = this.GetLeadInfo();
             var output = _accountService.GetLeadBalance(leadId, leadInfo);
             return StatusCode(200, output);
         }
