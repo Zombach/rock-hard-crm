@@ -79,7 +79,7 @@ namespace CRM.Business.Services
 
             var response = _client.Execute<string>(request);
 
-            accountModel.AddDeserializedTransactions(response.Data);
+            accountModel.AddDeserializedTransactions(response.Data, _accountRepository, _mapper);
 
             accountModel.BalanceCalculation(accountId);
 
@@ -89,6 +89,8 @@ namespace CRM.Business.Services
         public List<AccountBusinessModel> GetTransactionsByPeriodAndPossiblyAccountId(TimeBasedAcquisitionBusinessModel model, LeadIdentityInfo leadInfo)
         {
             var list = new List<AccountBusinessModel>();
+            AccountBusinessModelExtension.Transfers = new List<TransferBusinessModel>();
+            AccountBusinessModelExtension.Transactions = new List<TransactionBusinessModel>();
             if (model.AccountId != null)
             {
                 var dto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound((int)model.AccountId);
@@ -99,10 +101,8 @@ namespace CRM.Business.Services
                 request.AddHeader("LeadId", leadInfo.LeadId.ToString());
 
                 var response = _client.Execute<string>(request);
-                accountModel.AddDeserializedTransactions(response.Data);
-
-
-                accountModel.BalanceCalculation((int)model.AccountId);
+                accountModel.AddDeserializedTransactions(response.Data, _accountRepository, _mapper);
+                
                 list.Add(accountModel);
             }
 
@@ -112,32 +112,18 @@ namespace CRM.Business.Services
 
                 var request = _requestHelper.CreatePostRequest($"{GetTransactionsByPeriodEndpoint}", model);
                 request.AddHeader("LeadId", leadInfo.LeadId.ToString());
+                request.Timeout = 3000000;
 
                 do
                 {
                     var response = _client.Execute<string>(request);
-                    list.AddDeserializedTransactions(response.Data);
+                    list.AddDeserializedTransactions(response.Data, _accountRepository, _mapper);
+                    //    break;
                 }
                 while (AccountBusinessModelExtension.IsPart);
-
-                GetAccountsInfoAndBalance(list);
             }
 
             return list;
-        }
-
-        private void GetAccountsInfoAndBalance(List<AccountBusinessModel> list)
-        {
-            foreach (var item in list)
-            {
-                var account = _accountRepository.GetAccountById(item.Id);
-                item.LeadId = account.LeadId;
-                item.Currency = account.Currency;
-                item.CreatedOn = account.CreatedOn;
-                item.IsDeleted = account.IsDeleted;
-                item.Closed = account.Closed;
-                item.BalanceCalculation(item.Id);
-            }
         }
 
         public AccountBusinessModel GetLeadBalance(int leadId, LeadIdentityInfo leadInfo)

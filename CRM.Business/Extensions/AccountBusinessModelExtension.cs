@@ -2,22 +2,24 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
+using CRM.DAL.Repositories;
 
 namespace CRM.Business.Models
 {
     public static class AccountBusinessModelExtension
     {
         public static bool IsPart { get; set; }
+        public static List<TransferBusinessModel> Transfers;
+        public static List<TransactionBusinessModel> Transactions;
 
-        public static T AddDeserializedTransactions<T>(this T model, string json)
+        public static T AddDeserializedTransactions<T>(this T model, string json, IAccountRepository accountRepository, IMapper mapper)
         {
-            List<TransferBusinessModel> _transfers = new();
-            List<TransactionBusinessModel> _transactions = new();
             JToken jToken;
 
-            if (json==string.Empty)
+            if (json == string.Empty)
             {
-                throw new Exception();
+                throw new Exception();//транзакций в периоде нет
             }
 
             if (model is List<AccountBusinessModel> businessModels)
@@ -28,33 +30,42 @@ namespace CRM.Business.Models
                     throw new Exception("tstore slomalsya");
                 }
 
-                GetListModels(jToken, _transfers, _transactions);
+                GetListModels(jToken, Transfers, Transactions);
                 if (IsPart) { return model; }
 
                 var listIds = new List<int>();
-                listIds.AddRange(_transactions.Select(item => item.AccountId).Distinct());
-                listIds.AddRange(_transfers.Select(item => item.AccountId).Distinct());
+                listIds.AddRange(Transactions.Select(item => item.AccountId).Distinct());
+                listIds.AddRange(Transfers.Select(item => item.AccountId).Distinct());
                 var ids = listIds.Distinct().ToList();
-                businessModels.AddRange(ids.Select(item => new AccountBusinessModel { Id = item }));
+                ids.Sort();
+                //Transactions = Transactions.OrderBy(t => t.AccountId).ToList();
+                //Transfers = Transfers.OrderBy(t => t.AccountId).ToList();
+                businessModels.GetAccountsInfo(ids, accountRepository, mapper);
 
+                var b = DateTime.Now;
                 foreach (var item in businessModels)
                 {
-                    item.Transactions = _transactions.FindAll(t => t.AccountId == item.Id);
-                    item.Transfers = _transfers.FindAll(t => t.AccountId == item.Id);
+                    item.Transactions = Transactions.FindAll(t => t.AccountId == item.Id);
+                    Transactions.RemoveAll(t=>t.AccountId==item.Id);
+                    item.Transfers = Transfers.FindAll(t => t.AccountId == item.Id);
+                    Transfers.RemoveAll(t => t.AccountId == item.Id);
                 }
+
+                var c = DateTime.Now;
+                var v = c - b;
             }
 
             if (model is AccountBusinessModel businessModel)
             {
-                jToken = GetJToken(json);
+                jToken = CheckStatusGetJToken(json);
                 if (jToken == null)
                 {
                     throw new Exception("tstore slomalsya");
                 }
-                GetListModels(jToken, _transfers, _transactions);
+                GetListModels(jToken, Transfers, Transactions);
 
-                businessModel.Transactions = _transactions;
-                businessModel.Transfers = _transfers;
+                businessModel.Transactions = Transactions;
+                businessModel.Transfers = Transfers;
             }
 
             return model;
@@ -89,7 +100,7 @@ namespace CRM.Business.Models
         {
             try
             {
-                return JArray.Parse(json);
+                return JObject.Parse(json);
             }
             catch (Exception e)
             {
@@ -104,8 +115,8 @@ namespace CRM.Business.Models
             var transactionsJToken = jToken.Where(j => j.SelectToken(@"$.RecipientAccountId") == null)
                 .Select(t => t.ToObject<TransactionBusinessModel>()).ToList();
 
-            transfers.AddRange(transfersJToken);
             transactions.AddRange(transactionsJToken);
+            transfers.AddRange(transfersJToken);
         }
 
         private static void GetBalanceModel(AccountBusinessModel model, int accountId)
@@ -123,6 +134,24 @@ namespace CRM.Business.Models
                 foreach (var obj in model.Transfers.Where(obj => obj.AccountId == accountId))
                 {
                     model.Balance += obj.Amount;
+                }
+            }
+        }
+
+        private static void GetAccountsInfo(this List<AccountBusinessModel> list, List<int> ids, IAccountRepository accountRepository, IMapper mapper)
+        {
+            var idss = new List<int>();
+            foreach (var item in ids)
+            {
+                var account = accountRepository.GetAccountById(item);
+                if (account == null)
+                {
+                    idss.Add(item);//errror
+                }
+                else
+                {
+                    var model = mapper.Map<AccountBusinessModel>(account);
+                    list.Add(model);
                 }
             }
         }
