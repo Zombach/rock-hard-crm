@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel;
+using MailExchange;
+using MassTransit;
 
 namespace CRM.API.Controllers
 {
@@ -17,11 +19,13 @@ namespace CRM.API.Controllers
     {
         private readonly IMapper _mapper;
         private readonly ITransactionService _transactionService;
+        private readonly IPublishEndpoint _publishEndpoint;
 
-        public TransactionController(IMapper mapper, ITransactionService transactionService)
+        public TransactionController(IMapper mapper, ITransactionService transactionService, IPublishEndpoint publishEndpoint)
         {
             _mapper = mapper;
             _transactionService = transactionService;
+            _publishEndpoint = publishEndpoint;
         }
 
         // api/transaction/deposit
@@ -30,10 +34,11 @@ namespace CRM.API.Controllers
         [ProducesResponseType(typeof(CommissionFeeShortOutputModel), StatusCodes.Status201Created)]
         public ActionResult<CommissionFeeShortOutputModel> AddDeposit([FromBody] TransactionInputModel inputModel)
         {
-            var leadInfo = this.GetLeadIdAndRoles();
+            var leadInfo = this.GetLeadInfo();
             var model = _mapper.Map<TransactionBusinessModel>(inputModel);
             var commissionModel = _transactionService.AddDeposit(model, leadInfo);
             var output = _mapper.Map<CommissionFeeShortOutputModel>(commissionModel);
+            _publishEndpoint.Publish<IMailExchangeModel>(new {MailTo = leadInfo.Email, Subject = "Deposit", Body = $"вы положили {inputModel.Amount} на {inputModel.AccountId}"});
             return StatusCode(201, output);
         }
 
@@ -43,11 +48,11 @@ namespace CRM.API.Controllers
         [ProducesResponseType(typeof(CommissionFeeShortOutputModel), StatusCodes.Status201Created)]
         public ActionResult<CommissionFeeShortOutputModel> AddWithdraw([FromBody] TransactionInputModel inputModel)
         {
-            var leadInfo = this.GetLeadIdAndRoles();
+            var leadInfo = this.GetLeadInfo();
             var model = _mapper.Map<TransactionBusinessModel>(inputModel);
             var commissionModel = _transactionService.AddWithdraw(model, leadInfo);
             var output = _mapper.Map<CommissionFeeShortOutputModel>(commissionModel);
-
+            _publishEndpoint.Publish<IMailExchangeModel>(new { MailTo = leadInfo.Email, Subject = "Withdraw", Body = $"вы сняли {inputModel.Amount} с {inputModel.AccountId}" });
             return StatusCode(201, output);
         }
 
@@ -57,11 +62,11 @@ namespace CRM.API.Controllers
         [ProducesResponseType(typeof(CommissionFeeShortOutputModel), StatusCodes.Status201Created)]
         public ActionResult<CommissionFeeShortOutputModel> AddTransfer([FromBody] TransferInputModel inputModel)
         {
-            var leadInfo = this.GetLeadIdAndRoles();
+            var leadInfo = this.GetLeadInfo();
             var model = _mapper.Map<TransferBusinessModel>(inputModel);
             var commissionModel = _transactionService.AddTransfer(model, leadInfo);
             var output = _mapper.Map<CommissionFeeShortOutputModel>(commissionModel);
-
+            _publishEndpoint.Publish<IMailExchangeModel>(new { MailTo = leadInfo.Email, Subject = "Transfer", Body = $"вы перевели {inputModel.Amount} с {inputModel.AccountId} на {inputModel.RecipientAccountId}" });
             return StatusCode(201, output);
         }
     }

@@ -78,6 +78,7 @@ namespace CRM.Business.Services
             if (!Verify(lead.Password, password)) throw new AuthorizationException(ServiceMessages.WrongPassword);
             claims.Add(new Claim(JwtRegisteredClaimNames.NameId, lead.Id.ToString()));
             claims.Add(new Claim(ClaimsIdentity.DefaultRoleClaimType, lead.Role.ToString()));
+            claims.Add(new Claim(JwtRegisteredClaimNames.Email, lead.Email));
 
             return new ClaimsIdentity(claims, "Token", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
         }

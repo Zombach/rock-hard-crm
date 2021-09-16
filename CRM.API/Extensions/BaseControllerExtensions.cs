@@ -19,14 +19,16 @@ namespace CRM.API.Extensions
             return (Role)Enum.Parse(typeof(Role), controller.User.Claims.First(c => c.Type == ClaimTypes.Role).Value);
         }
 
-        public static LeadIdentityInfo GetLeadIdAndRoles(this Controller controller)
+        public static LeadIdentityInfo GetLeadInfo(this Controller controller)
         {
             var leadId = Convert.ToInt32(controller.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value);
             var role = (Role)Enum.Parse(typeof(Role), controller.User.Claims.First(c => c.Type == ClaimTypes.Role).Value);
+            var email = controller.User.Claims.First(c => c.Type == ClaimTypes.Email).Value;
             return new LeadIdentityInfo
             {
                 LeadId = leadId,
-                Role = role
+                Role = role,
+                Email = email
             };
         }
     }

@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using NSwag.Generation.Processors.Security;
 using System.Text.Json.Serialization;
+using MassTransit;
 
 namespace CRM.API.Extensions
 {
@@ -125,6 +126,20 @@ namespace CRM.API.Extensions
                         return new UnprocessableEntityObjectResult(exc);
                     };
                 });
+        }
+
+        public static IServiceCollection EmailSender(this IServiceCollection services)
+        {
+            services.AddMassTransit(x =>
+            {
+                x.UsingRabbitMq((context, cfg) => cfg.Host("localhost", "/", h =>
+                {
+                    h.Username("nafanya");
+                    h.Password("qwe!23");
+                }));
+            });
+            services.AddMassTransitHostedService();
+            return services;
         }
     }
 }

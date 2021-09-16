@@ -110,21 +110,13 @@ namespace CRM.DAL.Repositories
 
         public LeadDto GetLeadByEmail(string email)
         {
-            LeadDto result = default;
             return _connection
-                .Query<LeadDto, AccountDto, CityDto, Role, LeadDto>(
+                .Query<LeadDto, Role, LeadDto>(
                     _getLeadByEmailProcedure,
-                    (lead, account, city, role) =>
+                    (lead, role) =>
                     {
-                        if (result == null)
-                        {
-                            result = lead;
-                            result.City = city;
-                            result.Role = role;
-                            result.Accounts = new List<AccountDto>();
-                        }
-                        result.Accounts.Add(account);
-                        return result;
+                        lead.Role = role;
+                        return lead;
                     },
                     new { email },
                     commandType: CommandType.StoredProcedure)
