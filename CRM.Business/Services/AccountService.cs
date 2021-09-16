@@ -128,9 +128,9 @@ namespace CRM.Business.Services
                 {
                     var response = _client.Execute<string>(request);
                     list.AddDeserializedTransactions(response.Data, _accountRepository, _mapper);
-                    //    break;
+                    if (response.Data == "[]") break;
                 }
-                while (AccountBusinessModelExtension.IsPart);
+                while (true);
             }
 
             return list;
