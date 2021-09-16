@@ -21,6 +21,8 @@ namespace CRM.DAL.Repositories
         private const string _getAllLeadsProcedure = "dbo.Lead_SelectAll";
         private const string _getAllLeadsByBatchesProcedure = "dbo.Lead_SelectAllByBatchesWithoutAdmins";
         private const string _updateLeadRoleProcedure = "dbo.Lead_UpdateRole";
+        private const string _updateListRoleLeadsProcedure = "dbo.LeadsList_Role_Update";
+        private const string _LeadDtoType = "dbo.LeadDtoType";
 
         public LeadRepository(IOptions<DatabaseSettings> options) : base(options) { }
 
@@ -76,6 +78,24 @@ namespace CRM.DAL.Repositories
                 },
                 commandType: CommandType.StoredProcedure
             );
+        }
+
+        public void ChangeRoleForLeads(List<LeadDto> listLeadDtos)
+        {
+            var dt = new DataTable();
+            dt.Columns.Add("LeadId");
+            dt.Columns.Add("Role");
+
+            foreach (var lead in listLeadDtos)
+            {
+                dt.Rows.Add(lead.Id, (int)lead.Role);
+            }
+
+            _connection.Execute(
+                _updateListRoleLeadsProcedure,
+                    new { tblLeadDto = dt.AsTableValuedParameter(_LeadDtoType) },
+                    commandType: CommandType.StoredProcedure
+                    );
         }
 
         public int DeleteLead(int id)

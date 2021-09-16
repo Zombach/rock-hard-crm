@@ -13,6 +13,7 @@ namespace CRM.DAL.Repositories
         LeadDto GetLeadById(int id);
         LeadDto GetLeadByEmail(string email);
         List<LeadDto> GetAllLeads();
+        void ChangeRoleForLeads(List<LeadDto> listLeadDtos);
         List<LeadDto> GetLeadsByFilters(SqlResult sqlResult);
         List<LeadDto> GetAllLeadsByBatches(int cursorId);
     }

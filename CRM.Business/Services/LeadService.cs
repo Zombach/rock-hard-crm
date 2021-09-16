@@ -61,6 +61,11 @@ namespace CRM.Business.Services
             return _leadRepository.GetLeadById(leadId);
         }
 
+        public void ChangeRoleForLeads(List<LeadDto> listLeadDtos)
+        {
+            _leadRepository.ChangeRoleForLeads(listLeadDtos);
+        }
+
         public void DeleteLead(int leadId)
         {
             _leadValidationHelper.GetLeadByIdAndThrowIfNotFound(leadId);
