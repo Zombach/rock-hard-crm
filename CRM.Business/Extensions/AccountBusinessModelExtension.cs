@@ -1,9 +1,9 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using AutoMapper;
+using CRM.DAL.Repositories;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using AutoMapper;
-using CRM.DAL.Repositories;
 
 namespace CRM.Business.Models
 {
@@ -46,7 +46,7 @@ namespace CRM.Business.Models
                 foreach (var item in businessModels)
                 {
                     item.Transactions = Transactions.FindAll(t => t.AccountId == item.Id);
-                    Transactions.RemoveAll(t=>t.AccountId==item.Id);
+                    Transactions.RemoveAll(t => t.AccountId == item.Id);
                     item.Transfers = Transfers.FindAll(t => t.AccountId == item.Id);
                     Transfers.RemoveAll(t => t.AccountId == item.Id);
                 }

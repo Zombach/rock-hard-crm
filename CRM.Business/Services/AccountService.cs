@@ -8,6 +8,8 @@ using CRM.Business.ValidationHelpers;
 using CRM.Core;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
+using MailExchange;
+using MassTransit;
 using Microsoft.Extensions.Options;
 using RestSharp;
 using System;
@@ -24,6 +26,7 @@ namespace CRM.Business.Services
         private readonly RestClient _client;
         private readonly RequestHelper _requestHelper;
         private readonly IAccountValidationHelper _accountValidationHelper;
+        private readonly IPublishEndpoint _publishEndpoint;
 
         public AccountService
         (
@@ -31,7 +34,8 @@ namespace CRM.Business.Services
             ILeadRepository leadRepository,
             IOptions<ConnectionSettings> options,
             IMapper mapper,
-            IAccountValidationHelper accountValidationHelper
+            IAccountValidationHelper accountValidationHelper,
+            IPublishEndpoint publishEndpoint
         )
         {
             _accountRepository = accountRepository;
@@ -40,6 +44,7 @@ namespace CRM.Business.Services
             _client = new RestClient(options.Value.TransactionStoreUrl);
             _requestHelper = new RequestHelper();
             _accountValidationHelper = accountValidationHelper;
+            _publishEndpoint = publishEndpoint;
         }
 
         public int AddAccount(AccountDto dto, LeadIdentityInfo leadInfo)
@@ -49,6 +54,13 @@ namespace CRM.Business.Services
             _accountValidationHelper.CheckForVipAccess(dto.Currency, leadInfo);
             dto.LeadId = lead.Id;
             var accountId = _accountRepository.AddAccount(dto);
+            _publishEndpoint.Publish<IMailExchangeModel>(new
+            {
+                Subject = "",
+                Body = "",
+                DisplayName = "",
+                MailAddresses = ""
+            });
             return accountId;
         }
 
@@ -104,7 +116,7 @@ namespace CRM.Business.Services
 
                 var response = _client.Execute<string>(request);
                 accountModel.AddDeserializedTransactions(response.Data, _accountRepository, _mapper);
-                
+
                 list.Add(accountModel);
             }
 

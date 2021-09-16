@@ -3,12 +3,12 @@ using CRM.API.Extensions;
 using CRM.API.Models;
 using CRM.Business.Models;
 using CRM.Business.Services;
+using MailExchange;
+using MassTransit;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel;
-using MailExchange;
-using MassTransit;
 
 namespace CRM.API.Controllers
 {
@@ -38,7 +38,7 @@ namespace CRM.API.Controllers
             var model = _mapper.Map<TransactionBusinessModel>(inputModel);
             var commissionModel = _transactionService.AddDeposit(model, leadInfo);
             var output = _mapper.Map<CommissionFeeShortOutputModel>(commissionModel);
-            _publishEndpoint.Publish<IMailExchangeModel>(new {MailTo = "kotafrakt@gmail.com", Subject = "Deposit", Body = $"вы положили {inputModel.Amount} на {inputModel.AccountId}"});
+            _publishEndpoint.Publish<IMailExchangeModel>(new { MailTo = "kotafrakt@gmail.com", Subject = "Deposit", Body = $"вы положили {inputModel.Amount} на {inputModel.AccountId}" });
             return StatusCode(201, output);
         }
 

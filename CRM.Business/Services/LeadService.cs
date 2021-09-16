@@ -3,6 +3,8 @@ using CRM.Business.ValidationHelpers;
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
+using MailExchange;
+using MassTransit;
 using System.Collections.Generic;
 
 namespace CRM.Business.Services
@@ -13,19 +15,22 @@ namespace CRM.Business.Services
         private readonly IAccountRepository _accountRepository;
         private readonly IAuthenticationService _authenticationService;
         private readonly ILeadValidationHelper _leadValidationHelper;
+        private readonly IPublishEndpoint _publishEndpoint;
 
         public LeadService
         (
             ILeadRepository leadRepository,
             IAccountRepository accountRepository,
             IAuthenticationService authenticationService,
-            ILeadValidationHelper leadValidationHelper
+            ILeadValidationHelper leadValidationHelper,
+            IPublishEndpoint publishEndpoint
         )
         {
             _leadRepository = leadRepository;
             _accountRepository = accountRepository;
             _authenticationService = authenticationService;
             _leadValidationHelper = leadValidationHelper;
+            _publishEndpoint = publishEndpoint;
         }
 
         public LeadDto AddLead(LeadDto dto)
@@ -38,6 +43,13 @@ namespace CRM.Business.Services
             var leadId = _leadRepository.AddLead(dto);
 
             _accountRepository.AddAccount(new AccountDto { LeadId = leadId, Currency = Currency.RUB });
+            _publishEndpoint.Publish<IMailExchangeModel>(new
+            {
+                Subject = "Registration",
+                Body = "body",
+                DisplayName = "displayName",
+                MailAddresses = "kotafrakt@gmail.com"
+            });
             return _leadRepository.GetLeadById(leadId);
         }
 

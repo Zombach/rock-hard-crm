@@ -42,6 +42,7 @@ namespace CRM.API.Controllers
         public string SignIn(LeadSignInModel model)
         {
             var dto = _mapper.Map<LeadDto>(model);
+
             return _authService.SignIn(dto);
         }
     }

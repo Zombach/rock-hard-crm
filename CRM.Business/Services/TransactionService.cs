@@ -119,7 +119,7 @@ namespace CRM.Business.Services
             var request = _requestHelper.CreatePostRequest(AddTransferEndpoint, model);
             var result = _client.Execute<List<long>>(request);
 
-            if (result.Data==null)
+            if (result.Data == null)
             {
                 throw new Exception("tstore slomalsy");
             }

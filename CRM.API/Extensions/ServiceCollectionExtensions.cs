@@ -4,6 +4,7 @@ using CRM.Business.Services;
 using CRM.Business.ValidationHelpers;
 using CRM.Core;
 using CRM.DAL.Repositories;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -11,7 +12,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using NSwag.Generation.Processors.Security;
 using System.Text.Json.Serialization;
-using MassTransit;
 
 namespace CRM.API.Extensions
 {
@@ -132,7 +132,7 @@ namespace CRM.API.Extensions
         {
             services.AddMassTransit(x =>
             {
-                x.UsingRabbitMq((context, cfg) => cfg.Host("80.78.240.16", h =>
+                x.UsingRabbitMq((context, cfg) => cfg.Host("80.78.240.16", "/", h =>
                 {
                     cfg.OverrideDefaultBusEndpointQueueName("queue-mail");
                     h.Username("nafanya");
