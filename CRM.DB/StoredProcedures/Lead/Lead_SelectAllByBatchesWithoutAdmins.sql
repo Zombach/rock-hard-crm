@@ -1,9 +1,9 @@
 ﻿CREATE PROCEDURE dbo.Lead_SelectAllByBatchesWithoutAdmins
-@Cursor int
+@LeadId int
 AS
 BEGIN
   SELECT 
-  TOP 100000
+  TOP 10000
     l.Id,
     l.FirstName,
     l.LastName,
@@ -16,6 +16,6 @@ BEGIN
   FROM dbo.[Lead] l
   left join dbo.Account a on a.LeadId = l.Id
   Where l.IsDeleted = 0
-  AND l.Id > @Cursor
+  AND l.Id > @LeadId
   AND l.Role IN (2, 3)
 END

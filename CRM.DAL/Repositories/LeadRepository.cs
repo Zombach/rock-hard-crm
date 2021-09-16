@@ -180,7 +180,7 @@ namespace CRM.DAL.Repositories
             return result;
         }
 
-        public List<LeadDto> GetAllLeadsByBatches(int cursor)
+        public List<LeadDto> GetAllLeadsByBatches(int leadId)
         {
             var leadDictionary = new Dictionary<int, LeadDto>();
 
@@ -201,7 +201,7 @@ namespace CRM.DAL.Repositories
 
                         return leadEntry;
                     },
-                    new { cursor },
+                    new { leadId },
                     splitOn: "id",
                     commandType: CommandType.StoredProcedure)
                 .Distinct()
