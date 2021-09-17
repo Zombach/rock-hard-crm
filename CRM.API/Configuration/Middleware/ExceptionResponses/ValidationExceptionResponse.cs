@@ -20,7 +20,7 @@ namespace CRM.API.Configuration.Middleware.ExceptionResponses
         {
             Errors = new List<ValidationError>
             {
-                new() {Code = ValidationStatusCode, Field = exception.FieldOfError, Message = exception.Message}
+                new() {Code = _validationStatusCode, Field = exception.FieldOfError, Message = exception.Message}
             };
         }
 

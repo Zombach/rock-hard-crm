@@ -2,7 +2,6 @@
 using CRM.Business.Tests.TestsDataHelpers;
 using CRM.Business.ValidationHelpers;
 using CRM.DAL.Repositories;
-using DevEdu.Business.ValidationHelpers;
 using Moq;
 using NUnit.Framework;
 using RestSharp;
