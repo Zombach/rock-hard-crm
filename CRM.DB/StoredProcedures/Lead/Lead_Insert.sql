@@ -7,7 +7,10 @@
 	@Password			nvarchar(200),                            
 	@Role				INT,
 	@CityId				INT,
-	@BirthDate			DATE
+	@BirthDate			DATE,
+	@BirthYear			smallint,
+	@BirthMonth			tinyint,
+	@BirthDay			tinyint
 AS
 BEGIN
 	INSERT INTO dbo.[Lead] 
@@ -18,9 +21,12 @@ BEGIN
 		[Email],
 		[PhoneNumber],
 		[Password],
-		[Role],
+		[Role],		
+		[CityId],
 		[BirthDate],
-		[CityId])
+		[BirthYear],
+		[BirthMonth],
+		[BirthDay])
 	VALUES 
 		(@FirstName,
 		@LastName,
@@ -30,7 +36,10 @@ BEGIN
 		@PhoneNumber,
 		@Password,
 		@Role,
+		@CityId,
 		@BirthDate,
-		@CityId)
+		@BirthYear,
+		@BirthMonth,
+		@BirthDay)
 	SELECT @@IDENTITY
 END

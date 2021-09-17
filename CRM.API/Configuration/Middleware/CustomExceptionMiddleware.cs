@@ -1,5 +1,6 @@
 ﻿using CRM.API.Configuration.Middleware.ExceptionResponses;
 using CRM.Business.Exceptions;
+using CRM.Core;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using System;
@@ -24,7 +25,6 @@ namespace CRM.API.Configuration.Middleware
         private const int _unknownErrorCode = 3000;
         private const int _invalidCode = 1002;
 
-
         public CustomExceptionMiddleware(RequestDelegate next) => _next = next;
 
         public async Task Invoke(HttpContext context)
@@ -39,7 +39,7 @@ namespace CRM.API.Configuration.Middleware
             }
         }
 
-        private Task HandleExceptionAsync(HttpContext context, Exception exception)
+        private static Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
             HttpStatusCode code;
             object error;
@@ -52,18 +52,22 @@ namespace CRM.API.Configuration.Middleware
                         Code = _validationCode,
                         Message = _messageValidation
                     };
+                    Logger.Writer(exception.Message);
                     break;
                 case InvalidArgumentException:
                     code = HttpStatusCode.BadRequest;
                     error = GenerateExceptionResponse(_invalidCode, _messageInvalidArgument, exception);
+                    Logger.Writer(exception.Message);
                     break;
                 case EntityNotFoundException _:
                     code = HttpStatusCode.NotFound;
                     error = GenerateExceptionResponse(_entityCode, _messageEntity, exception);
+                    Logger.Writer(exception.Message);
                     break;
                 case AuthorizationException _:
                     code = HttpStatusCode.Forbidden;
                     error = GenerateExceptionResponse(_authorizationCode, _messageAuthorization, exception);
+                    Logger.Writer(exception.Message);
                     break;
                 default:
                     code = HttpStatusCode.InternalServerError;
@@ -73,8 +77,10 @@ namespace CRM.API.Configuration.Middleware
                         message = _messageUnknownError,
                         description = exception.Message
                     };
+                    Logger.Writer(exception.Message);
                     break;
             }
+
             var result = JsonConvert.SerializeObject(error);
 
             context.Response.ContentType = _jsonType;
@@ -83,15 +89,14 @@ namespace CRM.API.Configuration.Middleware
             return context.Response.WriteAsync(result);
         }
 
-        private ExceptionResponse GenerateExceptionResponse(int code, string message, Exception ex)
+        private static ExceptionResponse GenerateExceptionResponse(int code, string message, Exception ex)
         {
-            var result = new ExceptionResponse
+            return new()
             {
                 Code = code,
                 Message = message,
                 Description = ex.Message
             };
-            return result;
         }
     }
 }

@@ -1,15 +1,20 @@
 ﻿using AutoMapper;
+using CRM.Business.Constants;
+using CRM.Business.Exceptions;
+using CRM.Business.IdentityInfo;
 using CRM.Business.Models;
 using CRM.Business.Requests;
+using CRM.Business.ValidationHelpers;
 using CRM.Core;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
-using DevEdu.Business.ValidationHelpers;
+using MailExchange;
+using MassTransit;
 using Microsoft.Extensions.Options;
 using RestSharp;
+using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
-using static CRM.Business.TransactionEndpoint;
+using static CRM.Business.Constants.TransactionEndpoint;
 
 namespace CRM.Business.Services
 {
@@ -21,6 +26,7 @@ namespace CRM.Business.Services
         private readonly RestClient _client;
         private readonly RequestHelper _requestHelper;
         private readonly IAccountValidationHelper _accountValidationHelper;
+        private readonly IPublishEndpoint _publishEndpoint;
 
         public AccountService
         (
@@ -43,67 +49,124 @@ namespace CRM.Business.Services
         (
             IAccountRepository accountRepository,
             ILeadRepository leadRepository,
-            IOptions<ConnectionUrl> options,
+            IOptions<ConnectionSettings> options,
             IMapper mapper,
-            IAccountValidationHelper accountValidationHelper
+            IAccountValidationHelper accountValidationHelper,
+            IPublishEndpoint publishEndpoint
         )
         {
             _accountRepository = accountRepository;
             _leadRepository = leadRepository;
             _mapper = mapper;
-            _client = new RestClient(options.Value.TstoreUrl);
+            _client = new RestClient(options.Value.TransactionStoreUrl);
             _requestHelper = new RequestHelper();
             _accountValidationHelper = accountValidationHelper;
+            _publishEndpoint = publishEndpoint;
         }
 
-        public int AddAccount(AccountDto account, int leadId)
+        public int AddAccount(AccountDto accountDto, LeadIdentityInfo leadInfo)
         {
-            var lead = _leadRepository.GetLeadById(leadId);
-            _accountValidationHelper.CheckForDuplicateCurrencies(lead, account.Currency);
-            account.LeadId = lead.Id;
-            var accountId = _accountRepository.AddAccount(account);
+            var leadDto = _leadRepository.GetLeadById(leadInfo.LeadId);
+            _accountValidationHelper.CheckForDuplicateCurrencies(leadDto, accountDto.Currency);
+            _accountValidationHelper.CheckForVipAccess(accountDto.Currency, leadInfo);
+            accountDto.LeadId = leadDto.Id;
+            var accountId = _accountRepository.AddAccount(accountDto);
+            EmailSender(leadDto, EmailMessages.AccountAddedSubject, EmailMessages.AccountAddedBody, accountDto);
             return accountId;
         }
 
-        public void DeleteAccount(int id, int leadId)
+        public void DeleteAccount(int accountId, int leadId)
         {
-            var dto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(id);
-            _accountValidationHelper.CheckLeadAccessToAccount(dto.LeadId, leadId);
-
-            _accountRepository.DeleteAccount(id);
+            var leadDto = _leadRepository.GetLeadById(leadId);
+            var accountDto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(accountId);
+            _accountValidationHelper.CheckLeadAccessToAccount(accountDto.LeadId, leadId);
+            EmailSender(leadDto, EmailMessages.AccountDeleteSubject, EmailMessages.AccountDeleteBody, accountDto);
+            _accountRepository.DeleteAccount(accountId);
         }
 
-        public AccountBusinessModel GetAccountWithTransactions(int id, int leadId)
+        public void RestoreAccount(int accountId, int leadId)
         {
-            var dto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(id);
-            _accountValidationHelper.CheckLeadAccessToAccount(dto.LeadId, leadId);
+            var leadDto = _leadRepository.GetLeadById(leadId);
+            var accountDto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(accountId);
+            _accountValidationHelper.CheckLeadAccessToAccount(accountDto.LeadId, leadId);
+            EmailSender(leadDto, EmailMessages.AccountRestoreSubject, EmailMessages.AccountRestoreBody, accountDto);
+            _accountRepository.RestoreAccount(accountId);
+        }
+
+        public AccountBusinessModel GetAccountWithTransactions(int accountId, LeadIdentityInfo leadInfo)
+        {
+            AccountBusinessModelExtension.Transfers = new List<TransferBusinessModel>();
+            AccountBusinessModelExtension.Transactions = new List<TransactionBusinessModel>();
+            var dto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(accountId);
+            if (!leadInfo.IsAdmin())
+                _accountValidationHelper.CheckLeadAccessToAccount(dto.LeadId, leadInfo.LeadId);
 
             var accountModel = _mapper.Map<AccountBusinessModel>(dto);
-            var request = _requestHelper.CreateGetRequest($"{GetTransactionsByAccountIdEndpoint}{id}");
+            var request = _requestHelper.CreateGetRequest($"{GetTransactionsByAccountIdEndpoint}{accountId}");
 
             var response = _client.Execute<string>(request);
-            var transfers = new List<TransferBusinessModel>();
-            var transactions = new List<TransactionBusinessModel>();
-            var result = JsonConvert.DeserializeObject<List<TransferBusinessModel>>(response.Data);
 
-            if (result != null)
-                foreach (var obj in result)
-                {
-                    if (obj.RecipientAccountId != default)
-                    {
-                        transfers.Add(obj);
-                    }
-                    else
-                    {
-                        transactions.Add(obj);
-                    }
-                    accountModel.Balance += obj.Amount;
-                }
+            accountModel.AddDeserializedTransactions(response.Data, _accountRepository, _mapper);
 
-            accountModel.Transactions = transactions;
-            accountModel.Transfers = transfers;
+            accountModel.BalanceCalculation(accountId);
 
             return accountModel;
+        }
+
+        public List<AccountBusinessModel> GetTransactionsByPeriodAndPossiblyAccountId(TimeBasedAcquisitionBusinessModel model, LeadIdentityInfo leadInfo)
+        {
+            var list = new List<AccountBusinessModel>();
+            AccountBusinessModelExtension.Transfers = new List<TransferBusinessModel>();
+            AccountBusinessModelExtension.Transactions = new List<TransactionBusinessModel>();
+            if (model.AccountId != null)
+            {
+                var dto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound((int)model.AccountId);
+                if (!leadInfo.IsAdmin())
+                    _accountValidationHelper.CheckLeadAccessToAccount(dto.LeadId, leadInfo.LeadId);
+                var accountModel = _mapper.Map<AccountBusinessModel>(dto);
+                var request = _requestHelper.CreatePostRequest($"{GetTransactionsByPeriodEndpoint}", model);
+                request.AddHeader("LeadId", leadInfo.LeadId.ToString());
+
+                var response = _client.Execute<string>(request);
+                accountModel.AddDeserializedTransactions(response.Data, _accountRepository, _mapper);
+
+                list.Add(accountModel);
+            }
+
+            else
+            {
+                if (!leadInfo.IsAdmin()) throw new AuthorizationException($"{ServiceMessages.NoAdminRights}");
+
+                var request = _requestHelper.CreatePostRequest($"{GetTransactionsByPeriodEndpoint}", model);
+                request.AddHeader("LeadId", leadInfo.LeadId.ToString());
+                request.Timeout = 3000000;
+
+                do
+                {
+                    var response = _client.Execute<string>(request);
+                    list.AddDeserializedTransactions(response.Data, _accountRepository, _mapper);
+                    if (response.Data == "[]") break;
+                }
+                while (true);
+            }
+
+            return list;
+        }
+
+        public AccountBusinessModel GetLeadBalance(int leadId, LeadIdentityInfo leadInfo)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void EmailSender(LeadDto dto, string subject, string body, AccountDto accountDto)
+        {
+            _publishEndpoint.Publish<IMailExchangeModel>(new
+            {
+                Subject = subject,
+                Body = $"{dto.LastName} {dto.FirstName} {body} {accountDto.Currency}",
+                DisplayName = "Best CRM",
+                MailAddresses = $"{dto.Email}"
+            });
         }
     }
 }

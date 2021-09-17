@@ -12,6 +12,7 @@ namespace CRM.DAL.Repositories
     {
         private const string _addAccountProcedure = "dbo.Account_Insert";
         private const string _deleteAccountProcedure = "dbo.Account_Delete";
+        private const string _restoreAccountProcedure = "dbo.Account_Restore";
         private const string _selectByIdAccountProcedure = "dbo.Account_SelectById";
 
         public AccountRepository(IOptions<DatabaseSettings> options) : base(options) { }
@@ -38,9 +39,18 @@ namespace CRM.DAL.Repositories
             );
         }
 
+        public void RestoreAccount(int id)
+        {
+            _connection.Execute(
+                _restoreAccountProcedure,
+                new { id },
+                commandType: CommandType.StoredProcedure
+            );
+        }
+
         public AccountDto GetAccountById(int id)
         {
-            AccountDto result = default;
+            AccountDto result;
             return _connection.Query<AccountDto, Currency, AccountDto>(
                 _selectByIdAccountProcedure,
                 (accountDto, currency) =>

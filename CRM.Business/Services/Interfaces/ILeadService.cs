@@ -1,4 +1,6 @@
-﻿using CRM.DAL.Models;
+﻿using CRM.Business.IdentityInfo;
+using CRM.DAL.Enums;
+using CRM.DAL.Models;
 using System.Collections.Generic;
 
 namespace CRM.Business.Services
@@ -6,9 +8,10 @@ namespace CRM.Business.Services
     public interface ILeadService
     {
         LeadDto AddLead(LeadDto dto);
-        void DeleteLeadById(int id);
+        LeadDto UpdateLead(int leadId, LeadDto dto);
+        LeadDto UpdateLeadRole(int leadId, Role role);
+        void DeleteLead(int leadId);
+        LeadDto GetLeadById(int leadId, LeadIdentityInfo leadInfo);
         List<LeadDto> GetAllLeads();
-        LeadDto GetLeadById(int id);
-        LeadDto UpdateLead(int id, LeadDto dto);
     }
 }
