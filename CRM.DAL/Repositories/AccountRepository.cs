@@ -1,4 +1,5 @@
-﻿using CRM.Core;
+﻿using System.Collections.Generic;
+using CRM.Core;
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using Dapper;
@@ -14,6 +15,8 @@ namespace CRM.DAL.Repositories
         private const string _deleteAccountProcedure = "dbo.Account_Delete";
         private const string _restoreAccountProcedure = "dbo.Account_Restore";
         private const string _selectByIdAccountProcedure = "dbo.Account_SelectById";
+        private const string _selectAllByListIdAccountProcedure = "dbo.Account_SelectByListId";
+        private const string _accountIdType = "dbo.AccountIdType";
 
         public AccountRepository(IOptions<DatabaseSettings> options) : base(options) { }
 
@@ -63,6 +66,28 @@ namespace CRM.DAL.Repositories
                 splitOn: "Id",
                 commandType: CommandType.StoredProcedure)
               .FirstOrDefault();
+        }
+
+        public List<AccountDto> GetAccountsByListId(List<int> accountsId)
+        {
+            var dt = new DataTable();
+            dt.Columns.Add("Id");
+
+            foreach (var id in accountsId)
+            {
+                dt.Rows.Add(id);
+            }
+
+            return _connection.Query<AccountDto, Currency, AccountDto>(
+                _selectAllByListIdAccountProcedure,
+                (accountDto, currency) =>
+                {
+                    accountDto.Currency = currency;
+                    return accountDto;
+                },
+                new { tblIds = dt.AsTableValuedParameter(_accountIdType) },
+                commandType: CommandType.StoredProcedure
+            ).ToList();
         }
     }
 }

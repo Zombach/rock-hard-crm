@@ -111,22 +111,17 @@ namespace CRM.Business.Services
                 }
 
 
-                if (tmpTransaction.Count == 0 || tmpTransfer.Count == 0)
+                if (tmpTransaction.Count != 0 && tmpTransfer.Count != 0) continue;
+                if (_transactions.Count != 0 || _transfers.Count != 0) continue;
+                for (; i < accounts.Count; i++)
                 {
-                    if (_transactions.Count == 0 && _transfers.Count == 0)
+                    if (tmpTransaction.Count == 0)
                     {
-                        for (; i < accounts.Count; i++)
-                        {
-                            if (tmpTransaction.Count == 0)
-                            {
-                                GetTransfersForAccount(accounts[i], tmpTransfer);
-                            }
-                            else
-                            {
-                                GetTransactionsForAccount(accounts[i], tmpTransaction);
-                            }
-                        }
-
+                        GetTransfersForAccount(accounts[i], tmpTransfer);
+                    }
+                    else
+                    {
+                        GetTransactionsForAccount(accounts[i], tmpTransaction);
                     }
                 }
 
@@ -170,9 +165,9 @@ namespace CRM.Business.Services
             {
                 return JArray.Parse(json);
             }
-            catch
+            catch(Exception e)
             {
-                return JObject.Parse(json); //Уже не нужно, ошибку сюда
+                throw new Exception("все упало");
             }
         }
 
@@ -217,28 +212,29 @@ namespace CRM.Business.Services
 
         private void GetAccountsInfo(List<int> ids, out List<AccountBusinessModel> models)
         {
-            models = new();
-            List<int> errorIds = new();
-            foreach (var id in ids)
-            {
-                var account = _accountRepository.GetAccountById(id);
-                if (account == null)
-                {
-                    errorIds.Add(id);//error
-                }
-                else
-                {
-                    var model = _mapper.Map<AccountBusinessModel>(account);
-                    models.Add(model);
-                }
-                //AccountBusinessModel model = new()
-                //{
-                //    Id = id,
-                //    Transactions = new(),
-                //    Transfers = new()
-                //};
-                //models.Add(model);
-            }
+            //List<int> errorIds = new();
+            var dto = _accountRepository.GetAccountsByListId(ids);
+            models = _mapper.Map<List<AccountBusinessModel>>(dto);
+            //foreach (var id in ids)
+            //{
+            //    models =_accountRepository.GetAccountsByListId(ids);
+            //    //if (account == null)
+            //    //{
+            //    //    errorIds.Add(id);//error
+            //    //}
+            //    //else
+            //    //{
+            //    //    var model = _mapper.Map<AccountBusinessModel>(account);
+            //    //    models.Add(model);
+            //    //}
+            //    //AccountBusinessModel model = new()
+            //    //{
+            //    //    Id = id,
+            //    //    Transactions = new(),
+            //    //    Transfers = new()
+            //    //};
+            //    //models.Add(model);
+            //}
         }
 
         private void CleanListModels()

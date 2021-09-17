@@ -1,4 +1,5 @@
-﻿using CRM.DAL.Models;
+﻿using System.Collections.Generic;
+using CRM.DAL.Models;
 
 namespace CRM.DAL.Repositories
 {
@@ -8,5 +9,6 @@ namespace CRM.DAL.Repositories
         void DeleteAccount(int id);
         void RestoreAccount(int id);
         AccountDto GetAccountById(int id);
+        List<AccountDto> GetAccountsByListId(List<int> accountsId);
     }
 }
