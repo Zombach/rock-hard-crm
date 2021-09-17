@@ -38,8 +38,6 @@ namespace CRM.Business.Services
                         businessModels = businessModels.OrderBy(b => b.Id).ToList();
                         GetAccountsInfo(ids, out List<AccountBusinessModel> models);
 
-                        var b = DateTime.Now;
-
                         return await GroupsTransacAndTransf(models) as T;
                     }
                 case AccountBusinessModel businessModel:
@@ -223,23 +221,23 @@ namespace CRM.Business.Services
             List<int> errorIds = new();
             foreach (var id in ids)
             {
-                //var account = _accountRepository.GetAccountById(id);
-                //if (account == null)
-                //{
-                //    errorIds.Add(id);//error
-                //}
-                //else
-                //{
-                //    var model = _mapper.Map<AccountBusinessModel>(account);
-                //    models.Add(model);
-                //}
-                AccountBusinessModel model = new()
+                var account = _accountRepository.GetAccountById(id);
+                if (account == null)
                 {
-                    Id = id,
-                    Transactions = new(),
-                    Transfers = new()
-                };
-                models.Add(model);
+                    errorIds.Add(id);//error
+                }
+                else
+                {
+                    var model = _mapper.Map<AccountBusinessModel>(account);
+                    models.Add(model);
+                }
+                //AccountBusinessModel model = new()
+                //{
+                //    Id = id,
+                //    Transactions = new(),
+                //    Transfers = new()
+                //};
+                //models.Add(model);
             }
         }
 
