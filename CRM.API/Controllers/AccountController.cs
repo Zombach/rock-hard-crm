@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace CRM.API.Controllers
 {
@@ -76,11 +77,11 @@ namespace CRM.API.Controllers
         [HttpPost("by-period")]
         [Description("Get transactions by period or period and account id")]
         [ProducesResponseType(typeof(List<TransactionOutputModel>), StatusCodes.Status200OK)]
-        public List<AccountBusinessModel> GetTransactionsByPeriodAndPossiblyAccountId([FromBody] TimeBasedAcquisitionInputModel model)
+        public async Task<List<AccountBusinessModel>> GetTransactionsByPeriodAndPossiblyAccountId([FromBody] TimeBasedAcquisitionInputModel model)
         {
             var leadInfo = this.GetLeadInfo();
             var dto = _mapper.Map<TimeBasedAcquisitionBusinessModel>(model);
-            var output = _accountService.GetTransactionsByPeriodAndPossiblyAccountId(dto, leadInfo).Result;
+            var output = await _accountService.GetTransactionsByPeriodAndPossiblyAccountId(dto, leadInfo);
             return _mapper.Map<List<AccountBusinessModel>>(output);
         }
 

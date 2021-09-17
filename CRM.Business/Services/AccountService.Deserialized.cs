@@ -9,10 +9,14 @@ namespace CRM.Business.Services
 {
     public partial class AccountService
     {
+        public AccountService()
+        {
+        }
+
         private static List<TransferBusinessModel> _transfers = new();
         private static List<TransactionBusinessModel> _transactions = new();
 
-        private async Task<T> AddDeserializedTransactionsAsync<T>(T model, string json)
+        public async Task<T> AddDeserializedTransactionsAsync<T>(T model, string json) where T : class
         {
             JToken jToken;
 
@@ -36,20 +40,7 @@ namespace CRM.Business.Services
 
                         var b = DateTime.Now;
 
-                        await For(models);
-
-
-                        foreach (var item in businessModels)
-                        {
-                            item.Transactions = _transactions.FindAll(t => t.AccountId == item.Id);
-                            _transactions.RemoveAll(t => t.AccountId == item.Id);
-                            item.Transfers = _transfers.FindAll(t => t.AccountId == item.Id);
-                            _transfers.RemoveAll(t => t.AccountId == item.Id);
-                        }
-
-                        var c = DateTime.Now;
-                        var v = c - b;
-                        break;
+                        return await GroupsTransacAndTransf(models) as T;
                     }
                 case AccountBusinessModel businessModel:
                     {
@@ -63,7 +54,7 @@ namespace CRM.Business.Services
 
                         businessModel.Transactions = _transactions;
                         businessModel.Transfers = _transfers;
-                        break;
+                        return businessModel as T;
                     }
             }
 
@@ -71,7 +62,7 @@ namespace CRM.Business.Services
         }
 
 
-        private async Task For(List<AccountBusinessModel> accounts)
+        private async Task<List<AccountBusinessModel>> GroupsTransacAndTransf(List<AccountBusinessModel> accounts)
         {
             List<TransferBusinessModel> tmpTransfer = new();
             List<TransactionBusinessModel> tmpTransaction = new();
@@ -142,6 +133,8 @@ namespace CRM.Business.Services
                 }
 
             } while (tmpTransaction.Count != 0 || tmpTransfer.Count != 0);
+
+            return accounts;
         }
 
         private void GetTransfersForAccount(AccountBusinessModel account, List<TransferBusinessModel> tmpTransfer)
@@ -230,16 +223,23 @@ namespace CRM.Business.Services
             List<int> errorIds = new();
             foreach (var id in ids)
             {
-                var account = _accountRepository.GetAccountById(id);
-                if (account == null)
+                //var account = _accountRepository.GetAccountById(id);
+                //if (account == null)
+                //{
+                //    errorIds.Add(id);//error
+                //}
+                //else
+                //{
+                //    var model = _mapper.Map<AccountBusinessModel>(account);
+                //    models.Add(model);
+                //}
+                AccountBusinessModel model = new()
                 {
-                    errorIds.Add(id);//error
-                }
-                else
-                {
-                    var model = _mapper.Map<AccountBusinessModel>(account);
-                    models.Add(model);
-                }
+                    Id = id,
+                    Transactions = new(),
+                    Transfers = new()
+                };
+                models.Add(model);
             }
         }
 

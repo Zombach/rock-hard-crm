@@ -95,7 +95,7 @@ namespace CRM.Business.Services
             return BalanceCalculation(model, accountId);
         }
 
-        public async Task<List<AccountBusinessModel>>  GetTransactionsByPeriodAndPossiblyAccountId(TimeBasedAcquisitionBusinessModel model, LeadIdentityInfo leadInfo)
+        public async Task<List<AccountBusinessModel>> GetTransactionsByPeriodAndPossiblyAccountId(TimeBasedAcquisitionBusinessModel model, LeadIdentityInfo leadInfo)
         {
             CleanListModels();
             List<AccountBusinessModel> models = new();
@@ -104,8 +104,8 @@ namespace CRM.Business.Services
                 var dto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound((int)model.AccountId);
                 if (!leadInfo.IsAdmin())
                     _accountValidationHelper.CheckLeadAccessToAccount(dto.LeadId, leadInfo.LeadId);
-                var accountModel = _mapper.Map<AccountBusinessModel>(dto); //Чет не в курил нах это?
-                models.Add(accountModel); // с этим
+                var accountModel = _mapper.Map<AccountBusinessModel>(dto);
+                models.Add(accountModel);
             }
             else 
             {
@@ -118,9 +118,8 @@ namespace CRM.Business.Services
 
             do
             {
-                var response = _client.Execute<string>(request);
-                await AddDeserializedTransactionsAsync(models, response.Data);
-                //models = AddDeserializedTransactionsAsync(models, response.Data);
+                var response = await _client.ExecuteAsync<string>(request);
+                models = Task.Run(async () => await AddDeserializedTransactionsAsync(models, response.Data)).Result;
                 if (response.Data == FinishResponse) break;
             }
             while (true);
