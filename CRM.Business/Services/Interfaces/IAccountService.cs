@@ -2,6 +2,7 @@
 using CRM.Business.Models;
 using CRM.DAL.Models;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CRM.Business.Services
 {
@@ -11,7 +12,7 @@ namespace CRM.Business.Services
         void DeleteAccount(int accountId, int leadId);
         void RestoreAccount(int accountId, int leadId);
         AccountBusinessModel GetAccountWithTransactions(int accountId, LeadIdentityInfo leadInfo);
-        List<AccountBusinessModel> GetTransactionsByPeriodAndPossiblyAccountId(TimeBasedAcquisitionBusinessModel model, LeadIdentityInfo leadInfo);
+        Task<List<AccountBusinessModel>> GetTransactionsByPeriodAndPossiblyAccountId(TimeBasedAcquisitionBusinessModel model, LeadIdentityInfo leadInfo);
         AccountBusinessModel GetLeadBalance(int leadId, LeadIdentityInfo leadInfo);
     }
 }

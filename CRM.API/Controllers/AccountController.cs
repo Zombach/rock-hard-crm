@@ -80,7 +80,7 @@ namespace CRM.API.Controllers
         {
             var leadInfo = this.GetLeadInfo();
             var dto = _mapper.Map<TimeBasedAcquisitionBusinessModel>(model);
-            var output = _accountService.GetTransactionsByPeriodAndPossiblyAccountId(dto, leadInfo);
+            var output = _accountService.GetTransactionsByPeriodAndPossiblyAccountId(dto, leadInfo).Result;
             return _mapper.Map<List<AccountBusinessModel>>(output);
         }
 

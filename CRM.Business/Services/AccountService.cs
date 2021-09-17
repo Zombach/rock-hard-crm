@@ -14,12 +14,14 @@ using Microsoft.Extensions.Options;
 using RestSharp;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using static CRM.Business.Constants.TransactionEndpoint;
 
 namespace CRM.Business.Services
 {
-    public class AccountService : IAccountService
+    public partial class AccountService : IAccountService
     {
+        private const string FinishResponse = "[]";
         private readonly IAccountRepository _accountRepository;
         private readonly ILeadRepository _leadRepository;
         private readonly IMapper _mapper;
@@ -78,8 +80,7 @@ namespace CRM.Business.Services
 
         public AccountBusinessModel GetAccountWithTransactions(int accountId, LeadIdentityInfo leadInfo)
         {
-            AccountBusinessModelExtension.Transfers = new List<TransferBusinessModel>();
-            AccountBusinessModelExtension.Transactions = new List<TransactionBusinessModel>();
+            CleanListModels();
             var dto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(accountId);
             if (!leadInfo.IsAdmin())
                 _accountValidationHelper.CheckLeadAccessToAccount(dto.LeadId, leadInfo.LeadId);
@@ -89,51 +90,42 @@ namespace CRM.Business.Services
 
             var response = _client.Execute<string>(request);
 
-            accountModel.AddDeserializedTransactions(response.Data, _accountRepository, _mapper);
+            var model = Task.Run(async () => await AddDeserializedTransactionsAsync(accountModel, response.Data)).Result;
 
-            accountModel.BalanceCalculation(accountId);
-
-            return accountModel;
+            return BalanceCalculation(model, accountId);
         }
 
-        public List<AccountBusinessModel> GetTransactionsByPeriodAndPossiblyAccountId(TimeBasedAcquisitionBusinessModel model, LeadIdentityInfo leadInfo)
+        public async Task<List<AccountBusinessModel>>  GetTransactionsByPeriodAndPossiblyAccountId(TimeBasedAcquisitionBusinessModel model, LeadIdentityInfo leadInfo)
         {
-            var list = new List<AccountBusinessModel>();
-            AccountBusinessModelExtension.Transfers = new List<TransferBusinessModel>();
-            AccountBusinessModelExtension.Transactions = new List<TransactionBusinessModel>();
+            CleanListModels();
+            List<AccountBusinessModel> models = new();
             if (model.AccountId != null)
             {
                 var dto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound((int)model.AccountId);
                 if (!leadInfo.IsAdmin())
                     _accountValidationHelper.CheckLeadAccessToAccount(dto.LeadId, leadInfo.LeadId);
-                var accountModel = _mapper.Map<AccountBusinessModel>(dto);
-                var request = _requestHelper.CreatePostRequest($"{GetTransactionsByPeriodEndpoint}", model);
-                request.AddHeader("LeadId", leadInfo.LeadId.ToString());
-
-                var response = _client.Execute<string>(request);
-                accountModel.AddDeserializedTransactions(response.Data, _accountRepository, _mapper);
-
-                list.Add(accountModel);
+                var accountModel = _mapper.Map<AccountBusinessModel>(dto); //Чет не в курил нах это?
+                models.Add(accountModel); // с этим
             }
-
-            else
+            else 
             {
                 if (!leadInfo.IsAdmin()) throw new AuthorizationException($"{ServiceMessages.NoAdminRights}");
-
-                var request = _requestHelper.CreatePostRequest($"{GetTransactionsByPeriodEndpoint}", model);
-                request.AddHeader("LeadId", leadInfo.LeadId.ToString());
-                request.Timeout = 3000000;
-
-                do
-                {
-                    var response = _client.Execute<string>(request);
-                    list.AddDeserializedTransactions(response.Data, _accountRepository, _mapper);
-                    if (response.Data == "[]") break;
-                }
-                while (true);
             }
 
-            return list;
+            var request = _requestHelper.CreatePostRequest($"{GetTransactionsByPeriodEndpoint}", model);
+            request.AddHeader("LeadId", leadInfo.LeadId.ToString());
+            request.Timeout = 3000000;
+
+            do
+            {
+                var response = _client.Execute<string>(request);
+                await AddDeserializedTransactionsAsync(models, response.Data);
+                //models = AddDeserializedTransactionsAsync(models, response.Data);
+                if (response.Data == FinishResponse) break;
+            }
+            while (true);
+
+            return models;
         }
 
         public AccountBusinessModel GetLeadBalance(int leadId, LeadIdentityInfo leadInfo)
