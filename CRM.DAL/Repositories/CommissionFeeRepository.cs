@@ -29,7 +29,7 @@ namespace CRM.DAL.Repositories
                     dto.AccountId,
                     dto.TransactionId,
                     dto.Role,
-                    dto.Amount
+                    Amount = dto.CommissionAmount
                 },
                 commandType: CommandType.StoredProcedure
             );
