@@ -12,6 +12,9 @@ using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using CRM.DAL.Repositories;
+using MailExchange;
+using MassTransit;
 using static CRM.Business.Constants.TransactionEndpoint;
 
 namespace CRM.Business.Services
@@ -26,6 +29,8 @@ namespace CRM.Business.Services
         private readonly decimal _commission;
         private readonly decimal _vipCommission;
         private readonly decimal _commissionModifier;
+        private readonly IPublishEndpoint _publishEndpoint;
+        private readonly ILeadRepository _leadRepository;
 
         public TransactionService
         (
@@ -33,7 +38,9 @@ namespace CRM.Business.Services
             IOptions<CommissionSettings> commissionOptions,
             IAccountValidationHelper accountValidationHelper,
             IAccountService accountService,
-            ICommissionFeeService commissionFeeService
+            ICommissionFeeService commissionFeeService,
+            IPublishEndpoint publishEndpoint,
+            ILeadRepository leadRepository
         )
         {
             _client = new RestClient(connectionOptions.Value.TransactionStoreUrl);
@@ -44,10 +51,13 @@ namespace CRM.Business.Services
             _accountValidationHelper = accountValidationHelper;
             _accountService = accountService;
             _commissionFeeService = commissionFeeService;
+            _publishEndpoint = publishEndpoint;
+            _leadRepository = leadRepository;
         }
 
         public CommissionFeeDto AddDeposit(TransactionBusinessModel model, LeadIdentityInfo leadInfo)
         {
+            var leadDto = _leadRepository.GetLeadById(leadInfo.LeadId);
             var account = CheckAccessAndReturnAccount(model.AccountId, leadInfo);
             _accountValidationHelper.CheckForVipAccess(account.Currency, leadInfo);
             var commission = CalculateCommission(model.Amount, leadInfo);
@@ -63,7 +73,7 @@ namespace CRM.Business.Services
                 throw new Exception($"{result.ErrorMessage} {_client.BaseUrl}");
             }
             var transactionId = result.Data;
-
+            EmailSender(leadDto, EmailMessages.DepositSubject, string.Format(EmailMessages.DepositBody, model.Amount));
             var dto = new CommissionFeeDto
             { LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = leadInfo.Role, Amount = commission, TransactionType = TransactionType.Deposit };
 
@@ -74,19 +84,23 @@ namespace CRM.Business.Services
 
         public CommissionFeeDto AddWithdraw(TransactionBusinessModel model, LeadIdentityInfo leadInfo)
         {
-            var account = _accountService.GetAccountWithTransactions(model.AccountId, leadInfo);
-            _accountValidationHelper.CheckForVipAccess(account.Currency, leadInfo);
+            var leadDto = _leadRepository.GetLeadById(leadInfo.LeadId);
+            var accountModel = _accountService.GetAccountWithTransactions(model.AccountId, leadInfo);
+            _accountValidationHelper.CheckForVipAccess(accountModel.Currency, leadInfo);
             var commission = CalculateCommission(model.Amount, leadInfo);
 
-            CheckBalance(account, model.Amount);
+            CheckBalance(accountModel, model.Amount);
 
             model.Amount -= commission;
-            model.AccountId = account.Id;
-            model.Currency = account.Currency;
+            model.AccountId = accountModel.Id;
+            model.Currency = accountModel.Currency;
 
             var request = _requestHelper.CreatePostRequest(AddWithdrawEndpoint, model);
             var result = _client.Execute<long>(request);
             var transactionId = result.Data;
+
+
+            EmailSender(leadDto, EmailMessages.WithdrawSubject, string.Format(EmailMessages.WithdrawBody, model.Amount));
 
             var dto = new CommissionFeeDto
             { LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = leadInfo.Role, Amount = commission, TransactionType = TransactionType.Withdraw };
@@ -98,6 +112,7 @@ namespace CRM.Business.Services
 
         public CommissionFeeDto AddTransfer(TransferBusinessModel model, LeadIdentityInfo leadInfo)
         {
+            var leadDto = _leadRepository.GetLeadById(leadInfo.LeadId);
             var account = _accountService.GetAccountWithTransactions(model.AccountId, leadInfo);
             var recipientAccount = CheckAccessAndReturnAccount(model.RecipientAccountId, leadInfo);
             var commission = CalculateCommission(model.Amount, leadInfo);
@@ -119,7 +134,12 @@ namespace CRM.Business.Services
             var request = _requestHelper.CreatePostRequest(AddTransferEndpoint, model);
             var result = _client.Execute<List<long>>(request);
 
+            if (result.Data == null)
+            {
+                throw new Exception("tstore slomalsy");
+            }
             var transactionId = result.Data.First();
+            EmailSender(leadDto, EmailMessages.TransferSubject, string.Format(EmailMessages.TransferBody, model.Amount, model.Currency, model.RecipientCurrency));
 
             var dto = new CommissionFeeDto
             { LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = leadInfo.Role, Amount = commission, TransactionType = TransactionType.Transfer };
@@ -152,6 +172,17 @@ namespace CRM.Business.Services
             {
                 throw new ValidationException(nameof(amount), string.Format(ServiceMessages.DoesNotHaveEnoughMoney, account.Id, account.Balance));
             }
+        }
+
+        private void EmailSender(LeadDto dto, string subject, string body)
+        {
+            _publishEndpoint.Publish<IMailExchangeModel>(new
+            {
+                Subject = subject,
+                Body = $"{dto.LastName} {dto.FirstName} {body}",
+                DisplayName = "Best CRM",
+                MailAddresses = $"{dto.Email}"
+            });
         }
     }
 }

@@ -1,15 +1,14 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using AutoMapper;
+using CRM.DAL.Repositories;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using AutoMapper;
-using CRM.DAL.Repositories;
 
 namespace CRM.Business.Models
 {
     public static class AccountBusinessModelExtension
     {
-        public static bool IsPart { get; set; }
         public static List<TransferBusinessModel> Transfers;
         public static List<TransactionBusinessModel> Transactions;
 
@@ -17,21 +16,14 @@ namespace CRM.Business.Models
         {
             JToken jToken;
 
-            if (json == string.Empty)
-            {
-                throw new Exception();//транзакций в периоде нет
-            }
-
             if (model is List<AccountBusinessModel> businessModels)
             {
-                jToken = CheckStatusGetJToken(json);
-                if (jToken == null)
+                if (json != "[]")
                 {
-                    throw new Exception("tstore slomalsya");
+                    jToken = GetJToken(json);
+                    GetListModels(jToken, Transfers, Transactions);
+                    return model;
                 }
-
-                GetListModels(jToken, Transfers, Transactions);
-                if (IsPart) { return model; }
 
                 var listIds = new List<int>();
                 listIds.AddRange(Transactions.Select(item => item.AccountId).Distinct());
@@ -46,7 +38,7 @@ namespace CRM.Business.Models
                 foreach (var item in businessModels)
                 {
                     item.Transactions = Transactions.FindAll(t => t.AccountId == item.Id);
-                    Transactions.RemoveAll(t=>t.AccountId==item.Id);
+                    Transactions.RemoveAll(t => t.AccountId == item.Id);
                     item.Transfers = Transfers.FindAll(t => t.AccountId == item.Id);
                     Transfers.RemoveAll(t => t.AccountId == item.Id);
                 }
@@ -55,9 +47,9 @@ namespace CRM.Business.Models
                 var v = c - b;
             }
 
-            if (model is AccountBusinessModel businessModel)
+            else if (model is AccountBusinessModel businessModel)
             {
-                jToken = CheckStatusGetJToken(json);
+                jToken = GetJToken(json);
                 if (jToken == null)
                 {
                     throw new Exception("tstore slomalsya");
@@ -88,23 +80,15 @@ namespace CRM.Business.Models
             return model;
         }
 
-        private static JToken CheckStatusGetJToken(string json)
-        {
-            var jObject = JObject.Parse(json);
-            var status = jObject.SelectToken(@"$.Status");
-            if (status != null) IsPart = status.ToObject<bool>();
-            return jObject.SelectToken(@"$.List");
-        }
-
         private static JToken GetJToken(string json)
         {
             try
             {
-                return JObject.Parse(json);
+                return JArray.Parse(json);
             }
-            catch (Exception e)
+            catch
             {
-                throw new Exception(e.Message);
+                return JObject.Parse(json);
             }
         }
 

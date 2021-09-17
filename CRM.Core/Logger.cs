@@ -27,6 +27,6 @@ namespace CRM.Core
             {
                 sWriter.WriteLine(DateTime.Now + " " + message);
             }
-        }   
+        }
     }
 }
