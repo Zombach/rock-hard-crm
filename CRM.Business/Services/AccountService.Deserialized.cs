@@ -9,9 +9,7 @@ namespace CRM.Business.Services
 {
     public partial class AccountService
     {
-        public AccountService()
-        {
-        }
+        private int _maxSizeList = 20000;
 
         private static List<TransferBusinessModel> _transfers = new();
         private static List<TransactionBusinessModel> _transactions = new();
@@ -35,8 +33,8 @@ namespace CRM.Business.Services
                         ids.Sort();
                         _transactions = _transactions.OrderBy(t => t.AccountId).ToList();
                         _transfers = _transfers.OrderBy(t => t.AccountId).ToList();
-                        businessModels = businessModels.OrderBy(b => b.Id).ToList();
-                        GetAccountsInfo(ids, out List<AccountBusinessModel> models);
+                        GetAccountsInfo(ids, out businessModels);
+                        var models = businessModels.OrderBy(b => b.Id).ToList();
 
                         return await GroupsTransacAndTransf(models) as T;
                     }
@@ -58,55 +56,23 @@ namespace CRM.Business.Services
 
             return model;
         }
-
-
+                
         private async Task<List<AccountBusinessModel>> GroupsTransacAndTransf(List<AccountBusinessModel> accounts)
         {
+            int i = 0;
             List<TransferBusinessModel> tmpTransfer = new();
             List<TransactionBusinessModel> tmpTransaction = new();
-            int i = 0;
             do
             {
-                if (tmpTransfer.Count == 0)
-                {
-                    if (_transfers.Count != 0)
-                    {
-                        int transfersCount = _transfers.Count >= 2000 ? 2000 : _transfers.Count;
-                        tmpTransfer = _transfers.GetRange(0, transfersCount);
-                        _transfers.RemoveRange(0, transfersCount);
-                    }
-                }
-
-                if (tmpTransaction.Count == 0)
-                {
-                    if (_transactions.Count != 0)
-                    {
-                        int transactionCount = _transactions.Count >= 2000 ? 2000 : _transactions.Count;
-                        tmpTransaction = _transactions.GetRange(0, transactionCount);
-                        _transactions.RemoveRange(0, transactionCount);
-                    }
-                }
+                GetValuesForList(tmpTransfer, out tmpTransfer);
+                GetValuesForList(tmpTransaction, out tmpTransaction);
 
                 if (tmpTransaction.Count != 0 && tmpTransfer.Count != 0)
                 {
                     for (; i < accounts.Count; i++)
                     {
-                        List<Task> tasks = new()
-                        {
-                            Task.Run(() =>
-                            {
-                                GetTransactionsForAccount(accounts[i], tmpTransaction);
-                            }),
-                            Task.Run(() =>
-                            {
-                                GetTransfersForAccount(accounts[i], tmpTransfer);
-                            })
-                        };
-                        await Task.WhenAll(tasks);
-                        if (tmpTransaction.Count == 0 || tmpTransfer.Count == 0)
-                        {
-                            break;
-                        }
+                        await SetValuesForAccount(accounts[i], tmpTransfer, tmpTransaction);
+                        if (tmpTransaction.Count == 0 || tmpTransfer.Count == 0) { break; }
                     }
                 }
 
@@ -125,9 +91,73 @@ namespace CRM.Business.Services
                     }
                 }
 
-            } while (tmpTransaction.Count != 0 || tmpTransfer.Count != 0);
+                if(i == accounts.Count && tmpTransaction.Count != 0 || i == accounts.Count && tmpTransfer.Count != 0) { throw new Exception("Что-то пошло не по плану"); }
+            }
+            while (tmpTransaction.Count != 0 || tmpTransfer.Count != 0);
 
             return accounts;
+        }
+
+        private void GetValuesForList<T>(T models, out T result) where T : class
+        {
+            if (models is List<TransferBusinessModel> transfers)
+            {
+                GetTransfersForList(transfers, out transfers);
+                result = transfers as T;
+            }
+            else if (models is List<TransactionBusinessModel> transaction)
+            {
+                GetTransactionForList(transaction, out transaction);
+                result = transaction as T;
+            }
+            else
+            {
+                throw new Exception("Не удалось определить тип данных");
+            }
+        }
+
+        private async Task SetValuesForAccount(AccountBusinessModel account, List<TransferBusinessModel> transfers, List<TransactionBusinessModel> transactions)
+        {
+            List<Task> tasks = new()
+            {
+                Task.Run(() =>
+                {
+                    GetTransactionsForAccount(account, transactions);
+                }),
+                Task.Run(() =>
+                {
+                    GetTransfersForAccount(account, transfers);
+                })
+            };
+            await Task.WhenAll(tasks);
+        }
+
+        private void GetTransfersForList(List<TransferBusinessModel> transfers, out List<TransferBusinessModel> result)
+        {
+            if (transfers.Count == 0)
+            {
+                if (_transfers.Count != 0)
+                {
+                    int transfersCount = _transfers.Count >= _maxSizeList ? _maxSizeList : _transfers.Count;
+                    transfers = _transfers.GetRange(0, transfersCount);
+                    _transfers.RemoveRange(0, transfersCount);
+                }
+            }
+            result = transfers;
+        }
+
+        private void GetTransactionForList(List<TransactionBusinessModel> transactions, out List<TransactionBusinessModel> result)
+        {
+            if (transactions.Count == 0)
+            {
+                if (_transactions.Count != 0)
+                {
+                    int transactionsCount = _transactions.Count >= _maxSizeList ? _maxSizeList : _transactions.Count;
+                    transactions = _transactions.GetRange(0, transactionsCount);
+                    _transactions.RemoveRange(0, transactionsCount);
+                }
+            }
+            result = transactions;
         }
 
         private void GetTransfersForAccount(AccountBusinessModel account, List<TransferBusinessModel> tmpTransfer)
@@ -165,7 +195,7 @@ namespace CRM.Business.Services
             {
                 return JArray.Parse(json);
             }
-            catch(Exception e)
+            catch
             {
                 throw new Exception("все упало");
             }
@@ -212,29 +242,8 @@ namespace CRM.Business.Services
 
         private void GetAccountsInfo(List<int> ids, out List<AccountBusinessModel> models)
         {
-            //List<int> errorIds = new();
             var dto = _accountRepository.GetAccountsByListId(ids);
             models = _mapper.Map<List<AccountBusinessModel>>(dto);
-            //foreach (var id in ids)
-            //{
-            //    models =_accountRepository.GetAccountsByListId(ids);
-            //    //if (account == null)
-            //    //{
-            //    //    errorIds.Add(id);//error
-            //    //}
-            //    //else
-            //    //{
-            //    //    var model = _mapper.Map<AccountBusinessModel>(account);
-            //    //    models.Add(model);
-            //    //}
-            //    //AccountBusinessModel model = new()
-            //    //{
-            //    //    Id = id,
-            //    //    Transactions = new(),
-            //    //    Transfers = new()
-            //    //};
-            //    //models.Add(model);
-            //}
         }
 
         private void CleanListModels()
