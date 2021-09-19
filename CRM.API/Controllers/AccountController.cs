@@ -31,11 +31,11 @@ namespace CRM.API.Controllers
         [HttpPost("account/create")]
         [Description("Create lead account")]
         [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
-        public ActionResult<int> AddAccount([FromBody] AccountInputModel inputModel)
+        public async Task<ActionResult<int>> AddAccountAsync([FromBody] AccountInputModel inputModel)
         {
             var leadInfo = this.GetLeadInfo();
             var dto = _mapper.Map<AccountDto>(inputModel);
-            var accountId = _accountService.AddAccount(dto, leadInfo);
+            var accountId = await _accountService.AddAccountAsync(dto, leadInfo);
             return StatusCode(201, accountId);
         }
 
@@ -43,10 +43,10 @@ namespace CRM.API.Controllers
         [HttpDelete("account/{accountId}")]
         [Description("Delete lead account")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public ActionResult DeleteAccount(int accountId)
+        public async Task<ActionResult> DeleteAccountAsync(int accountId)
         {
             var leadId = this.GetLeadId();
-            _accountService.DeleteAccount(accountId, leadId);
+            await _accountService.DeleteAccountAsync(accountId, leadId);
             return NoContent();
         }
 
@@ -54,11 +54,11 @@ namespace CRM.API.Controllers
         [HttpPut("{accountId}")]
         [Description("Restore account")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public ActionResult RestoreAccount(int accountId)
+        public async Task<ActionResult> RestoreAccountAsync(int accountId)
         {
             var leadInfo = this.GetLeadInfo();
             /*var output =*/
-            _accountService.RestoreAccount(accountId, leadInfo.LeadId);
+            await _accountService.RestoreAccountAsync(accountId, leadInfo.LeadId);
             //return StatusCode(201, output);
             return NoContent();
         }
@@ -67,21 +67,21 @@ namespace CRM.API.Controllers
         [HttpGet("{accountId}")]
         [Description("Get account with transactions")]
         [ProducesResponseType(typeof(AccountBusinessModel), StatusCodes.Status200OK)]
-        public AccountBusinessModel GetAccountWithTransactions(int accountId)
+        public async Task<AccountBusinessModel> GetAccountWithTransactionsAsync(int accountId)
         {
             var leadInfo = this.GetLeadInfo();
-            return _accountService.GetAccountWithTransactions(accountId, leadInfo);
+            return await _accountService.GetAccountWithTransactionsAsync(accountId, leadInfo);
         }
 
         // api/account/by-period
         [HttpPost("by-period")]
         [Description("Get transactions by period or period and account id")]
         [ProducesResponseType(typeof(List<TransactionOutputModel>), StatusCodes.Status200OK)]
-        public async Task<List<AccountBusinessModel>> GetTransactionsByPeriodAndPossiblyAccountId([FromBody] TimeBasedAcquisitionInputModel model)
+        public async Task<List<AccountBusinessModel>> GetTransactionsByPeriodAndPossiblyAccountIdAsync([FromBody] TimeBasedAcquisitionInputModel model)
         {
             var leadInfo = this.GetLeadInfo();
             var dto = _mapper.Map<TimeBasedAcquisitionBusinessModel>(model);
-            var output = await _accountService.GetTransactionsByPeriodAndPossiblyAccountId(dto, leadInfo);
+            var output = await _accountService.GetTransactionsByPeriodAndPossiblyAccountIdAsync(dto, leadInfo);
             return _mapper.Map<List<AccountBusinessModel>>(output);
         }
 
@@ -89,10 +89,10 @@ namespace CRM.API.Controllers
         [HttpGet("lead/{leadId}")]
         [Description("Get account with transactions")]
         [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
-        public ActionResult<AccountBusinessModel> GetLeadBalance(int leadId)
+        public async Task<ActionResult<AccountBusinessModel>> GetLeadBalanceAsync(int leadId)
         {
             var leadInfo = this.GetLeadInfo();
-            var output = _accountService.GetLeadBalance(leadId, leadInfo);
+            var output = await _accountService.GetLeadBalanceAsync(leadId, leadInfo);
             return StatusCode(200, output);
         }
     }

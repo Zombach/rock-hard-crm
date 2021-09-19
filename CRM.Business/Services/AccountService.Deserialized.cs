@@ -29,14 +29,14 @@ namespace CRM.Business.Services
                         var listIds = new List<int>();
                         listIds.AddRange(_transactions.Select(item => item.AccountId).Distinct());
                         listIds.AddRange(_transfers.Select(item => item.AccountId).Distinct());
-                        var ids = listIds.Distinct().ToList();
+                        List<int> ids = listIds.Distinct().ToList();
                         ids.Sort();
                         _transactions = _transactions.OrderBy(t => t.AccountId).ToList();
                         _transfers = _transfers.OrderBy(t => t.AccountId).ToList();
                         GetAccountsInfo(ids, out businessModels);
-                        var models = businessModels.OrderBy(b => b.Id).ToList();
+                        businessModels = businessModels.OrderBy(b => b.Id).ToList();
 
-                        return await GroupsTransacAndTransf(models) as T;
+                        return await GroupsTransactionsAndTransfers(businessModels) as T;
                     }
                 case AccountBusinessModel businessModel:
                     {
@@ -57,7 +57,7 @@ namespace CRM.Business.Services
             return model;
         }
                 
-        private async Task<List<AccountBusinessModel>> GroupsTransacAndTransf(List<AccountBusinessModel> accounts)
+        private async Task<List<AccountBusinessModel>> GroupsTransactionsAndTransfers(List<AccountBusinessModel> accounts)
         {
             int i = 0;
             List<TransferBusinessModel> tmpTransfer = new();
@@ -242,7 +242,7 @@ namespace CRM.Business.Services
 
         private void GetAccountsInfo(List<int> ids, out List<AccountBusinessModel> models)
         {
-            var dto = _accountRepository.GetAccountsByListId(ids);
+            var dto = _accountRepository.GetAccountsByListIdAsync(ids);
             models = _mapper.Map<List<AccountBusinessModel>>(dto);
         }
 

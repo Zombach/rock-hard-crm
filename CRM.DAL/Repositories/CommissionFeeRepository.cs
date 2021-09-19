@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace CRM.DAL.Repositories
 {
@@ -19,9 +20,9 @@ namespace CRM.DAL.Repositories
 
         public CommissionFeeRepository(IOptions<DatabaseSettings> options) : base(options) { }
 
-        public int AddCommissionFee(CommissionFeeDto dto)
+        public async Task<int> AddCommissionFeeAsync(CommissionFeeDto dto)
         {
-            return _connection.QuerySingleOrDefault<int>(
+            return await _connection.QuerySingleOrDefaultAsync<int>(
                 _insertCommissionFeeProcedure,
                 new
                 {
@@ -35,10 +36,10 @@ namespace CRM.DAL.Repositories
             );
         }
 
-        public List<CommissionFeeDto> SearchingCommissionFeesForThePeriod(TimeBasedAcquisitionDto dto)
+        public async Task<List<CommissionFeeDto>> SearchingCommissionFeesForThePeriodAsync(TimeBasedAcquisitionDto dto)
         {
-            return _connection
-                .Query<CommissionFeeDto>(
+            return (await _connection
+                .QueryAsync<CommissionFeeDto>(
                     _getCommissionFeesByPeriodProcedure,
                     new
                     {
@@ -48,46 +49,46 @@ namespace CRM.DAL.Repositories
                         dto.AccountId,
                         dto.Role
                     },
-                    commandType: CommandType.StoredProcedure)
+                    commandType: CommandType.StoredProcedure))
                 .ToList();
         }
 
-        public List<CommissionFeeDto> GetAllCommissionFees()
+        public async Task<List<CommissionFeeDto>> GetAllCommissionFeesAsync()
         {
-            return _connection
-                .Query<CommissionFeeDto>(
+            return (await _connection
+                .QueryAsync<CommissionFeeDto>(
                     _getAllCommissionFeesProcedure,
-                    commandType: CommandType.StoredProcedure)
+                    commandType: CommandType.StoredProcedure))
                 .ToList();
         }
 
-        public List<CommissionFeeDto> GetCommissionFeesByAccountId(int accountId)
+        public async Task<List<CommissionFeeDto>> GetCommissionFeesByAccountIdAsync(int accountId)
         {
-            return _connection
-                .Query<CommissionFeeDto>(
+            return (await _connection
+                .QueryAsync<CommissionFeeDto>(
                     _getCommissionFeesByAccountIdProcedure,
                     new { accountId },
-                    commandType: CommandType.StoredProcedure)
+                    commandType: CommandType.StoredProcedure))
                 .ToList();
         }
 
-        public List<CommissionFeeDto> GetCommissionFeesByLeadId(int leadId)
+        public async Task<List<CommissionFeeDto>> GetCommissionFeesByLeadIdAsync(int leadId)
         {
-            return _connection
-                .Query<CommissionFeeDto>(
+            return (await _connection
+                .QueryAsync<CommissionFeeDto>(
                     _getCommissionFeesByLeadIdProcedure,
                     new { leadId },
-                    commandType: CommandType.StoredProcedure)
+                    commandType: CommandType.StoredProcedure))
                 .ToList();
         }
 
-        public List<CommissionFeeDto> GetCommissionFeesByRole(int requiredRole)
+        public async Task<List<CommissionFeeDto>> GetCommissionFeesByRoleAsync(int requiredRole)
         {
-            return _connection
-                .Query<CommissionFeeDto>(
+            return (await _connection
+                .QueryAsync<CommissionFeeDto>(
                     _getCommissionFeesByRoleIdProcedure,
                     new { role = requiredRole },
-                    commandType: CommandType.StoredProcedure)
+                    commandType: CommandType.StoredProcedure))
                 .ToList();
         }
     }

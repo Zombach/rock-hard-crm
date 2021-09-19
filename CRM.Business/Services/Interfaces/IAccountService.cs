@@ -8,11 +8,11 @@ namespace CRM.Business.Services
 {
     public interface IAccountService
     {
-        int AddAccount(AccountDto accountDto, LeadIdentityInfo leadInfo);
-        void DeleteAccount(int accountId, int leadId);
-        void RestoreAccount(int accountId, int leadId);
-        AccountBusinessModel GetAccountWithTransactions(int accountId, LeadIdentityInfo leadInfo);
-        Task<List<AccountBusinessModel>> GetTransactionsByPeriodAndPossiblyAccountId(TimeBasedAcquisitionBusinessModel model, LeadIdentityInfo leadInfo);
-        AccountBusinessModel GetLeadBalance(int leadId, LeadIdentityInfo leadInfo);
+        Task<int> AddAccountAsync(AccountDto accountDto, LeadIdentityInfo leadInfo);
+        Task DeleteAccountAsync(int accountId, int leadId);
+        Task RestoreAccountAsync(int accountId, int leadId);
+        Task<AccountBusinessModel> GetAccountWithTransactionsAsync(int accountId, LeadIdentityInfo leadInfo);
+        Task<List<AccountBusinessModel>> GetTransactionsByPeriodAndPossiblyAccountIdAsync(TimeBasedAcquisitionBusinessModel model, LeadIdentityInfo leadInfo);
+        Task<AccountBusinessModel> GetLeadBalanceAsync(int leadId, LeadIdentityInfo leadInfo);
     }
 }

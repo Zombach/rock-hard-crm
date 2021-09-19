@@ -49,39 +49,39 @@ namespace CRM.Business.Services
             _publishEndpoint = publishEndpoint;
         }
 
-        public int AddAccount(AccountDto accountDto, LeadIdentityInfo leadInfo)
+        public async Task<int> AddAccountAsync(AccountDto accountDto, LeadIdentityInfo leadInfo)
         {
-            var leadDto = _leadRepository.GetLeadById(leadInfo.LeadId);
+            var leadDto = await _leadRepository.GetLeadByIdAsync(leadInfo.LeadId);
             _accountValidationHelper.CheckForDuplicateCurrencies(leadDto, accountDto.Currency);
             _accountValidationHelper.CheckForVipAccess(accountDto.Currency, leadInfo);
             accountDto.LeadId = leadDto.Id;
-            var accountId = _accountRepository.AddAccount(accountDto);
-            EmailSender(leadDto, EmailMessages.AccountAddedSubject, EmailMessages.AccountAddedBody, accountDto);
+            var accountId = await _accountRepository.AddAccountAsync(accountDto);
+            await EmailSenderAsync(leadDto, EmailMessages.AccountAddedSubject, EmailMessages.AccountAddedBody, accountDto);
             return accountId;
         }
 
-        public void DeleteAccount(int accountId, int leadId)
+        public async Task DeleteAccountAsync(int accountId, int leadId)
         {
-            var leadDto = _leadRepository.GetLeadById(leadId);
-            var accountDto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(accountId);
+            var leadDto = await _leadRepository.GetLeadByIdAsync(leadId);
+            var accountDto = await _accountValidationHelper.GetAccountByIdAndThrowIfNotFoundAsync(accountId);
             _accountValidationHelper.CheckLeadAccessToAccount(accountDto.LeadId, leadId);
-            EmailSender(leadDto, EmailMessages.AccountDeleteSubject, EmailMessages.AccountDeleteBody, accountDto);
-            _accountRepository.DeleteAccount(accountId);
+            await EmailSenderAsync(leadDto, EmailMessages.AccountDeleteSubject, EmailMessages.AccountDeleteBody, accountDto);
+            await _accountRepository.DeleteAccountAsync(accountId);
         }
 
-        public void RestoreAccount(int accountId, int leadId)
+        public async Task RestoreAccountAsync(int accountId, int leadId)
         {
-            var leadDto = _leadRepository.GetLeadById(leadId);
-            var accountDto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(accountId);
+            var leadDto = await _leadRepository.GetLeadByIdAsync(leadId);
+            var accountDto = await _accountValidationHelper.GetAccountByIdAndThrowIfNotFoundAsync(accountId);
             _accountValidationHelper.CheckLeadAccessToAccount(accountDto.LeadId, leadId);
-            EmailSender(leadDto, EmailMessages.AccountRestoreSubject, EmailMessages.AccountRestoreBody, accountDto);
-            _accountRepository.RestoreAccount(accountId);
+            await EmailSenderAsync(leadDto, EmailMessages.AccountRestoreSubject, EmailMessages.AccountRestoreBody, accountDto);
+            await _accountRepository.RestoreAccountAsync(accountId);
         }
 
-        public AccountBusinessModel GetAccountWithTransactions(int accountId, LeadIdentityInfo leadInfo)
+        public async Task<AccountBusinessModel> GetAccountWithTransactionsAsync(int accountId, LeadIdentityInfo leadInfo)
         {
             CleanListModels();
-            var dto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(accountId);
+            var dto = await _accountValidationHelper.GetAccountByIdAndThrowIfNotFoundAsync(accountId);
             if (!leadInfo.IsAdmin())
                 _accountValidationHelper.CheckLeadAccessToAccount(dto.LeadId, leadInfo.LeadId);
 
@@ -90,18 +90,18 @@ namespace CRM.Business.Services
 
             var response = _client.Execute<string>(request);
 
-            var model = Task.Run(async () => await AddDeserializedTransactionsAsync(accountModel, response.Data)).Result;
+            var model = await Task.Run(async () => await AddDeserializedTransactionsAsync(accountModel, response.Data));
 
             return BalanceCalculation(model, accountId);
         }
 
-        public async Task<List<AccountBusinessModel>> GetTransactionsByPeriodAndPossiblyAccountId(TimeBasedAcquisitionBusinessModel model, LeadIdentityInfo leadInfo)
+        public async Task<List<AccountBusinessModel>> GetTransactionsByPeriodAndPossiblyAccountIdAsync(TimeBasedAcquisitionBusinessModel model, LeadIdentityInfo leadInfo)
         {
             CleanListModels();
             List<AccountBusinessModel> models = new();
             if (model.AccountId != null)
             {
-                var dto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound((int)model.AccountId);
+                var dto = await _accountValidationHelper.GetAccountByIdAndThrowIfNotFoundAsync((int)model.AccountId);
                 if (!leadInfo.IsAdmin())
                     _accountValidationHelper.CheckLeadAccessToAccount(dto.LeadId, leadInfo.LeadId);
                 var accountModel = _mapper.Map<AccountBusinessModel>(dto);
@@ -119,7 +119,7 @@ namespace CRM.Business.Services
             do
             {
                 var response = await _client.ExecuteAsync<string>(request);
-                models = Task.Run(async () => await AddDeserializedTransactionsAsync(models, response.Data)).Result;
+                models = await Task.Run(async () => await AddDeserializedTransactionsAsync(models, response.Data));
                 if (response.Data == FinishResponse) break;
             }
             while (true);
@@ -127,14 +127,15 @@ namespace CRM.Business.Services
             return models;
         }
 
-        public AccountBusinessModel GetLeadBalance(int leadId, LeadIdentityInfo leadInfo)
+        public async Task<AccountBusinessModel> GetLeadBalanceAsync(int leadId, LeadIdentityInfo leadInfo)
         {
-            throw new NotImplementedException();
+            await Task.Run(() => throw new NotImplementedException());
+            return null;
         }
 
-        private void EmailSender(LeadDto dto, string subject, string body, AccountDto accountDto)
+        private async Task EmailSenderAsync(LeadDto dto, string subject, string body, AccountDto accountDto)
         {
-            _publishEndpoint.Publish<IMailExchangeModel>(new
+            await _publishEndpoint.Publish<IMailExchangeModel>(new
             {
                 Subject = subject,
                 Body = $"{dto.LastName} {dto.FirstName} {body} {accountDto.Currency}",

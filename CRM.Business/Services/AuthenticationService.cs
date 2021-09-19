@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 
 namespace CRM.Business.Services
 {
@@ -33,9 +34,9 @@ namespace CRM.Business.Services
             return Convert.ToBase64String(hashBytes);
         }
 
-        public string SignIn(LeadDto dto)
+        public async Task<string> SignIn (LeadDto dto)
         {
-            var identity = GetIdentity(dto.Email, dto.Password);
+            var identity = await GetIdentity(dto.Email, dto.Password);
             if (identity == default)
             {
                 return default;
@@ -68,9 +69,9 @@ namespace CRM.Business.Services
             return result == hashedPassword;
         }
 
-        private ClaimsIdentity GetIdentity(string email, string password)
+        private async Task<ClaimsIdentity> GetIdentity(string email, string password)
         {
-            var lead = _leadRepository.GetLeadByEmail(email);
+            var lead = await _leadRepository.GetLeadByEmailAsync(email);
             if (lead == null)
                 throw new AuthorizationException(ServiceMessages.EntityNotFound);
 

@@ -6,6 +6,7 @@ using Dapper;
 using Microsoft.Extensions.Options;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace CRM.DAL.Repositories
 {
@@ -20,9 +21,9 @@ namespace CRM.DAL.Repositories
 
         public AccountRepository(IOptions<DatabaseSettings> options) : base(options) { }
 
-        public int AddAccount(AccountDto dto)
+        public async Task<int> AddAccountAsync(AccountDto dto)
         {
-            return _connection.QuerySingleOrDefault<int>(
+            return await _connection.QueryFirstOrDefaultAsync<int>(
                 _addAccountProcedure,
                 new
                 {
@@ -33,28 +34,28 @@ namespace CRM.DAL.Repositories
             );
         }
 
-        public void DeleteAccount(int id)
+        public async Task DeleteAccountAsync(int id)
         {
-            _connection.Execute(
+            await _connection.ExecuteAsync(
                 _deleteAccountProcedure,
                 new { id },
                 commandType: CommandType.StoredProcedure
             );
         }
 
-        public void RestoreAccount(int id)
+        public async Task RestoreAccountAsync(int id)
         {
-            _connection.Execute(
+            await _connection.ExecuteAsync(
                 _restoreAccountProcedure,
                 new { id },
                 commandType: CommandType.StoredProcedure
             );
         }
 
-        public AccountDto GetAccountById(int id)
+        public async Task<AccountDto> GetAccountByIdAsync(int id)
         {
             AccountDto result;
-            return _connection.Query<AccountDto, Currency, AccountDto>(
+            return (await _connection.QueryAsync<AccountDto, Currency, AccountDto>(
                 _selectByIdAccountProcedure,
                 (accountDto, currency) =>
                 {
@@ -64,11 +65,11 @@ namespace CRM.DAL.Repositories
                 },
                 new { id },
                 splitOn: "Id",
-                commandType: CommandType.StoredProcedure)
+                commandType: CommandType.StoredProcedure))
               .FirstOrDefault();
         }
 
-        public List<AccountDto> GetAccountsByListId(List<int> accountsId)
+        public async Task<List<AccountDto>> GetAccountsByListIdAsync(List<int> accountsId)
         {
             var dt = new DataTable();
             dt.Columns.Add("Id");
@@ -78,7 +79,7 @@ namespace CRM.DAL.Repositories
                 dt.Rows.Add(id);
             }
 
-            return _connection.Query<AccountDto, Currency, AccountDto>(
+            return (await _connection.QueryAsync<AccountDto, Currency, AccountDto>(
                 _selectAllByListIdAccountProcedure,
                 (accountDto, currency) =>
                 {
@@ -86,8 +87,8 @@ namespace CRM.DAL.Repositories
                     return accountDto;
                 },
                 new { tblIds = dt.AsTableValuedParameter(_accountIdType) },
-                commandType: CommandType.StoredProcedure
-            ).ToList();
+                commandType: CommandType.StoredProcedure))
+                .ToList();
         }
     }
 }

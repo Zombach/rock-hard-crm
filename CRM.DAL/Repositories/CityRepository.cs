@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace CRM.DAL.Repositories
 {
@@ -14,12 +15,12 @@ namespace CRM.DAL.Repositories
 
         public CityRepository(IOptions<DatabaseSettings> options) : base(options) { }
 
-        public List<CityDto> GetAllCities()
+        public async Task<List<CityDto>> GetAllCitiesAsync()
         {
-            return _connection.Query<CityDto>(
+            return (await _connection.QueryAsync<CityDto>(
                 _citySelectAll,
                     commandType: CommandType.StoredProcedure
-                )
+                ))
                 .ToList();
         }
     }

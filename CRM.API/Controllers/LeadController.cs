@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace CRM.API.Controllers
 {
@@ -31,11 +32,11 @@ namespace CRM.API.Controllers
         [HttpPut]
         [Description("Update lead")]
         [ProducesResponseType(typeof(LeadOutputModel), StatusCodes.Status200OK)]
-        public LeadOutputModel UpdateLeadById([FromBody] LeadUpdateInputModel model)
+        public async Task<LeadOutputModel> UpdateLeadByIdAsync([FromBody] LeadUpdateInputModel model)
         {
             var id = this.GetLeadId();
             var dto = _mapper.Map<LeadDto>(model);
-            dto = _leadService.UpdateLead(id, dto);
+            dto = await _leadService.UpdateLeadAsync(id, dto);
             return _mapper.Map<LeadOutputModel>(dto);
         }
 
@@ -44,9 +45,9 @@ namespace CRM.API.Controllers
         [HttpPut("{id}/role/{role}")]
         [Description("Update lead role")]
         [ProducesResponseType(typeof(LeadOutputModel), StatusCodes.Status200OK)]
-        public LeadOutputModel UpdateLeadRole(int id, Role role)
+        public async Task<LeadOutputModel> UpdateLeadRoleAsync(int id, Role role)
         {
-            var dto = _leadService.UpdateLeadRole(id, role);
+            var dto = await _leadService.UpdateLeadRoleAsync(id, role);
             return _mapper.Map<LeadOutputModel>(dto);
         }
 
@@ -54,10 +55,10 @@ namespace CRM.API.Controllers
         [HttpDelete]
         [Description("Delete lead")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public ActionResult DeleteLead()
+        public async Task<ActionResult> DeleteLeadAsync()
         {
             var leadId = this.GetLeadId();
-            _leadService.DeleteLead(leadId);
+            await _leadService.DeleteLeadAsync(leadId);
             return NoContent();
         }
 
@@ -65,10 +66,10 @@ namespace CRM.API.Controllers
         [HttpGet("{id}")]
         [Description("Get lead by id")]
         [ProducesResponseType(typeof(LeadOutputModel), StatusCodes.Status200OK)]
-        public LeadOutputModel GetLeadById(int id)
+        public async Task<LeadOutputModel> GetLeadByIdAsync(int id)
         {
             var leadInfo = this.GetLeadInfo();
-            var dto = _leadService.GetLeadById(id, leadInfo);
+            var dto = await _leadService.GetLeadByIdAsync(id, leadInfo);
             var outPut = _mapper.Map<LeadOutputModel>(dto);
             return outPut;
         }
@@ -78,9 +79,9 @@ namespace CRM.API.Controllers
         [HttpGet]
         [Description("Get all Leads")]
         [ProducesResponseType(typeof(List<LeadOutputModel>), StatusCodes.Status200OK)]
-        public List<LeadOutputModel> GetAllLeads()
+        public async Task<List<LeadOutputModel>> GetAllLeadsAsync()
         {
-            var listDto = _leadService.GetAllLeads();
+            var listDto = await _leadService.GetAllLeadsAsync();
             var listOutPut = _mapper.Map<List<LeadOutputModel>>(listDto);
             return listOutPut;
         }
