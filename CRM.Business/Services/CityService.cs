@@ -1,6 +1,7 @@
 ﻿using CRM.DAL.Models;
 using CRM.DAL.Repositories;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CRM.Business.Services
 {
@@ -13,9 +14,9 @@ namespace CRM.Business.Services
             _cityRepository = cityRepository;
         }
 
-        public List<CityDto> GetAllCities()
+        public async Task<List<CityDto>> GetAllCities()
         {
-            return _cityRepository.GetAllCities();
+            return await _cityRepository.GetAllCitiesAsync();
         }
     }
 }

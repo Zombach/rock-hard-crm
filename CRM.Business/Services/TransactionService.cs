@@ -16,6 +16,7 @@ using CRM.DAL.Repositories;
 using MailExchange;
 using MassTransit;
 using static CRM.Business.Constants.TransactionEndpoint;
+using System.Threading.Tasks;
 
 namespace CRM.Business.Services
 {
@@ -55,10 +56,10 @@ namespace CRM.Business.Services
             _leadRepository = leadRepository;
         }
 
-        public CommissionFeeDto AddDeposit(TransactionBusinessModel model, LeadIdentityInfo leadInfo)
+        public async Task<CommissionFeeDto> AddDepositAsync(TransactionBusinessModel model, LeadIdentityInfo leadInfo)
         {
-            var leadDto = _leadRepository.GetLeadById(leadInfo.LeadId);
-            var account = CheckAccessAndReturnAccount(model.AccountId, leadInfo);
+            var leadDto = await _leadRepository.GetLeadByIdAsync(leadInfo.LeadId);
+            var account = await CheckAccessAndReturnAccount(model.AccountId, leadInfo);
             _accountValidationHelper.CheckForVipAccess(account.Currency, leadInfo);
             var commission = CalculateCommission(model.Amount, leadInfo);
 
@@ -82,10 +83,10 @@ namespace CRM.Business.Services
             return dto;
         }
 
-        public CommissionFeeDto AddWithdraw(TransactionBusinessModel model, LeadIdentityInfo leadInfo)
+        public async Task<CommissionFeeDto> AddWithdrawAsync(TransactionBusinessModel model, LeadIdentityInfo leadInfo)
         {
-            var leadDto = _leadRepository.GetLeadById(leadInfo.LeadId);
-            var accountModel = _accountService.GetAccountWithTransactions(model.AccountId, leadInfo);
+            var leadDto = await _leadRepository.GetLeadByIdAsync(leadInfo.LeadId);
+            var accountModel = await _accountService.GetAccountWithTransactionsAsync(model.AccountId, leadInfo);
             _accountValidationHelper.CheckForVipAccess(accountModel.Currency, leadInfo);
             var commission = CalculateCommission(model.Amount, leadInfo);
 
@@ -110,11 +111,11 @@ namespace CRM.Business.Services
             return dto;
         }
 
-        public CommissionFeeDto AddTransfer(TransferBusinessModel model, LeadIdentityInfo leadInfo)
+        public async Task<CommissionFeeDto> AddTransferAsync(TransferBusinessModel model, LeadIdentityInfo leadInfo)
         {
-            var leadDto = _leadRepository.GetLeadById(leadInfo.LeadId);
-            var account = _accountService.GetAccountWithTransactions(model.AccountId, leadInfo);
-            var recipientAccount = CheckAccessAndReturnAccount(model.RecipientAccountId, leadInfo);
+            var leadDto = await _leadRepository.GetLeadByIdAsync(leadInfo.LeadId);
+            var account = await _accountService.GetAccountWithTransactionsAsync(model.AccountId, leadInfo);
+            var recipientAccount = await CheckAccessAndReturnAccount(model.RecipientAccountId, leadInfo);
             var commission = CalculateCommission(model.Amount, leadInfo);
 
             CheckBalance(account, model.Amount);
@@ -132,7 +133,7 @@ namespace CRM.Business.Services
             model.Currency = account.Currency;
             model.RecipientCurrency = recipientAccount.Currency;
             var request = _requestHelper.CreatePostRequest(AddTransferEndpoint, model);
-            var result = _client.Execute<List<long>>(request);
+            var result = await _client.ExecuteAsync<List<long>>(request);
 
             if (result.Data == null)
             {
@@ -149,16 +150,16 @@ namespace CRM.Business.Services
             return dto;
         }
 
-        private AccountDto CheckAccessAndReturnAccount(int accountId, LeadIdentityInfo leadInfo)
+        private async Task<AccountDto> CheckAccessAndReturnAccount(int accountId, LeadIdentityInfo leadInfo)
         {
-            var account = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(accountId);
+            var account = await _accountValidationHelper.GetAccountByIdAndThrowIfNotFoundAsync(accountId);
             _accountValidationHelper.CheckLeadAccessToAccount(account.LeadId, leadInfo.LeadId);
             return account;
         }
 
         private void AddCommissionFee(CommissionFeeDto dto)
         {
-            _commissionFeeService.AddCommissionFee(dto);
+            _commissionFeeService.AddCommissionFeeAsync(dto);
         }
 
         private decimal CalculateCommission(decimal amount, LeadIdentityInfo leadInfo)

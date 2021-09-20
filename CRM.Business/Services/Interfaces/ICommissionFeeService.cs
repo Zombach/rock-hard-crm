@@ -1,16 +1,17 @@
 ﻿using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CRM.Business.Services
 {
     public interface ICommissionFeeService
     {
-        int AddCommissionFee(CommissionFeeDto dto);
-        List<CommissionFeeDto> GetAllCommissionFees();
-        List<CommissionFeeDto> GetCommissionFeesByAccountId(int accountId);
-        List<CommissionFeeDto> GetCommissionFeesByLeadId(int leadId);
-        List<CommissionFeeDto> SearchingCommissionFeesForThePeriod(TimeBasedAcquisitionDto dto);
-        List<CommissionFeeDto> GetCommissionFeesByRole(Role role);
+        Task<int> AddCommissionFeeAsync(CommissionFeeDto dto);
+        Task<List<CommissionFeeDto>> GetAllCommissionFeesAsync();
+        Task<List<CommissionFeeDto>> GetCommissionFeesByAccountIdAsync(int accountId);
+        Task<List<CommissionFeeDto>> GetCommissionFeesByLeadIdAsync(int leadId);
+        Task<List<CommissionFeeDto>> SearchingCommissionFeesForThePeriodAsync(TimeBasedAcquisitionDto dto);
+        Task<List<CommissionFeeDto>> GetCommissionFeesByRoleAsync(Role role);
     }
 }

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace CRM.API.Controllers
 {
@@ -35,11 +36,11 @@ namespace CRM.API.Controllers
         [HttpPost("deposit")]
         [Description("Add deposit")]
         [ProducesResponseType(typeof(CommissionFeeShortOutputModel), StatusCodes.Status201Created)]
-        public ActionResult<CommissionFeeShortOutputModel> AddDeposit([FromBody] TransactionInputModel inputModel)
+        public async Task<ActionResult<CommissionFeeShortOutputModel>> AddDepositAsync([FromBody] TransactionInputModel inputModel)
         {
             var leadInfo = this.GetLeadInfo();
             var model = _mapper.Map<TransactionBusinessModel>(inputModel);
-            var commissionModel = _transactionService.AddDeposit(model, leadInfo);
+            var commissionModel = await _transactionService.AddDepositAsync(model, leadInfo);
             var output = _mapper.Map<CommissionFeeShortOutputModel>(commissionModel);
             return StatusCode(201, output);
         }
@@ -48,11 +49,11 @@ namespace CRM.API.Controllers
         [HttpPost("withdraw")]
         [Description("Add withdraw")]
         [ProducesResponseType(typeof(CommissionFeeShortOutputModel), StatusCodes.Status201Created)]
-        public ActionResult<CommissionFeeShortOutputModel> AddWithdraw([FromBody] TransactionInputModel inputModel)
+        public async Task<ActionResult<CommissionFeeShortOutputModel>> AddWithdrawAsync([FromBody] TransactionInputModel inputModel)
         {
             var leadInfo = this.GetLeadInfo();
             var model = _mapper.Map<TransactionBusinessModel>(inputModel);
-            var commissionModel = _transactionService.AddWithdraw(model, leadInfo);
+            var commissionModel = await _transactionService.AddWithdrawAsync(model, leadInfo);
             var output = _mapper.Map<CommissionFeeShortOutputModel>(commissionModel);
             return StatusCode(201, output);
         }
@@ -61,11 +62,11 @@ namespace CRM.API.Controllers
         [HttpPost("transfer")]
         [Description("Add transfer")]
         [ProducesResponseType(typeof(CommissionFeeShortOutputModel), StatusCodes.Status201Created)]
-        public ActionResult<CommissionFeeShortOutputModel> AddTransfer([FromBody] TransferInputModel inputModel)
+        public async Task<ActionResult<CommissionFeeShortOutputModel>> AddTransferAsync([FromBody] TransferInputModel inputModel)
         {
             var leadInfo = this.GetLeadInfo();
             var model = _mapper.Map<TransferBusinessModel>(inputModel);
-            var commissionModel = _transactionService.AddTransfer(model, leadInfo);
+            var commissionModel = await _transactionService.AddTransferAsync(model, leadInfo);
             var output = _mapper.Map<CommissionFeeShortOutputModel>(commissionModel);
             return StatusCode(201, output);
         }
