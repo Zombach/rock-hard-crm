@@ -6,5 +6,6 @@ namespace CRM.Business.IdentityInfo
     {
         public int LeadId { get; set; }
         public Role Role { get; set; }
+        public string KeyForTwoFactorAuth { get; set; }
     }
 }
