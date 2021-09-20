@@ -33,7 +33,7 @@ namespace CRM.Business.Services
                         ids.Sort();
                         _transactions = _transactions.OrderBy(t => t.AccountId).ToList();
                         _transfers = _transfers.OrderBy(t => t.AccountId).ToList();
-                        GetAccountsInfo(ids, out businessModels);
+                        businessModels = await GetAccountsInfoAsync(ids);
                         businessModels = businessModels.OrderBy(b => b.Id).ToList();
 
                         return await GroupsTransactionsAndTransfers(businessModels) as T;
@@ -56,7 +56,7 @@ namespace CRM.Business.Services
 
             return model;
         }
-                
+
         private async Task<List<AccountBusinessModel>> GroupsTransactionsAndTransfers(List<AccountBusinessModel> accounts)
         {
             int i = 0;
@@ -91,7 +91,7 @@ namespace CRM.Business.Services
                     }
                 }
 
-                if(i == accounts.Count && tmpTransaction.Count != 0 || i == accounts.Count && tmpTransfer.Count != 0) { throw new Exception("Что-то пошло не по плану"); }
+                if (i == accounts.Count && tmpTransaction.Count != 0 || i == accounts.Count && tmpTransfer.Count != 0) { throw new Exception("Что-то пошло не по плану"); }
             }
             while (tmpTransaction.Count != 0 || tmpTransfer.Count != 0);
 
@@ -240,10 +240,10 @@ namespace CRM.Business.Services
             }
         }
 
-        private void GetAccountsInfo(List<int> ids, out List<AccountBusinessModel> models)
+        private async Task<List<AccountBusinessModel>> GetAccountsInfoAsync(List<int> ids)
         {
-            var dto = _accountRepository.GetAccountsByListIdAsync(ids);
-            models = _mapper.Map<List<AccountBusinessModel>>(dto);
+            var dto = await _accountRepository.GetAccountsByListIdAsync(ids);
+            return _mapper.Map<List<AccountBusinessModel>>(dto);
         }
 
         private void CleanListModels()
