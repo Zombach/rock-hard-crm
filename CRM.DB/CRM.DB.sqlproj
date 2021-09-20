@@ -65,6 +65,8 @@
     <Folder Include="StoredProcedures\Account" />
     <Folder Include="StoredProcedures\City" />
     <Folder Include="StoredProcedures\CommissionFee" />
+    <Folder Include="Types" />
+    <Folder Include="Types\User-Defined Table Types" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Tables\Account.sql" />
@@ -89,5 +91,12 @@
     <Build Include="StoredProcedures\CommissionFee\CommissionFee_Insert.sql" />
     <Build Include="StoredProcedures\Lead\Lead_UpdateRole.sql" />
     <Build Include="StoredProcedures\Account\Account_Restore.sql" />
+    <Build Include="Types\User-Defined Table Types\AccountIdType.sql" />
+    <Build Include="StoredProcedures\Account\Account_SelectByListId.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
 </Project>
