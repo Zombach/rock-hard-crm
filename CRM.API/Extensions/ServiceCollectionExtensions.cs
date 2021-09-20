@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using NSwag.Generation.Processors.Security;
+using RestSharp;
 using System.Text.Json.Serialization;
 
 namespace CRM.API.Extensions
@@ -31,6 +32,14 @@ namespace CRM.API.Extensions
             services.AddOptions<CommissionSettings>()
                 .Bind(configuration.GetSection(nameof(CommissionSettings)))
                 .ValidateDataAnnotations();
+        }
+
+        public static void AddRestClient(this IServiceCollection services, IConfiguration configuration)
+        {
+            var baseUrl = configuration
+                .GetSection($"{nameof(ConnectionSettings)}:{nameof(ConnectionSettings.TransactionStoreUrl)}")
+                .Value;
+            services.AddScoped<RestClient>(s => new RestClient(baseUrl));
         }
 
         public static void AddBearerAuthentication(this IServiceCollection services)

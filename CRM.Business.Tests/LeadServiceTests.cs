@@ -3,6 +3,7 @@ using CRM.Business.Services;
 using CRM.Business.Tests.TestsDataHelpers;
 using CRM.Business.ValidationHelpers;
 using CRM.DAL.Repositories;
+using MassTransit;
 using Moq;
 using NUnit.Framework;
 
@@ -12,9 +13,10 @@ namespace CRM.Business.Tests
     {
         private Mock<ILeadRepository> _leadRepoMock;
         private Mock<IAccountRepository> _accountRepoMock;
+        private Mock< IPublishEndpoint> _publishEndpointMock;
         private IAuthenticationService _authenticationService;
         private ILeadValidationHelper _leadValidationHelper;
-        private IAuthOptions _authOptions;
+        private readonly IAuthOptions _authOptions;
         private LeadService _sut;
 
 
@@ -25,7 +27,12 @@ namespace CRM.Business.Tests
             _accountRepoMock = new Mock<IAccountRepository>();
             _leadValidationHelper = new LeadValidationHelper(_leadRepoMock.Object);
             _authenticationService = new AuthenticationService(_leadRepoMock.Object, _authOptions);
-            _sut = new LeadService(_leadRepoMock.Object, _accountRepoMock.Object, _authenticationService, _leadValidationHelper);
+            _sut = new LeadService(
+                _leadRepoMock.Object, 
+                _accountRepoMock.Object, 
+                _authenticationService, 
+                _leadValidationHelper,
+                _publishEndpointMock.Object);
         }
 
         [Test]
@@ -85,30 +92,16 @@ namespace CRM.Business.Tests
         {
             //Given
             var expectedLeadDto = LeadData.GetLead();
-            _leadRepoMock.Setup(x => x.GetLeadById(expectedLeadDto.Id)).Returns(expectedLeadDto);
+            var leadRegular = LeadIdentityInfoData.GetRegularLeadIdentityInfo();
+
+            _leadRepoMock.Setup(x => x.GetLeadById(leadRegular.LeadId)).Returns(expectedLeadDto);
 
             //When
-            var actualLeadDto = _sut.GetLeadById(expectedLeadDto.Id);
+            var actualLeadDto = _sut.GetLeadById(leadRegular.LeadId, leadRegular);
 
             //Then
             Assert.AreEqual(expectedLeadDto, actualLeadDto);
             _leadRepoMock.Verify(x => x.GetLeadById(expectedLeadDto.Id), Times.Once);
-        }
-
-        [Test]
-        public void DeleteLeadById()
-        {
-            //Given
-            var expectedLeadDto = LeadData.GetLead();
-            _leadRepoMock.Setup(x => x.DeleteLeadById(expectedLeadDto.Id));
-            _leadRepoMock.Setup(x => x.GetLeadById(expectedLeadDto.Id)).Returns(expectedLeadDto);
-
-            //When
-            _sut.DeleteLeadById(expectedLeadDto.Id);
-
-            //Then
-            _leadRepoMock.Verify(x => x.GetLeadById(expectedLeadDto.Id), Times.Once);
-            _leadRepoMock.Verify(x => x.DeleteLeadById(expectedLeadDto.Id), Times.Once);
         }
     }
 }

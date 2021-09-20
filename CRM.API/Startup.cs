@@ -41,6 +41,7 @@ namespace CRM.API
             services.AddSwagger();
             services.AddValidationExceptionResponse();
             services.EmailSender();
+            services.AddRestClient(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

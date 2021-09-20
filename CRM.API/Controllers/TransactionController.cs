@@ -10,7 +10,7 @@ using System.ComponentModel;
 
 namespace CRM.API.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class TransactionController : Controller

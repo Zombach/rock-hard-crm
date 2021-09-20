@@ -34,29 +34,6 @@ namespace CRM.Business.Services
 
         public TransactionService
         (
-            IOptions<ConnectionSettings> connectionOptions,
-            IOptions<CommissionSettings> commissionOptions,
-            IAccountValidationHelper accountValidationHelper,
-            IAccountService accountService,
-            ICommissionFeeService commissionFeeService,
-            IPublishEndpoint publishEndpoint,
-            ILeadRepository leadRepository
-        )
-        {
-            _client = new RestClient(connectionOptions.Value.TransactionStoreUrl);
-            _commission = commissionOptions.Value.Commission;
-            _vipCommission = commissionOptions.Value.VipCommission;
-            _commissionModifier = commissionOptions.Value.CommissionModifier;
-            _requestHelper = new RequestHelper();
-            _accountValidationHelper = accountValidationHelper;
-            _accountService = accountService;
-            _commissionFeeService = commissionFeeService;
-            _publishEndpoint = publishEndpoint;
-            _leadRepository = leadRepository;
-        }
-
-        public TransactionService
-        (
             IOptions<CommissionSettings> commissionOptions,
             IAccountValidationHelper accountValidationHelper,
             IAccountService accountService,
@@ -67,7 +44,6 @@ namespace CRM.Business.Services
         )
         {
             _client = restClient;
-            _requestHelper = new RequestHelper();
             _commission = commissionOptions.Value.Commission;
             _vipCommission = commissionOptions.Value.VipCommission;
             _commissionModifier = commissionOptions.Value.CommissionModifier;

@@ -1,7 +1,10 @@
 ﻿using CRM.Business.Services;
 using CRM.Business.Tests.TestsDataHelpers;
 using CRM.Business.ValidationHelpers;
+using CRM.Core;
 using CRM.DAL.Repositories;
+using MassTransit;
+using Microsoft.Extensions.Options;
 using Moq;
 using NUnit.Framework;
 using RestSharp;
@@ -12,16 +15,38 @@ namespace CRM.Business.Tests
     {
         private Mock<RestClient> _clientMock;
         private Mock<IAccountRepository> _accountRepoMock;
+        private Mock<IAccountService> _accountServiceMock;
         private TransactionService _sut;
         private IAccountValidationHelper _accountValidationHelper;
+        private Mock<ICommissionFeeService> _commissionFeeServiceMock;
+        private Mock<ILeadRepository> _leadRepoMock;
+        private Mock<IPublishEndpoint> _publishEndPointMock;
 
         [SetUp]
         public void SetUp()
         {
+            _commissionFeeServiceMock = new Mock<ICommissionFeeService>();
             _accountRepoMock = new Mock<IAccountRepository>();
+            _accountServiceMock = new Mock<IAccountService>();
+            _publishEndPointMock = new Mock<IPublishEndpoint>();
+            _leadRepoMock = new Mock<ILeadRepository>();
             _clientMock = new Mock<RestClient>();
             _accountValidationHelper = new AccountValidationHelper(_accountRepoMock.Object);
-            _sut = new TransactionService(_accountValidationHelper, _clientMock.Object);
+
+            var optionsMock = new Mock<IOptions<CommissionSettings>>();
+            optionsMock.Setup(x => x.Value).Returns(new CommissionSettings { 
+                Commission = 0.2m, 
+                CommissionModifier = 1.5m, 
+                VipCommission = 0.1m });
+            
+            _sut = new TransactionService(
+                optionsMock.Object,
+                _accountValidationHelper,
+                _accountServiceMock.Object,
+                _commissionFeeServiceMock.Object,
+                _publishEndPointMock.Object,
+                _leadRepoMock.Object,
+                _clientMock.Object);
         }
 
         [Test]
@@ -31,7 +56,7 @@ namespace CRM.Business.Tests
             var expected = 234324243L;
             var model = TransactionData.GeTransactionBusinessModel();
             var account = AccountData.GetAccountDto();
-
+            var leadInfo = LeadIdentityInfoData.GetRegularLeadIdentityInfo();
             _accountRepoMock.Setup(x => x
                 .GetAccountById(account.Id))
                 .Returns(account);
@@ -43,7 +68,7 @@ namespace CRM.Business.Tests
                 });
 
             //When
-            var actual = _sut.AddDeposit(model);
+            var actual = _sut.AddDeposit(model, leadInfo);
 
             //Then
             Assert.AreEqual(expected, actual);
@@ -57,19 +82,20 @@ namespace CRM.Business.Tests
             var expected = 2344243L;
             var model = TransactionData.GeTransactionBusinessModel();
             var account = AccountData.GetAccountDto();
+            var leadInfo = LeadIdentityInfoData.GetRegularLeadIdentityInfo();
 
-            _accountRepoMock.Setup(x => x
-                    .GetAccountById(account.Id))
+            _accountRepoMock
+                .Setup(x => x.GetAccountById(account.Id))
                 .Returns(account);
-            _clientMock.Setup(x => x
-                    .Execute<long>(It.IsAny<IRestRequest>()))
+            _clientMock
+                .Setup(x => x.Execute<long>(It.IsAny<IRestRequest>()))
                 .Returns(new RestResponse<long>
                 {
                     Data = expected
                 });
 
             //When
-            var actual = _sut.AddWithdraw(model);
+            var actual = _sut.AddWithdraw(model, leadInfo);
 
             //Then
             Assert.AreEqual(expected, actual);
@@ -84,6 +110,7 @@ namespace CRM.Business.Tests
             var model = TransactionData.GetTransferBusinessModel();
             var account = AccountData.GetAccountDto();
             var accountAnother = AccountData.GetAnotherAccountDto();
+            var leadInfo = LeadIdentityInfoData.GetRegularLeadIdentityInfo();
 
             model.Currency = account.Currency;
             model.RecipientCurrency = accountAnother.Currency;
@@ -93,16 +120,16 @@ namespace CRM.Business.Tests
             _accountRepoMock.Setup(x => x
                     .GetAccountById(model.AccountId))
                 .Returns(accountAnother);
-            
-          _clientMock.Setup(x => x
-                    .Execute<string>(It.IsAny<IRestRequest>()))
-                .Returns(new RestResponse<string>
-                {
-                    Data = expected
-                });
+
+            _clientMock.Setup(x => x
+                      .Execute<string>(It.IsAny<IRestRequest>()))
+                  .Returns(new RestResponse<string>
+                  {
+                      Data = expected
+                  });
 
             //When
-            var actual = _sut.AddTransfer(model);
+            var actual = _sut.AddTransfer(model, leadInfo);
 
             //Then
             Assert.AreEqual(expected, actual);

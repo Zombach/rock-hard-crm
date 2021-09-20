@@ -34,31 +34,14 @@ namespace CRM.Business.Services
             ILeadRepository leadRepository,
             IMapper mapper,
             IAccountValidationHelper accountValidationHelper,
-            RestClient client,
-            RequestHelper requestHelper)
-        {
-            _accountRepository = accountRepository;
-            _leadRepository = leadRepository;
-            _mapper = mapper;
-            _accountValidationHelper = accountValidationHelper;
-            _client = client;
-            _requestHelper = requestHelper;
-        }
-
-        public AccountService
-        (
-            IAccountRepository accountRepository,
-            ILeadRepository leadRepository,
-            IOptions<ConnectionSettings> options,
-            IMapper mapper,
-            IAccountValidationHelper accountValidationHelper,
-            IPublishEndpoint publishEndpoint
+            IPublishEndpoint publishEndpoint,
+            RestClient restClient
         )
         {
             _accountRepository = accountRepository;
             _leadRepository = leadRepository;
             _mapper = mapper;
-            _client = new RestClient(options.Value.TransactionStoreUrl);
+            _client = restClient;
             _requestHelper = new RequestHelper();
             _accountValidationHelper = accountValidationHelper;
             _publishEndpoint = publishEndpoint;
@@ -69,9 +52,11 @@ namespace CRM.Business.Services
             var leadDto = _leadRepository.GetLeadById(leadInfo.LeadId);
             _accountValidationHelper.CheckForDuplicateCurrencies(leadDto, accountDto.Currency);
             _accountValidationHelper.CheckForVipAccess(accountDto.Currency, leadInfo);
+
             accountDto.LeadId = leadDto.Id;
             var accountId = _accountRepository.AddAccount(accountDto);
-            EmailSender(leadDto, EmailMessages.AccountAddedSubject, EmailMessages.AccountAddedBody, accountDto);
+            SendEmail(leadDto, EmailMessages.AccountAddedSubject, EmailMessages.AccountAddedBody, accountDto);
+
             return accountId;
         }
 
@@ -80,7 +65,7 @@ namespace CRM.Business.Services
             var leadDto = _leadRepository.GetLeadById(leadId);
             var accountDto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(accountId);
             _accountValidationHelper.CheckLeadAccessToAccount(accountDto.LeadId, leadId);
-            EmailSender(leadDto, EmailMessages.AccountDeleteSubject, EmailMessages.AccountDeleteBody, accountDto);
+            SendEmail(leadDto, EmailMessages.AccountDeleteSubject, EmailMessages.AccountDeleteBody, accountDto);
             _accountRepository.DeleteAccount(accountId);
         }
 
@@ -89,7 +74,7 @@ namespace CRM.Business.Services
             var leadDto = _leadRepository.GetLeadById(leadId);
             var accountDto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(accountId);
             _accountValidationHelper.CheckLeadAccessToAccount(accountDto.LeadId, leadId);
-            EmailSender(leadDto, EmailMessages.AccountRestoreSubject, EmailMessages.AccountRestoreBody, accountDto);
+            SendEmail(leadDto, EmailMessages.AccountRestoreSubject, EmailMessages.AccountRestoreBody, accountDto);
             _accountRepository.RestoreAccount(accountId);
         }
 
@@ -97,17 +82,16 @@ namespace CRM.Business.Services
         {
             AccountBusinessModelExtension.Transfers = new List<TransferBusinessModel>();
             AccountBusinessModelExtension.Transactions = new List<TransactionBusinessModel>();
+
             var dto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(accountId);
             if (!leadInfo.IsAdmin())
                 _accountValidationHelper.CheckLeadAccessToAccount(dto.LeadId, leadInfo.LeadId);
 
             var accountModel = _mapper.Map<AccountBusinessModel>(dto);
             var request = _requestHelper.CreateGetRequest($"{GetTransactionsByAccountIdEndpoint}{accountId}");
-
             var response = _client.Execute<string>(request);
 
             accountModel.AddDeserializedTransactions(response.Data, _accountRepository, _mapper);
-
             accountModel.BalanceCalculation(accountId);
 
             return accountModel;
@@ -158,7 +142,7 @@ namespace CRM.Business.Services
             throw new NotImplementedException();
         }
 
-        private void EmailSender(LeadDto dto, string subject, string body, AccountDto accountDto)
+        private void SendEmail(LeadDto dto, string subject, string body, AccountDto accountDto)
         {
             _publishEndpoint.Publish<IMailExchangeModel>(new
             {
