@@ -12,6 +12,6 @@ namespace CRM.DAL.Models
         public TransactionType TransactionType { get; set; }
         public Role Role { get; set; }
         public DateTime Date { get; set; }
-        public decimal Amount { get; set; }
+        public decimal CommissionAmount { get; set; }
     }
 }

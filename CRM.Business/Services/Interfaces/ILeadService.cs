@@ -2,17 +2,18 @@
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CRM.Business.Services
 {
     public interface ILeadService
     {
-        LeadDto AddLead(LeadDto dto);
-        LeadDto UpdateLead(int leadId, LeadDto dto);
-        LeadDto UpdateLeadRole(int leadId, Role role);
-        void DeleteLead(int leadId);
-        LeadDto GetLeadById(int leadId, LeadIdentityInfo leadInfo);
-        List<LeadDto> GetAllLeads();
+        Task<LeadDto> AddLeadAsync(LeadDto dto);
+        Task<LeadDto> UpdateLeadAsync(int leadId, LeadDto dto);
+        Task<LeadDto> UpdateLeadRoleAsync(int leadId, Role role);
+        Task DeleteLeadAsync(int leadId);
+        Task<LeadDto> GetLeadByIdAsync(int leadId, LeadIdentityInfo leadInfo);
+        Task<List<LeadDto>> GetAllLeadsAsync();
         void ChangeRoleForLeads(List<LeadDto> listLeadDtos);
         List<LeadDto> GetLeadsByFilters(LeadFiltersDto filter);
         List<LeadDto> GetAllLeadsByBatches(int cursorId);

@@ -1,4 +1,5 @@
-﻿using CRM.Business.Constants;
+﻿using System.Threading.Tasks;
+using CRM.Business.Constants;
 using CRM.Business.Exceptions;
 using CRM.Business.IdentityInfo;
 using CRM.DAL.Models;
@@ -15,9 +16,9 @@ namespace CRM.Business.ValidationHelpers
             _leadRepository = leadRepository;
         }
 
-        public LeadDto GetLeadByIdAndThrowIfNotFound(int leadId)
+        public async Task<LeadDto> GetLeadByIdAndThrowIfNotFoundAsync(int leadId)
         {
-            var lead = _leadRepository.GetLeadById(leadId);
+            var lead = await _leadRepository.GetLeadByIdAsync(leadId);
             if (lead == default)
                 throw new EntityNotFoundException(string.Format(ServiceMessages.EntityNotFoundMessage, nameof(lead), leadId));
             return lead;

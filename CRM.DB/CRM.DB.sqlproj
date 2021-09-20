@@ -94,11 +94,12 @@
     <Build Include="Types\User-Defined Table Types\LeadDtoType.sql" />
     <Build Include="StoredProcedures\Lead\Lead_SelectAllByBatchesWithoutAdmins.sql" />
     <Build Include="StoredProcedures\Lead\Lead_SelectAllByBatchesWithoutAdmins.sql" />
+    <Build Include="Types\User-Defined Table Types\AccountIdType.sql" />
+    <Build Include="StoredProcedures\Account\Account_SelectByListId.sql" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="StoredProcedures\Lead\LeadsList_Role_Update.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <RefactorLog Include="CRM.DB.refactorlog" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
 </Project>

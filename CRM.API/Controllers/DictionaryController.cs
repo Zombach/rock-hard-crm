@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace CRM.API.Controllers
 {
@@ -27,9 +28,9 @@ namespace CRM.API.Controllers
         [HttpGet("city")]
         [Description("Return list cities")]
         [ProducesResponseType(typeof(List<CityOutputModel>), StatusCodes.Status200OK)]
-        public List<CityOutputModel> GetAllCities()
+        public async Task<List<CityOutputModel>> GetAllCitiesAsync()
         {
-            var listDto = _cityService.GetAllCities();
+            var listDto = await _cityService.GetAllCities();
             var listOutPut = _mapper.Map<List<CityOutputModel>>(listDto);
             return listOutPut;
         }

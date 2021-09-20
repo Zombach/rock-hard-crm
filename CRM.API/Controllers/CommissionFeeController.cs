@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace CRM.API.Controllers
 {
@@ -29,10 +30,10 @@ namespace CRM.API.Controllers
         [HttpPost("by-period")]
         [Description("Return all commission fees for the period with or without lead id and account id")]
         [ProducesResponseType(typeof(List<CommissionFeeOutputModel>), StatusCodes.Status200OK)]
-        public List<CommissionFeeOutputModel> SearchingCommissionFeesForThePeriod([FromBody] TimeBasedAcquisitionSearchingInputModes model)
+        public async Task<List<CommissionFeeOutputModel>> SearchingCommissionFeesForThePeriodAsync([FromBody] TimeBasedAcquisitionSearchingInputModes model)
         {
             var dto = _mapper.Map<TimeBasedAcquisitionDto>(model);
-            var listDto = _commissionFeeService.SearchingCommissionFeesForThePeriod(dto);
+            var listDto = await _commissionFeeService.SearchingCommissionFeesForThePeriodAsync(dto);
             return _mapper.Map<List<CommissionFeeOutputModel>>(listDto);
         }
 
@@ -40,9 +41,9 @@ namespace CRM.API.Controllers
         [HttpGet]
         [Description("Return all commission fees")]
         [ProducesResponseType(typeof(List<CommissionFeeOutputModel>), StatusCodes.Status200OK)]
-        public List<CommissionFeeOutputModel> GetAllCommissionFees()
+        public async Task< List<CommissionFeeOutputModel>> GetAllCommissionFeesAsync()
         {
-            var listDto = _commissionFeeService.GetAllCommissionFees();
+            var listDto = await _commissionFeeService.GetAllCommissionFeesAsync();
             return _mapper.Map<List<CommissionFeeOutputModel>>(listDto);
         }
 
@@ -50,9 +51,9 @@ namespace CRM.API.Controllers
         [HttpGet("by-account/{accountId}")]
         [Description("Return all commission fees by accountId")]
         [ProducesResponseType(typeof(List<CommissionFeeOutputModel>), StatusCodes.Status200OK)]
-        public List<CommissionFeeOutputModel> GetCommissionFeesByAccountId(int accountId)
+        public async Task<List<CommissionFeeOutputModel>> GetCommissionFeesByAccountIdAsync(int accountId)
         {
-            var listDto = _commissionFeeService.GetCommissionFeesByAccountId(accountId);
+            var listDto = await _commissionFeeService.GetCommissionFeesByAccountIdAsync(accountId);
             return _mapper.Map<List<CommissionFeeOutputModel>>(listDto);
         }
 
@@ -60,9 +61,9 @@ namespace CRM.API.Controllers
         [HttpGet("by-lead/{leadId}")]
         [Description("Return all commission fees by leadId")]
         [ProducesResponseType(typeof(List<CommissionFeeOutputModel>), StatusCodes.Status200OK)]
-        public List<CommissionFeeOutputModel> GetCommissionFeesByLeadId(int leadId)
+        public async Task<List<CommissionFeeOutputModel>> GetCommissionFeesByLeadIdAsync(int leadId)
         {
-            var listDto = _commissionFeeService.GetCommissionFeesByLeadId(leadId);
+            var listDto = await _commissionFeeService.GetCommissionFeesByLeadIdAsync(leadId);
             return _mapper.Map<List<CommissionFeeOutputModel>>(listDto);
         }
 
@@ -70,9 +71,9 @@ namespace CRM.API.Controllers
         [HttpGet("by-role/{role}")]
         [Description("Return all commission fees by role")]
         [ProducesResponseType(typeof(List<CommissionFeeOutputModel>), StatusCodes.Status200OK)]
-        public List<CommissionFeeOutputModel> GetCommissionFeesByRole(Role role)
+        public async Task<List<CommissionFeeOutputModel>> GetCommissionFeesByRoleAsync(Role role)
         {
-            var listDto = _commissionFeeService.GetCommissionFeesByRole(role);
+            var listDto = await _commissionFeeService.GetCommissionFeesByRoleAsync(role);
             return _mapper.Map<List<CommissionFeeOutputModel>>(listDto);
         }
     }

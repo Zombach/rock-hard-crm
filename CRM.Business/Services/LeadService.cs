@@ -10,6 +10,7 @@ using SqlKata;
 using System;
 using CRM.Business.Extensions;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using CRM.Business.Constants;
 
 namespace CRM.Business.Services
@@ -38,34 +39,34 @@ namespace CRM.Business.Services
             _publishEndpoint = publishEndpoint;
         }
 
-        public LeadDto AddLead(LeadDto dto)
+        public async Task<LeadDto> AddLeadAsync(LeadDto dto)
         {
             dto.Password = _authenticationService.HashPassword(dto.Password);
             dto.Role = Role.Regular;
             dto.BirthYear = dto.BirthDate.Year;
             dto.BirthMonth = dto.BirthDate.Month;
             dto.BirthDay = dto.BirthDate.Day;
-            var leadId = _leadRepository.AddLead(dto);
-            _accountRepository.AddAccount(new AccountDto { LeadId = leadId, Currency = Currency.RUB });
-            EmailSender(dto, EmailMessages.RegistrationSubject, EmailMessages.RegistrationBody);
+            var leadId = await _leadRepository.AddLeadAsync(dto);
+            await _accountRepository.AddAccountAsync(new AccountDto { LeadId = leadId, Currency = Currency.RUB });
+            await EmailSender(dto, EmailMessages.RegistrationSubject, EmailMessages.RegistrationBody);
 
-            return _leadRepository.GetLeadById(leadId);
+            return await _leadRepository.GetLeadByIdAsync(leadId);
         }
 
-        public LeadDto UpdateLead(int leadId, LeadDto dto)
+        public async Task<LeadDto> UpdateLeadAsync(int leadId, LeadDto dto)
         {
-            _leadValidationHelper.GetLeadByIdAndThrowIfNotFound(leadId);
+            await _leadValidationHelper.GetLeadByIdAndThrowIfNotFoundAsync(leadId);
             dto.Id = leadId;
-            _leadRepository.UpdateLead(dto);
-            return _leadRepository.GetLeadById(leadId);
+            await _leadRepository.UpdateLeadAsync(dto);
+            return await _leadRepository.GetLeadByIdAsync(leadId);
         }
 
-        public LeadDto UpdateLeadRole(int leadId, Role role)
+        public async Task<LeadDto> UpdateLeadRoleAsync(int leadId, Role role)
         {
-            var dto = _leadValidationHelper.GetLeadByIdAndThrowIfNotFound(leadId);
+            var dto = await _leadValidationHelper.GetLeadByIdAndThrowIfNotFoundAsync(leadId);
             dto.Role = role;
-            _leadRepository.UpdateLeadRole(dto);
-            return _leadRepository.GetLeadById(leadId);
+            await _leadRepository.UpdateLeadRoleAsync(dto);
+            return await _leadRepository.GetLeadByIdAsync(leadId);
         }
 
         public void ChangeRoleForLeads(List<LeadDto> listLeadDtos)
@@ -73,16 +74,16 @@ namespace CRM.Business.Services
             _leadRepository.ChangeRoleForLeads(listLeadDtos);
         }
 
-        public void DeleteLead(int leadId)
+        public async Task DeleteLeadAsync(int leadId)
         {
-            var dto = _leadValidationHelper.GetLeadByIdAndThrowIfNotFound(leadId);
-            EmailSender(dto, EmailMessages.DeleteLeadSubject, EmailMessages.DeleteLeadBody);
-            _leadRepository.DeleteLead(leadId);
+            var dto = await _leadValidationHelper.GetLeadByIdAndThrowIfNotFoundAsync(leadId);
+            await EmailSender(dto, EmailMessages.DeleteLeadSubject, EmailMessages.DeleteLeadBody);
+            await _leadRepository.DeleteLeadAsync(leadId);
         }
 
-        public LeadDto GetLeadById(int leadId, LeadIdentityInfo leadInfo)
+        public async Task<LeadDto> GetLeadByIdAsync(int leadId, LeadIdentityInfo leadInfo)
         {
-            var dto = _leadValidationHelper.GetLeadByIdAndThrowIfNotFound(leadId);
+            var dto = await _leadValidationHelper.GetLeadByIdAndThrowIfNotFoundAsync(leadId);
             _leadValidationHelper.CheckAccessToLead(leadId, leadInfo);
             return dto;
         }
@@ -117,9 +118,9 @@ namespace CRM.Business.Services
             return _leadRepository.GetLeadsByFilters(sqlResult);
         }
 
-        public List<LeadDto> GetAllLeads()
+        public async Task<List<LeadDto>> GetAllLeadsAsync()
         {
-            return _leadRepository.GetAllLeads();
+            return await _leadRepository.GetAllLeadsAsync();
         }
 
         public List<LeadDto> GetAllLeadsByBatches(int lastLeadId)
@@ -127,9 +128,9 @@ namespace CRM.Business.Services
             return _leadRepository.GetAllLeadsByBatches(lastLeadId);
         }
 
-        private void EmailSender(LeadDto dto, string subject, string body)
+        private async Task EmailSender(LeadDto dto, string subject, string body)
         {
-            _publishEndpoint.Publish<IMailExchangeModel>(new
+            await _publishEndpoint.Publish<IMailExchangeModel>(new
             {
                 Subject = subject,
                 Body = $"{dto.LastName} {dto.FirstName} {body}",

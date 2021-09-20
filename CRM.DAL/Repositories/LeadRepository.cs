@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 using SqlKata;
 
 namespace CRM.DAL.Repositories
@@ -26,9 +27,9 @@ namespace CRM.DAL.Repositories
 
         public LeadRepository(IOptions<DatabaseSettings> options) : base(options) { }
 
-        public int AddLead(LeadDto lead)
+        public async Task<int> AddLeadAsync(LeadDto lead)
         {
-            return _connection.QuerySingleOrDefault<int>(
+            return await _connection.QuerySingleOrDefaultAsync<int>(
                 _insertLeadProcedure,
                 new
                 {
@@ -49,9 +50,9 @@ namespace CRM.DAL.Repositories
             );
         }
 
-        public void UpdateLead(LeadDto lead)
+        public async Task UpdateLeadAsync(LeadDto lead)
         {
-            _connection.Execute(
+            await _connection.ExecuteAsync(
                 _updateLeadProcedure,
                 new
                 {
@@ -67,9 +68,9 @@ namespace CRM.DAL.Repositories
             );
         }
 
-        public void UpdateLeadRole(LeadDto lead)
+        public async Task UpdateLeadRoleAsync(LeadDto lead)
         {
-            _connection.Execute(
+            await _connection.ExecuteAsync(
                 _updateLeadRoleProcedure,
                 new
                 {
@@ -98,20 +99,20 @@ namespace CRM.DAL.Repositories
                     );
         }
 
-        public int DeleteLead(int id)
+        public async Task<int> DeleteLeadAsync(int id)
         {
-            return _connection
-                .Execute(
+            return await _connection
+                .ExecuteAsync(
                     _deleteLeadByIdProcedure,
                     new { id },
                     commandType: CommandType.StoredProcedure);
         }
 
-        public LeadDto GetLeadById(int id)
+        public async Task<LeadDto> GetLeadByIdAsync(int id)
         {
             LeadDto result = default;
-            return _connection
-                .Query<LeadDto, AccountDto, CityDto, Role, LeadDto>(
+            return (await _connection
+                .QueryAsync<LeadDto, AccountDto, CityDto, Role, LeadDto>(
                     _getLeadByIdProcedure,
                     (lead, account, city, role) =>
                     {
@@ -127,14 +128,14 @@ namespace CRM.DAL.Repositories
                     },
                     new { id },
                     splitOn: "id",
-                    commandType: CommandType.StoredProcedure)
+                    commandType: CommandType.StoredProcedure))
                 .FirstOrDefault();
         }
 
-        public LeadDto GetLeadByEmail(string email)
+        public async Task<LeadDto> GetLeadByEmailAsync(string email)
         {
-            return _connection
-                .Query<LeadDto, Role, LeadDto>(
+            return (await _connection
+                .QueryAsync<LeadDto, Role, LeadDto>(
                     _getLeadByEmailProcedure,
                     (lead, role) =>
                     {
@@ -142,16 +143,16 @@ namespace CRM.DAL.Repositories
                         return lead;
                     },
                     new { email },
-                    commandType: CommandType.StoredProcedure)
+                    commandType: CommandType.StoredProcedure))
                 .FirstOrDefault();
         }
 
-        public List<LeadDto> GetAllLeads()
+        public async Task<List<LeadDto>> GetAllLeadsAsync()
         {
             var leadDictionary = new Dictionary<int, LeadDto>();
 
-            return _connection
-                .Query<LeadDto, AccountDto, CityDto, Role, LeadDto>(
+            return (await _connection
+                .QueryAsync<LeadDto, AccountDto, CityDto, Role, LeadDto>(
                     _getAllLeadsProcedure,
                     (lead, account, city, role) =>
                     {
@@ -169,7 +170,7 @@ namespace CRM.DAL.Repositories
                         return leadEntry;
                     },
                     splitOn: "id",
-                    commandType: CommandType.StoredProcedure)
+                    commandType: CommandType.StoredProcedure))
                 .Distinct()
                 .ToList();
         }
