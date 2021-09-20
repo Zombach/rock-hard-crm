@@ -1,17 +1,16 @@
-﻿using CRM.Business.IdentityInfo;
+﻿using CRM.Business.Constants;
+using CRM.Business.Extensions;
+using CRM.Business.IdentityInfo;
 using CRM.Business.ValidationHelpers;
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
 using MailExchange;
 using MassTransit;
-using SqlKata.Compilers;
 using SqlKata;
-using System;
-using CRM.Business.Extensions;
+using SqlKata.Compilers;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using CRM.Business.Constants;
 
 namespace CRM.Business.Services
 {

@@ -1,10 +1,10 @@
 using CRM.Business.Options;
 using CRM.Business.Services;
-using CRM.DAL.Repositories;
 using CRM.Business.ValidationHelpers;
+using CRM.DAL.Repositories;
+using MassTransit;
 using Moq;
 using NUnit.Framework;
-using MassTransit;
 
 namespace CRM.Business.Tests
 {
@@ -22,11 +22,11 @@ namespace CRM.Business.Tests
             _leadRepoMock = new Mock<ILeadRepository>();
             _accountRepoMock = new Mock<IAccountRepository>();
             var authenticationService = new AuthenticationService(_leadRepoMock.Object, new Mock<IAuthOptions>().Object);
-            var validationHelper = new LeadValidationHelper(_leadRepoMock.Object); 
+            var validationHelper = new LeadValidationHelper(_leadRepoMock.Object);
 
             _sut = new LeadService(
-                _leadRepoMock.Object, 
-                _accountRepoMock.Object, 
+                _leadRepoMock.Object,
+                _accountRepoMock.Object,
                 authenticationService,
                 validationHelper,
                 _publishEndpointMock.Object);

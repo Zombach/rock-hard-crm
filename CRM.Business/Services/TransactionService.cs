@@ -7,16 +7,16 @@ using CRM.Business.ValidationHelpers;
 using CRM.Core;
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
+using CRM.DAL.Repositories;
+using MailExchange;
+using MassTransit;
 using Microsoft.Extensions.Options;
 using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using CRM.DAL.Repositories;
-using MailExchange;
-using MassTransit;
-using static CRM.Business.Constants.TransactionEndpoint;
 using System.Threading.Tasks;
+using static CRM.Business.Constants.TransactionEndpoint;
 
 namespace CRM.Business.Services
 {

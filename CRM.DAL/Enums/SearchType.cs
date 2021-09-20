@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-
-namespace CRM.DAL.Enums
+﻿namespace CRM.DAL.Enums
 {
     public enum SearchType
     {

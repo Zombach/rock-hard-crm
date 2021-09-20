@@ -58,9 +58,9 @@ namespace CRM.API.Controllers
         [ProducesResponseType(typeof(List<LeadByFiltersOutputModel>), StatusCodes.Status200OK)]
         public List<LeadByFiltersOutputModel> GetAllLeadsByFilters(
             [FromBody] LeadFiltersInputModel leadFilter)
-        {            
+        {
             var filter = _mapper.Map<LeadFiltersDto>(leadFilter);
-            var leads = _leadService.GetLeadsByFilters(filter); 
+            var leads = _leadService.GetLeadsByFilters(filter);
             var result = _mapper.Map<List<LeadByFiltersOutputModel>>(leads);
             return result;
         }
@@ -71,8 +71,8 @@ namespace CRM.API.Controllers
         [Description("Get all Leads by batches")]
         [ProducesResponseType(typeof(List<LeadByBatchesOutputModel>), StatusCodes.Status200OK)]
         public List<LeadByBatchesOutputModel> GetAllLeadsByBatсhes(int lastLeadId)
-        {            
-            var leads = _leadService.GetAllLeadsByBatches(lastLeadId); 
+        {
+            var leads = _leadService.GetAllLeadsByBatches(lastLeadId);
             var result = _mapper.Map<List<LeadByBatchesOutputModel>>(leads);
             return result;
         }

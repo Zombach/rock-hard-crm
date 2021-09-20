@@ -2,13 +2,12 @@
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using Dapper;
-using DapperQueryBuilder;
 using Microsoft.Extensions.Options;
+using SqlKata;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
-using SqlKata;
 
 namespace CRM.DAL.Repositories
 {

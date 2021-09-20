@@ -8,7 +8,7 @@ namespace CRM.Business.Extensions
 {
     public static class LeadServiceExtensions
     {
-        public static Query FilterByName(this LeadService service, 
+        public static Query FilterByName(this LeadService service,
             Query query, string partOfName, SearchType? searchType, string field)
         {
             if (partOfName is null) return query;
