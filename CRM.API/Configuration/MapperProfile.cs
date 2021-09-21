@@ -48,6 +48,7 @@ namespace CRM.API.Configuration
                 .ForMember(dest => dest.BirthDate, opt => opt.MapFrom(src => src.BirthDate.ToString(_dateFormat)));
             CreateMap<LeadDto, LeadByBatchesOutputModel>()
                 .ForMember(dest => dest.BirthDate, opt => opt.MapFrom(src => src.BirthDate.ToString(_dateFormat)));
+            CreateMap<TransactionBusinessModel, TransactionOutputModel>();
         }
 
         private void CreateMappingToBusiness()

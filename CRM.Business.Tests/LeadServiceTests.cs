@@ -5,6 +5,8 @@ using CRM.DAL.Repositories;
 using MassTransit;
 using Moq;
 using NUnit.Framework;
+using MassTransit;
+using CRM.Business.Tests.Data;
 
 namespace CRM.Business.Tests
 {
@@ -32,9 +34,14 @@ namespace CRM.Business.Tests
                 _publishEndpointMock.Object);
         }
 
-        [Test]
-        public void Test1()
+        [TestCaseSource(typeof(LeadData), nameof(LeadData.GetLeadFilterData))]
+        public void GetLeadsByFiltersTest()
         {
+            //When
+
+            //Given
+
+            //Then
             Assert.Pass();
         }
     }

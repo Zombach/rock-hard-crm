@@ -76,13 +76,24 @@ namespace CRM.API.Controllers
         // api/account/by-period
         [HttpPost("by-period")]
         [Description("Get transactions by period or period and account id")]
-        [ProducesResponseType(typeof(List<TransactionOutputModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<AccountBusinessModel>), StatusCodes.Status200OK)]
         public async Task<List<AccountBusinessModel>> GetTransactionsByPeriodAndPossiblyAccountIdAsync([FromBody] TimeBasedAcquisitionInputModel model)
         {
             var leadInfo = this.GetLeadInfo();
             var dto = _mapper.Map<TimeBasedAcquisitionBusinessModel>(model);
             var output = await _accountService.GetTransactionsByPeriodAndPossiblyAccountIdAsync(dto, leadInfo);
             return _mapper.Map<List<AccountBusinessModel>>(output);
+        }
+
+        // api/account/by-period
+        [HttpPost("by-accountIds")]
+        [Description("Get transactions by period or period and account id")]
+        [ProducesResponseType(typeof(List<TransactionOutputModel>), StatusCodes.Status200OK)]
+        public List<TransactionOutputModel> GetTransactionsByTwoMonthAndAccountIdsAsync([FromBody] List<int> accounts)
+        {
+            var leadInfo = this.GetLeadInfo();
+            var output = _accountService.GetTransactionsByAccountIdsForTwoMonths(accounts, leadInfo);
+            return _mapper.Map<List<TransactionOutputModel>>(output);
         }
 
         // api/account/lead/{leadId}
