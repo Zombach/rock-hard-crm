@@ -1,8 +1,8 @@
-﻿using AutoMapper;
+﻿using System.Threading.Tasks;
+using AutoMapper;
 using CRM.Business.Constants;
 using CRM.Business.Exceptions;
 using CRM.Business.Models;
-using CRM.Business.Requests;
 using CRM.Business.Services;
 using CRM.Business.Tests.TestsDataHelpers;
 using CRM.Business.ValidationHelpers;
@@ -23,12 +23,10 @@ namespace CRM.Business.Tests
         private Mock<RestClient> _clientMock;
         private Mock<IPublishEndpoint> _publishEndPointMock;
         private AccountService _sut;
-        private RequestHelper _requestHelper;
 
         [SetUp]
         public void SetUp()
         {
-            _requestHelper = new RequestHelper();
             _leadRepoMock = new Mock<ILeadRepository>();
             _clientMock = new Mock<RestClient>();
             _mapperMock = new Mock<IMapper>();
@@ -53,31 +51,31 @@ namespace CRM.Business.Tests
             var expectedAccount = AccountData.GetAccountDto();
             var lead = LeadData.GetLead();
 
-            _accountRepoMock.Setup(x => x.AddAccount(expectedAccount)).Returns(expectedAccount.Id);
-            _leadRepoMock.Setup(x => x.GetLeadById(leadInfo.LeadId)).Returns(lead);
+            _accountRepoMock.Setup(x => x.AddAccountAsync(expectedAccount)).ReturnsAsync(expectedAccount.Id);
+            _leadRepoMock.Setup(x => x.GetLeadByIdAsync(leadInfo.LeadId)).ReturnsAsync(lead);
 
             //When
-            var actualId = _sut.AddAccount(expectedAccount, leadInfo);
+            var actualId = _sut.AddAccountAsync(expectedAccount, leadInfo);
 
             //Then
             Assert.AreEqual(expectedAccount.Id, actualId);
-            _accountRepoMock.Verify(x => x.AddAccount(expectedAccount), Times.Once);
+            _accountRepoMock.Verify(x => x.AddAccountAsync(expectedAccount), Times.Once);
         }
 
         [Test]
-        public void DeleteAccount()
+        public async Task DeleteAccount()
         {
             //Given
             var account = AccountData.GetAccountDto();
-            _accountRepoMock.Setup(x => x.DeleteAccount(account.Id));
-            _accountRepoMock.Setup(x => x.GetAccountById(account.Id)).Returns(account);
+            _accountRepoMock.Setup(x => x.DeleteAccountAsync(account.Id));
+            _accountRepoMock.Setup(x => x.GetAccountByIdAsync(account.Id)).ReturnsAsync(account);
 
             //When
-            _sut.DeleteAccount(account.Id, account.LeadId);
+            await _sut.DeleteAccountAsync(account.Id, account.LeadId);
 
             //Then
-            _accountRepoMock.Verify(x => x.GetAccountById(account.Id), Times.Once);
-            _accountRepoMock.Verify(x => x.DeleteAccount(account.Id), Times.Once);
+            _accountRepoMock.Verify(x => x.GetAccountByIdAsync(account.Id), Times.Once);
+            _accountRepoMock.Verify(x => x.DeleteAccountAsync(account.Id), Times.Once);
         }
 
         [Test]
@@ -88,20 +86,20 @@ namespace CRM.Business.Tests
             var accountAnother = AccountData.GetAnotherAccountDto();
             var expectedException = string.Format(ServiceMessages.LeadHasNoAccessMessageToAccount, account.LeadId);
 
-            _accountRepoMock.Setup(x => x.GetAccountById(account.Id)).Returns(accountAnother);
+            _accountRepoMock.Setup(x => x.GetAccountByIdAsync(account.Id)).ReturnsAsync(accountAnother);
 
             //When
-            var ex = Assert.Throws<AuthorizationException>(
-                () => _sut.DeleteAccount(account.Id, account.LeadId));
+            var ex = Assert.ThrowsAsync<AuthorizationException>(
+                () => _sut.DeleteAccountAsync(account.Id, account.LeadId));
 
             //Then
             Assert.AreEqual(expectedException, ex.Message);
-            _accountRepoMock.Verify(x => x.GetAccountById(account.Id), Times.Once);
-            _accountRepoMock.Verify(x => x.DeleteAccount(account.Id), Times.Never);
+            _accountRepoMock.Verify(x => x.GetAccountByIdAsync(account.Id), Times.Once);
+            _accountRepoMock.Verify(x => x.DeleteAccountAsync(account.Id), Times.Never);
         }
 
         [Test]
-        public void GetAccountWithTransactions()
+        public async Task GetAccountWithTransactions()
         {
             var accountDto = AccountData.GetAccountDto();
             var expectedList = TransactionData.GetJSONstring();
@@ -109,8 +107,8 @@ namespace CRM.Business.Tests
             var leadInfo = LeadIdentityInfoData.GetRegularLeadIdentityInfo();
 
             _accountRepoMock.Setup(x => x
-                .GetAccountById(accountDto.Id))
-                .Returns(accountDto);
+                .GetAccountByIdAsync(accountDto.Id))
+                .ReturnsAsync(accountDto);
             _mapperMock.Setup(x => x
                 .Map<AccountBusinessModel>(accountDto))
                 .Returns(accountBusinessModel);
@@ -122,11 +120,11 @@ namespace CRM.Business.Tests
                 });
 
             //When
-            var actualList = _sut.GetAccountWithTransactions(accountDto.Id, leadInfo);
+            var actualList = await _sut.GetAccountWithTransactionsAsync(accountDto.Id, leadInfo);
 
             //Then
             Assert.AreEqual(accountBusinessModel, actualList);
-            _accountRepoMock.Verify(x => x.GetAccountById(accountDto.Id), Times.Once);
+            _accountRepoMock.Verify(x => x.GetAccountByIdAsync(accountDto.Id), Times.Once);
         }
     }
 }

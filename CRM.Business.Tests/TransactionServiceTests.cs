@@ -58,8 +58,8 @@ namespace CRM.Business.Tests
             var account = AccountData.GetAccountDto();
             var leadInfo = LeadIdentityInfoData.GetRegularLeadIdentityInfo();
             _accountRepoMock.Setup(x => x
-                .GetAccountById(account.Id))
-                .Returns(account);
+                .GetAccountByIdAsync(account.Id))
+                .ReturnsAsync(account);
             _clientMock.Setup(x => x
                 .Execute<long>(It.IsAny<IRestRequest>()))
                 .Returns(new RestResponse<long>
@@ -68,11 +68,11 @@ namespace CRM.Business.Tests
                 });
 
             //When
-            var actual = _sut.AddDeposit(model, leadInfo);
+            var actual = _sut.AddDepositAsync(model, leadInfo);
 
             //Then
             Assert.AreEqual(expected, actual);
-            _accountRepoMock.Verify(x => x.GetAccountById(account.Id), Times.Once);
+            _accountRepoMock.Verify(x => x.GetAccountByIdAsync(account.Id), Times.Once);
         }
 
         [Test]
@@ -85,8 +85,8 @@ namespace CRM.Business.Tests
             var leadInfo = LeadIdentityInfoData.GetRegularLeadIdentityInfo();
 
             _accountRepoMock
-                .Setup(x => x.GetAccountById(account.Id))
-                .Returns(account);
+                .Setup(x => x.GetAccountByIdAsync(account.Id))
+                .ReturnsAsync(account);
             _clientMock
                 .Setup(x => x.Execute<long>(It.IsAny<IRestRequest>()))
                 .Returns(new RestResponse<long>
@@ -95,11 +95,11 @@ namespace CRM.Business.Tests
                 });
 
             //When
-            var actual = _sut.AddWithdraw(model, leadInfo);
+            var actual = _sut.AddWithdrawAsync(model, leadInfo);
 
             //Then
             Assert.AreEqual(expected, actual);
-            _accountRepoMock.Verify(x => x.GetAccountById(account.Id), Times.Once);
+            _accountRepoMock.Verify(x => x.GetAccountByIdAsync(account.Id), Times.Once);
         }
 
         [Test]
@@ -115,11 +115,11 @@ namespace CRM.Business.Tests
             model.Currency = account.Currency;
             model.RecipientCurrency = accountAnother.Currency;
             _accountRepoMock.Setup(x => x
-                    .GetAccountById(model.RecipientAccountId))
-                .Returns(account);
+                    .GetAccountByIdAsync(model.RecipientAccountId))
+                .ReturnsAsync(account);
             _accountRepoMock.Setup(x => x
-                    .GetAccountById(model.AccountId))
-                .Returns(accountAnother);
+                    .GetAccountByIdAsync(model.AccountId))
+                .ReturnsAsync(accountAnother);
 
             _clientMock.Setup(x => x
                       .Execute<string>(It.IsAny<IRestRequest>()))
@@ -129,12 +129,12 @@ namespace CRM.Business.Tests
                   });
 
             //When
-            var actual = _sut.AddTransfer(model, leadInfo);
+            var actual = _sut.AddTransferAsync(model, leadInfo);
 
             //Then
             Assert.AreEqual(expected, actual);
-            _accountRepoMock.Verify(x => x.GetAccountById(model.AccountId), Times.Once);
-            _accountRepoMock.Verify(x => x.GetAccountById(model.RecipientAccountId), Times.Once);
+            _accountRepoMock.Verify(x => x.GetAccountByIdAsync(model.AccountId), Times.Once);
+            _accountRepoMock.Verify(x => x.GetAccountByIdAsync(model.RecipientAccountId), Times.Once);
         }
     }
 }

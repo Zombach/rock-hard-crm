@@ -23,14 +23,14 @@ namespace CRM.Business.Tests
         {
             //Given
             var expectedCites = CityData.GetListCityDto();
-            _mock.Setup(x => x.GetAllCities()).Returns(expectedCites);
+            _mock.Setup(x => x.GetAllCitiesAsync()).ReturnsAsync(expectedCites);
 
             //When
             var actualCites = _sut.GetAllCities();
 
             //Then
             Assert.AreEqual(expectedCites, actualCites);
-            _mock.Verify(x => x.GetAllCities(), Times.Once);
+            _mock.Verify(x => x.GetAllCitiesAsync(), Times.Once);
         }
     }
 }
