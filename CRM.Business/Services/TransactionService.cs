@@ -17,6 +17,7 @@ using MailExchange;
 using MassTransit;
 using static CRM.Business.Constants.TransactionEndpoint;
 using System.Threading.Tasks;
+using System.Runtime.Caching;
 
 namespace CRM.Business.Services
 {
@@ -33,6 +34,8 @@ namespace CRM.Business.Services
         private readonly IPublishEndpoint _publishEndpoint;
         private readonly ILeadRepository _leadRepository;
 
+        static ObjectCache cache = MemoryCache.Default;
+        CacheItemPolicy policy = new CacheItemPolicy();
         public TransactionService
         (
             IOptions<ConnectionSettings> connectionOptions,
@@ -61,6 +64,8 @@ namespace CRM.Business.Services
             var leadDto = await _leadRepository.GetLeadByIdAsync(leadInfo.LeadId);
             var account = await CheckAccessAndReturnAccount(model.AccountId, leadInfo);
             _accountValidationHelper.CheckForVipAccess(account.Currency, leadInfo);
+
+            var m = cache["1"];
             var commission = CalculateCommission(model.Amount, leadInfo);
 
             model.Amount -= commission;
@@ -68,6 +73,7 @@ namespace CRM.Business.Services
             model.Currency = account.Currency;
 
             var request = _requestHelper.CreatePostRequest(AddDepositEndpoint, model);
+
             var result = _client.Execute<long>(request);
             if (!result.IsSuccessful)
             {
@@ -116,9 +122,9 @@ namespace CRM.Business.Services
             var leadDto = await _leadRepository.GetLeadByIdAsync(leadInfo.LeadId);
             var account = await _accountService.GetAccountWithTransactionsAsync(model.AccountId, leadInfo);
             var recipientAccount = await CheckAccessAndReturnAccount(model.RecipientAccountId, leadInfo);
+            CheckBalance(account, model.Amount);
             var commission = CalculateCommission(model.Amount, leadInfo);
 
-            CheckBalance(account, model.Amount);
 
             if (account.Currency != Currency.RUB && account.Currency != Currency.USD && !leadInfo.IsVip())
             {
@@ -132,6 +138,8 @@ namespace CRM.Business.Services
             model.Amount -= commission;
             model.Currency = account.Currency;
             model.RecipientCurrency = recipientAccount.Currency;
+
+
             var request = _requestHelper.CreatePostRequest(AddTransferEndpoint, model);
             var result = await _client.ExecuteAsync<List<long>>(request);
 
@@ -148,6 +156,38 @@ namespace CRM.Business.Services
             AddCommissionFee(dto);
 
             return dto;
+        }
+
+        public async Task CheckTransactionAndSendEmailAsync(TransactionBusinessModel model, LeadIdentityInfo leadInfo)
+        {
+            cache.Set("1", model, policy);
+            var leadDto = await _leadRepository.GetLeadByIdAsync(leadInfo.LeadId);
+            var account = await _accountService.GetAccountWithTransactionsAsync(model.AccountId, leadInfo);
+            CheckBalance(account, model.Amount);
+            EmailSender(leadDto, EmailMessages.TwoFactorAuthSubject, EmailMessages.TwoFactorAuthBody);
+        }
+
+        public async Task CheckTransferAndSendEmailAsync(TransferBusinessModel model, LeadIdentityInfo leadInfo)
+        {
+            cache.Set("1", model, policy);
+            var leadDto = await _leadRepository.GetLeadByIdAsync(leadInfo.LeadId);
+            var recipientAccount = await CheckAccessAndReturnAccount(model.RecipientAccountId, leadInfo);
+            var account = await _accountService.GetAccountWithTransactionsAsync(model.AccountId, leadInfo);
+            CheckBalance(account, model.Amount);
+            EmailSender(leadDto, EmailMessages.TwoFactorAuthSubject, EmailMessages.TwoFactorAuthBody);
+        }
+
+        public async Task<CommissionFeeDto> ContinueTransaction(LeadIdentityInfo leadInfo)
+        {
+            var model = (TransferBusinessModel)cache["1"];
+            if (model.RecipientAccountId != 0)
+            {
+                return await AddTransferAsync(model, leadInfo);
+            }
+            else
+            {
+                return await AddWithdrawAsync(model, leadInfo);
+            }
         }
 
         private async Task<AccountDto> CheckAccessAndReturnAccount(int accountId, LeadIdentityInfo leadInfo)

@@ -48,40 +48,39 @@ namespace CRM.API.Controllers
         // api/transaction/withdraw
         [HttpPost("withdraw")]
         [Description("Add withdraw")]
-        [ProducesResponseType(typeof(CommissionFeeShortOutputModel), StatusCodes.Status201Created)]
-        public async Task<ActionResult<CommissionFeeShortOutputModel>> AddWithdrawAsync([FromBody] TransactionInputModel inputModel)
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        public async Task AddWithdrawAsync([FromBody] TransactionInputModel inputModel)
         {
             var leadInfo = this.GetLeadInfo();
-            var model = _mapper.Map<TransactionBusinessModel>(inputModel);
-            var commissionModel = await _transactionService.AddWithdrawAsync(model, leadInfo);
-            var output = _mapper.Map<CommissionFeeShortOutputModel>(commissionModel);
-            return StatusCode(201, output);
+            var model = _mapper.Map<TransferBusinessModel>(inputModel);
+            await _transactionService.CheckTransactionAndSendEmailAsync(model, leadInfo);
         }
 
         // api/transaction/transfer
         [HttpPost("transfer")]
         [Description("Add transfer")]
-        [ProducesResponseType(typeof(CommissionFeeShortOutputModel), StatusCodes.Status201Created)]
-        public async Task<ActionResult<CommissionFeeShortOutputModel>> AddTransferAsync([FromBody] TransferInputModel inputModel)
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        public async Task AddTransferAsync([FromBody] TransferInputModel inputModel)
         {
             var leadInfo = this.GetLeadInfo();
             var model = _mapper.Map<TransferBusinessModel>(inputModel);
-            var commissionModel = await _transactionService.AddTransferAsync(model, leadInfo);
-            var output = _mapper.Map<CommissionFeeShortOutputModel>(commissionModel);
-            return StatusCode(201, output);
+            await _transactionService.CheckTransferAndSendEmailAsync(model, leadInfo);
         }
 
-        [HttpPost("two-factor-authentication")]
+        // api/transaction/two-factor-authentication/{pinCode}
+        [HttpPost("two-factor-authentication/{pinCode}")]
+        [Description("Two factor authentication")]
         [ProducesResponseType(typeof(CommissionFeeShortOutputModel), StatusCodes.Status201Created)]
-        public ActionResult TwoFactorAuthentication(TwoFactorAuthenticatorModel tfaModel, string pinCode)
+        public async Task<ActionResult<CommissionFeeShortOutputModel>> TwoFactorAuthentication(TwoFactorAuthenticatorModel tfaModel, string pinCode)
         {
             var leadInfo = this.GetLeadInfo();
-            var isValid = _twoFactorAuthService.ValidateTwoFactorPIN(leadInfo.KeyForTwoFactorAuth, pinCode);
+            var isValid = _twoFactorAuthService.ValidateTwoFactorPIN(tfaModel.Key, pinCode);
             if (!isValid)
             {
-                return Redirect("two-factor-authentication");
+                return Redirect("two-factor-authentication/{pinCode}");
             }
-
+            var commissionModel = await _transactionService.ContinueTransaction(leadInfo);
+            var output = _mapper.Map<CommissionFeeShortOutputModel>(commissionModel);
             return StatusCode(201, output);
         }
     }

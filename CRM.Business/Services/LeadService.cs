@@ -45,17 +45,16 @@ namespace CRM.Business.Services
         {
             var tfaModel = _twoFactorAuthService.GetTwoFactorAuthenticatorKey();
             SetupCode setupInfo = tfaModel.Tfa.GenerateSetupCode("CRM", dto.Email, tfaModel.Key, false, 3);
-
-            var qrCodeImageUrl = setupInfo.QrCodeSetupImageUrl;
-            //string manualEntrySetupCode = setupInfo.ManualEntryKey;
-            var qrCodeforEmail = $"<html><body><p>This is an HTML email with an embedded image.</p><p><img src={qrCodeImageUrl}/></p></body></html>";
+            var qrCodeImageUrl = setupInfo.QrCodeSetupImageUrl;          
+            
             dto.Password = _authenticationService.HashPassword(dto.Password);
             dto.Role = Role.Regular;
             dto.BirthYear = dto.BirthDate.Year;
             dto.BirthMonth = dto.BirthDate.Month;
             dto.BirthDay = dto.BirthDate.Day;
+            dto.KeyForTwoFactorAuth = tfaModel.Key;
             var leadId = await _leadRepository.AddLeadAsync(dto);
-            await EmailSender(dto, EmailMessages.RegistrationSubject, EmailMessages.RegistrationBody+$"{qrCodeforEmail}", true);
+            await EmailSender(dto, EmailMessages.RegistrationSubject, string.Format(EmailMessages.RegistrationBody, qrCodeImageUrl), true);
             await _accountRepository.AddAccountAsync(new AccountDto { LeadId = leadId, Currency = Currency.RUB });
 
             return await _leadRepository.GetLeadByIdAsync(leadId);
