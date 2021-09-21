@@ -128,11 +128,11 @@ namespace CRM.Business.Services
             return models;
         }
 
-        public List<TransactionBusinessModel> GetTransactionsByAccountIdsForTwoMonths(List<int> accountIds, LeadIdentityInfo leadInfo)
+        public async Task<List<TransactionBusinessModel>> GetTransactionsByAccountIdsForTwoMonthsAsync(List<int> accountIds, LeadIdentityInfo leadInfo)
         {
             foreach (int accountId in accountIds)
             {
-                var dto = _accountValidationHelper.GetAccountByIdAndThrowIfNotFound(accountId);
+                var dto = await _accountValidationHelper.GetAccountByIdAndThrowIfNotFoundAsync(accountId);
                 if (!leadInfo.IsAdmin())
                     _accountValidationHelper.CheckLeadAccessToAccount(dto.LeadId, leadInfo.LeadId);
             }

@@ -89,10 +89,10 @@ namespace CRM.API.Controllers
         [HttpPost("by-accountIds")]
         [Description("Get transactions by period or period and account id")]
         [ProducesResponseType(typeof(List<TransactionOutputModel>), StatusCodes.Status200OK)]
-        public List<TransactionOutputModel> GetTransactionsByTwoMonthAndAccountIdsAsync([FromBody] List<int> accounts)
+        public async Task<List<TransactionOutputModel>> GetTransactionsByTwoMonthAndAccountIdsAsync([FromBody] List<int> accounts)
         {
             var leadInfo = this.GetLeadInfo();
-            var output = _accountService.GetTransactionsByAccountIdsForTwoMonths(accounts, leadInfo);
+            var output = await _accountService.GetTransactionsByAccountIdsForTwoMonthsAsync(accounts, leadInfo);
             return _mapper.Map<List<TransactionOutputModel>>(output);
         }
 
