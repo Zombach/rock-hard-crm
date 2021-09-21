@@ -85,9 +85,9 @@ namespace CRM.API.Controllers
             return _mapper.Map<List<AccountBusinessModel>>(output);
         }
 
-        // api/account/by-period
+        // api/account/by-accountIds
         [HttpPost("by-accountIds")]
-        [Description("Get transactions by period or period and account id")]
+        [Description("Get transactions by two months and account ids")]
         [ProducesResponseType(typeof(List<TransactionOutputModel>), StatusCodes.Status200OK)]
         public async Task<List<TransactionOutputModel>> GetTransactionsByTwoMonthAndAccountIdsAsync([FromBody] List<int> accounts)
         {
