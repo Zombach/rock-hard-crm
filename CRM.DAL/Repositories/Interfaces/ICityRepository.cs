@@ -1,10 +1,11 @@
 ﻿using CRM.DAL.Models;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CRM.DAL.Repositories
 {
     public interface ICityRepository
     {
-        List<CityDto> GetAllCities();
+        Task<List<CityDto>> GetAllCitiesAsync();
     }
 }

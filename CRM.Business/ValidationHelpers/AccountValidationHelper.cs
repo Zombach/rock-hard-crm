@@ -5,6 +5,7 @@ using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace CRM.Business.ValidationHelpers
 {
@@ -17,9 +18,9 @@ namespace CRM.Business.ValidationHelpers
             _accountRepository = accountRepository;
         }
 
-        public AccountDto GetAccountByIdAndThrowIfNotFound(int accountId)
+        public async Task<AccountDto> GetAccountByIdAndThrowIfNotFoundAsync(int accountId)
         {
-            var account = _accountRepository.GetAccountById(accountId);
+            var account = await _accountRepository.GetAccountByIdAsync(accountId);
             if (account == default)
                 throw new EntityNotFoundException(string.Format(ServiceMessages.EntityNotFoundMessage, nameof(account), accountId));
             return account;

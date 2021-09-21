@@ -2,6 +2,7 @@
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CRM.Business.Services
 {
@@ -14,34 +15,34 @@ namespace CRM.Business.Services
             _commissionFeeRepository = commissionFeeRepository;
         }
 
-        public int AddCommissionFee(CommissionFeeDto dto)
+        public async Task<int> AddCommissionFeeAsync(CommissionFeeDto dto)
         {
-            return _commissionFeeRepository.AddCommissionFee(dto);
+            return await _commissionFeeRepository.AddCommissionFeeAsync(dto);
         }
 
-        public List<CommissionFeeDto> GetAllCommissionFees()
+        public async Task<List<CommissionFeeDto>> GetAllCommissionFeesAsync()
         {
-            return _commissionFeeRepository.GetAllCommissionFees();
+            return await _commissionFeeRepository.GetAllCommissionFeesAsync();
         }
 
-        public List<CommissionFeeDto> GetCommissionFeesByAccountId(int accountId)
+        public async Task<List<CommissionFeeDto>> GetCommissionFeesByAccountIdAsync(int accountId)
         {
-            return _commissionFeeRepository.GetCommissionFeesByAccountId(accountId);
+            return await _commissionFeeRepository.GetCommissionFeesByAccountIdAsync(accountId);
         }
 
-        public List<CommissionFeeDto> GetCommissionFeesByLeadId(int leadId)
+        public async Task<List<CommissionFeeDto>> GetCommissionFeesByLeadIdAsync(int leadId)
         {
-            return _commissionFeeRepository.GetCommissionFeesByLeadId(leadId);
+            return await _commissionFeeRepository.GetCommissionFeesByLeadIdAsync(leadId);
         }
 
-        public List<CommissionFeeDto> SearchingCommissionFeesForThePeriod(TimeBasedAcquisitionDto dto)
+        public async Task<List<CommissionFeeDto>> SearchingCommissionFeesForThePeriodAsync(TimeBasedAcquisitionDto dto)
         {
-            return _commissionFeeRepository.SearchingCommissionFeesForThePeriod(dto);
+            return await _commissionFeeRepository.SearchingCommissionFeesForThePeriodAsync(dto);
         }
 
-        public List<CommissionFeeDto> GetCommissionFeesByRole(Role role)
+        public async Task<List<CommissionFeeDto>> GetCommissionFeesByRoleAsync(Role role)
         {
-            return _commissionFeeRepository.GetCommissionFeesByRole((int)role);
+            return await _commissionFeeRepository.GetCommissionFeesByRoleAsync((int)role);
         }
     }
 }

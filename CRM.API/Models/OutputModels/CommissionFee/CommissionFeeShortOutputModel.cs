@@ -8,6 +8,6 @@ namespace CRM.API.Models
         public int AccountId { get; set; }
         public long TransactionId { get; set; }
         public Role Role { get; set; }
-        public decimal Amount { get; set; }
+        public decimal CommissionAmount { get; set; }
     }
 }
