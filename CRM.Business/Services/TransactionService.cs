@@ -69,16 +69,23 @@ namespace CRM.Business.Services
 
             var request = _requestHelper.CreatePostRequest(AddDepositEndpoint, model);
             var result = _client.Execute<long>(request);
-            if (!result.IsSuccessful)
-            {
-                throw new Exception($"{result.ErrorMessage} {_client.BaseUrl}");
-            }
+            //if (!result.IsSuccessful)
+            //{
+            //    throw new Exception($"{result.ErrorMessage} {_client.BaseUrl}");
+            //}
             var transactionId = result.Data;
             EmailSender(leadDto, EmailMessages.DepositSubject, string.Format(EmailMessages.DepositBody, model.Amount));
             var dto = new CommissionFeeDto
-            { LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = leadInfo.Role, CommissionAmount = commission, TransactionType = TransactionType.Deposit };
+            {
+                LeadId = leadInfo.LeadId,
+                AccountId = model.AccountId,
+                TransactionId = transactionId,
+                Role = leadInfo.Role,
+                CommissionAmount = commission,
+                TransactionType = TransactionType.Deposit
+            };
 
-            AddCommissionFee(dto);
+            await AddCommissionFee(dto);
 
             return dto;
         }
@@ -100,13 +107,19 @@ namespace CRM.Business.Services
             var result = _client.Execute<long>(request);
             var transactionId = result.Data;
 
-
             EmailSender(leadDto, EmailMessages.WithdrawSubject, string.Format(EmailMessages.WithdrawBody, model.Amount));
 
             var dto = new CommissionFeeDto
-            { LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = leadInfo.Role, CommissionAmount = commission, TransactionType = TransactionType.Withdraw };
+            {
+                LeadId = leadInfo.LeadId,
+                AccountId = model.AccountId,
+                TransactionId = transactionId,
+                Role = leadInfo.Role,
+                CommissionAmount = commission,
+                TransactionType = TransactionType.Withdraw
+            };
 
-            AddCommissionFee(dto);
+            await AddCommissionFee(dto);
 
             return dto;
         }
@@ -145,7 +158,7 @@ namespace CRM.Business.Services
             var dto = new CommissionFeeDto
             { LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = leadInfo.Role, CommissionAmount = commission, TransactionType = TransactionType.Transfer };
 
-            AddCommissionFee(dto);
+            await AddCommissionFee(dto);
 
             return dto;
         }
@@ -157,9 +170,9 @@ namespace CRM.Business.Services
             return account;
         }
 
-        private void AddCommissionFee(CommissionFeeDto dto)
+        private async Task<int> AddCommissionFee(CommissionFeeDto dto)
         {
-            _commissionFeeService.AddCommissionFeeAsync(dto);
+            return await _commissionFeeService.AddCommissionFeeAsync(dto);
         }
 
         private decimal CalculateCommission(decimal amount, LeadIdentityInfo leadInfo)

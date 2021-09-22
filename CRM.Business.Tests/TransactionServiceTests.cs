@@ -3,6 +3,8 @@ using CRM.Business.Services;
 using CRM.Business.Tests.TestsDataHelpers;
 using CRM.Business.ValidationHelpers;
 using CRM.Core;
+using CRM.DAL.Enums;
+using CRM.DAL.Models;
 using CRM.DAL.Repositories;
 using MassTransit;
 using Microsoft.Extensions.Options;
@@ -35,11 +37,13 @@ namespace CRM.Business.Tests
             _accountValidationHelper = new AccountValidationHelper(_accountRepoMock.Object);
 
             var optionsMock = new Mock<IOptions<CommissionSettings>>();
-            optionsMock.Setup(x => x.Value).Returns(new CommissionSettings { 
-                Commission = 0.2m, 
-                CommissionModifier = 1.5m, 
-                VipCommission = 0.1m });
-            
+            optionsMock.Setup(x => x.Value).Returns(new CommissionSettings
+            {
+                Commission = 0.2m,
+                CommissionModifier = 1.5m,
+                VipCommission = 0.1m
+            });
+
             _sut = new TransactionService(
                 optionsMock.Object,
                 _accountValidationHelper,
@@ -54,26 +58,42 @@ namespace CRM.Business.Tests
         public async Task AddDeposit()
         {
             //Given
-            var expected = 234324243L;
+            const long data = 21321L;
             var model = TransactionData.GeTransactionBusinessModel();
-            var account = AccountData.GetUsdAccountDto();
             var leadInfo = LeadIdentityInfoData.GetRegularLeadIdentityInfo();
-            _accountRepoMock.Setup(x => x
-                .GetAccountByIdAsync(account.Id))
-                .ReturnsAsync(account);
-            _clientMock.Setup(x => x
-                .Execute<long>(It.IsAny<IRestRequest>()))
+            var account = AccountData.GetUsdAccountDto();
+            var lead = LeadData.GetLeadDto();
+            var commission = new CommissionFeeDto
+            {
+                Id = 123,
+                LeadId = leadInfo.LeadId,
+                AccountId = model.AccountId,
+                TransactionId = data,
+                Role = leadInfo.Role,
+                CommissionAmount = 0.2m,
+                TransactionType = TransactionType.Deposit
+            };
+            account.LeadId = leadInfo.LeadId;
+
+            _leadRepoMock.Setup(x => x.GetLeadByIdAsync(leadInfo.LeadId)).ReturnsAsync(lead);
+            _commissionFeeServiceMock.Setup(x => x.AddCommissionFeeAsync(commission)).ReturnsAsync(commission.Id);
+            _accountRepoMock.Setup(x => x.GetAccountByIdAsync(account.Id)).ReturnsAsync(account);
+            _clientMock
+                .Setup(x => x.Execute<long>(It.IsAny<IRestRequest>()))
                 .Returns(new RestResponse<long>
                 {
-                    Data = expected
+                    Data = data
                 });
 
             //When
             var actual = await _sut.AddDepositAsync(model, leadInfo);
 
             //Then
-            Assert.AreEqual(expected, actual);
+            Assert.AreEqual(commission, actual);
             _accountRepoMock.Verify(x => x.GetAccountByIdAsync(account.Id), Times.Once);
+            _leadRepoMock.Verify(x => x.GetLeadByIdAsync(leadInfo.LeadId), Times.Once);
+            _commissionFeeServiceMock.Verify(x => x.AddCommissionFeeAsync(commission), Times.Once);
+
         }
 
         [Test]

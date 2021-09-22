@@ -49,7 +49,7 @@ namespace CRM.Business.Tests
             //Given
             var leadInfo = LeadIdentityInfoData.GetRegularLeadIdentityInfo();
             var expectedAccount = AccountData.GetUsdAccountDto();
-            var lead = LeadData.GetLead();
+            var lead = LeadData.GetLeadDto();
             expectedAccount.LeadId = lead.Id;
 
             _accountRepoMock.Setup(x => x.AddAccountAsync(expectedAccount)).ReturnsAsync(expectedAccount.Id);
@@ -70,7 +70,7 @@ namespace CRM.Business.Tests
             //Given
             var leadInfo = LeadIdentityInfoData.GetRegularLeadIdentityInfo();
             var expectedAccount = AccountData.GetRubAccountDto();
-            var lead = LeadData.GetLead();
+            var lead = LeadData.GetLeadDto();
             var expectedException = string.Format(ServiceMessages.LeadHasThisCurrencyMessage, lead.Id);
 
             _leadRepoMock.Setup(x => x.GetLeadByIdAsync(leadInfo.LeadId)).ReturnsAsync(lead);
@@ -91,7 +91,7 @@ namespace CRM.Business.Tests
             //Given
             var leadInfo = LeadIdentityInfoData.GetRegularLeadIdentityInfo();
             var expectedAccount = AccountData.GetEurAccountDto();
-            var lead = LeadData.GetLead();
+            var lead = LeadData.GetLeadDto();
             var expectedException = string.Format(ServiceMessages.LeadHasNoAccessMessageByRole, leadInfo.LeadId);
 
             _leadRepoMock.Setup(x => x.GetLeadByIdAsync(leadInfo.LeadId)).ReturnsAsync(lead);
@@ -111,7 +111,7 @@ namespace CRM.Business.Tests
         {
             //Given
             var account = AccountData.GetUsdAccountDto();
-            var lead = LeadData.GetLead();
+            var lead = LeadData.GetLeadDto();
 
             _accountRepoMock.Setup(x => x.DeleteAccountAsync(account.Id));
             _accountRepoMock.Setup(x => x.GetAccountByIdAsync(account.Id)).ReturnsAsync(account);
@@ -130,7 +130,7 @@ namespace CRM.Business.Tests
         {
             //Given
             var account = AccountData.GetUsdAccountDto();
-            var lead = LeadData.GetLead();
+            var lead = LeadData.GetLeadDto();
             var accountAnother = AccountData.GetEurAccountDto();
             var expectedException = string.Format(ServiceMessages.LeadHasNoAccessMessageToAccount, account.LeadId, accountAnother.Id);
 
@@ -152,7 +152,7 @@ namespace CRM.Business.Tests
         {
             //Given
             var account = AccountData.GetUsdAccountDto();
-            var lead = LeadData.GetLead();
+            var lead = LeadData.GetLeadDto();
             var expectedException = string.Format(ServiceMessages.EntityNotFoundMessage, nameof(account), account.Id);
 
             _leadRepoMock.Setup(x => x.GetLeadByIdAsync(lead.Id)).ReturnsAsync(lead);
@@ -202,7 +202,7 @@ namespace CRM.Business.Tests
         public async Task RestoreAccountAsync_ValidAccountAndLead_ReturnCompletedTask()
         {
             //Given
-            var leadDto = LeadData.GetLead();
+            var leadDto = LeadData.GetLeadDto();
             var accountDto = AccountData.GetUsdAccountDto();
 
             _leadRepoMock.Setup(x => x.GetLeadByIdAsync(leadDto.Id)).ReturnsAsync(leadDto);
@@ -227,8 +227,8 @@ namespace CRM.Business.Tests
         //    var model = new TimeBasedAcquisitionBusinessModel()
         //    {
         //        AccountId = account.Id,
-        //        From = "",
-        //        To = ""
+        //        From = "01.09.2021 00:00",
+        //        To = "02.09.2021 00:00"
         //    };
 
         //    var request = // _requestHelper.CreatePostRequest($"{GetTransactionsByPeriodEndpoint}", model);
@@ -244,10 +244,10 @@ namespace CRM.Business.Tests
 
         //    //When
 
-        //   // var actual = await _sut.GetTransactionsByPeriodAndPossiblyAccountIdAsync(model, leadInfo);
+        //     var actual = await _sut.GetTransactionsByPeriodAndPossiblyAccountIdAsync(model, leadInfo);
 
         //    //Then
-        //    //Assert.AreEqual(model, actual);
+        //    Assert.AreEqual(model, actual);
         //    _accountRepoMock.Verify(x => x.GetAccountByIdAsync(account.Id), Times.Once);
 
         //}

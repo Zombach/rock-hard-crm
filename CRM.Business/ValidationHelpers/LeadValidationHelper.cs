@@ -21,6 +21,7 @@ namespace CRM.Business.ValidationHelpers
             var lead = await _leadRepository.GetLeadByIdAsync(leadId);
             if (lead == default)
                 throw new EntityNotFoundException(string.Format(ServiceMessages.EntityNotFoundMessage, nameof(lead), leadId));
+            
             return lead;
         }
 

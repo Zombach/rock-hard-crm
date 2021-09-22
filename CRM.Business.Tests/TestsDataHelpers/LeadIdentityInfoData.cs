@@ -14,6 +14,15 @@ namespace CRM.Business.Tests.TestsDataHelpers
             };
         }
 
+        public static LeadIdentityInfo GetRegularAnotherLeadIdentityInfo()
+        {
+            return new ()
+            {
+                LeadId = 12,
+                Role = Role.Regular
+            };
+        }
+
         public static LeadIdentityInfo GetVipLeadIdentityInfo()
         {
             return new ()
