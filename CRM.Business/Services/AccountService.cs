@@ -15,6 +15,7 @@ using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using CRM.DAL.Enums;
 using static CRM.Business.Constants.TransactionEndpoint;
 
 namespace CRM.Business.Services
@@ -49,12 +50,12 @@ namespace CRM.Business.Services
             _publishEndpoint = publishEndpoint;
         }
 
-        public async Task<int> AddAccountAsync(AccountDto accountDto, LeadIdentityInfo leadInfo)
+        public async Task<int> AddAccountAsync(Currency currency, LeadIdentityInfo leadInfo)
         {
             var leadDto = await _leadRepository.GetLeadByIdAsync(leadInfo.LeadId);
-            _accountValidationHelper.CheckForDuplicateCurrencies(leadDto, accountDto.Currency);
-            _accountValidationHelper.CheckForVipAccess(accountDto.Currency, leadInfo);
-            accountDto.LeadId = leadDto.Id;
+            _accountValidationHelper.CheckForDuplicateCurrencies(leadDto, currency);
+            _accountValidationHelper.CheckForVipAccess(currency, leadInfo);
+            var accountDto = new AccountDto {LeadId = leadInfo.LeadId, Currency = currency};
             var accountId = await _accountRepository.AddAccountAsync(accountDto);
             await EmailSenderAsync(leadDto, EmailMessages.AccountAddedSubject, EmailMessages.AccountAddedBody, accountDto);
             return accountId;
