@@ -11,8 +11,8 @@ namespace CRM.Business.Services
     {
         private int _maxSizeList = 20000;
 
-        private static Dictionary<string, List<TransferBusinessModel>> _transfers = new();
-        private static Dictionary<string, List<TransactionBusinessModel>> _transactions = new();
+        private static readonly Dictionary<string, List<TransferBusinessModel>> _transfers = new();
+        private static readonly Dictionary<string, List<TransactionBusinessModel>> _transactions = new();
 
         public async Task<T> AddDeserializedTransactionsAsync<T>(T model, string json, string leadId) where T : class
         {
@@ -138,7 +138,7 @@ namespace CRM.Business.Services
             {
                 if (_transfers.Count != 0)
                 {
-                    int transfersCount = _transfers[leadId].Count >= _maxSizeList ? _maxSizeList : _transfers[leadId].Count;
+                    var transfersCount = _transfers[leadId].Count >= _maxSizeList ? _maxSizeList : _transfers[leadId].Count;
                     transfers = _transfers[leadId].GetRange(0, transfersCount);
                     _transfers[leadId].RemoveRange(0, transfersCount);
                 }
