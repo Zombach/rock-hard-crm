@@ -43,7 +43,7 @@ namespace CRM.API.Controllers
         {
             var leadInfo = this.GetLeadInfo();
             var model = _mapper.Map<TransactionBusinessModel>(inputModel);
-            await _transactionService.CheckTransactionAndSendEmailAsync(model, leadInfo);
+            await _transactionService.CheckDepositTransactionAndSendEmailAsync(model, leadInfo);
         }
 
         // api/transaction/withdraw
@@ -54,7 +54,7 @@ namespace CRM.API.Controllers
         {
             var leadInfo = this.GetLeadInfo();
             var model = _mapper.Map<TransactionBusinessModel>(inputModel);
-            await _transactionService.CheckTransactionAndSendEmailAsync(model, leadInfo);
+            await _transactionService.CheckWithdrawTransactionAndSendEmailAsync(model, leadInfo);
         }
 
         // api/transaction/transfer

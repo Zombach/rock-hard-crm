@@ -44,7 +44,7 @@ namespace CRM.Business.Services
         public async Task<LeadDto> AddLeadAsync(LeadDto dto)
         {
             var tfaModel = _twoFactorAuthService.GetTwoFactorAuthenticatorKey();
-            SetupCode setupInfo = tfaModel.Tfa.GenerateSetupCode("CRM", dto.Email, tfaModel.Key, false, 3);
+            SetupCode setupInfo = tfaModel.Tfa.GenerateSetupCode("CRM", dto.Email, tfaModel.Key, false, 6);
             var qrCodeImageUrl = setupInfo.QrCodeSetupImageUrl;
          
 
@@ -110,7 +110,7 @@ namespace CRM.Business.Services
 
         public async Task<int> AddTwoFactorKeyToLeadAsync(int leadId, string key)
         {
-            return await _leadRepository.AddTwoFactorKeyToLeadAsync(leadId, key);
+            return  _leadRepository.AddTwoFactorKeyToLeadAsync(leadId, key);
         }
 
         public async Task<string> GetTwoFactorKeyAsync(int leadId)

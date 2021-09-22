@@ -155,14 +155,14 @@ namespace CRM.DAL.Repositories
         }
 
 
-        public async Task<int> AddTwoFactorKeyToLeadAsync(int leadId, string key)
+        public  int AddTwoFactorKeyToLeadAsync(int leadId, string twoFactorKey)
         {
-            return await _connection.QuerySingleOrDefaultAsync<int>(
+            return  _connection.QuerySingleOrDefault<int>(
                 _insertTwoFactorKeyProcedure,
                 new
                 {
                     leadId,
-                    key
+                    twoFactorKey
                 },
                 commandType: CommandType.StoredProcedure
             );
@@ -170,7 +170,7 @@ namespace CRM.DAL.Repositories
         public async Task<string> GetTwoFactorKeyAsync(int leadId)
         {
             return (await _connection.QueryAsync<string>(
-                  _insertTwoFactorKeyProcedure,
+                  _getTwoFactorKeyProcedure,
                   new
                   { leadId },
                   commandType: CommandType.StoredProcedure

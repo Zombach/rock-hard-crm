@@ -33,6 +33,7 @@ namespace CRM.Business.Services
         private readonly decimal _commissionModifier;
         private readonly IPublishEndpoint _publishEndpoint;
         private readonly ILeadRepository _leadRepository;
+        private int _i = 0;
 
         static ObjectCache cache = MemoryCache.Default;
         CacheItemPolicy policy = new CacheItemPolicy();
@@ -78,7 +79,7 @@ namespace CRM.Business.Services
                 throw new Exception($"{result.ErrorMessage} {_client.BaseUrl}");
             }
             var transactionId = result.Data;
-            EmailSender(leadDto, EmailMessages.DepositSubject, string.Format(EmailMessages.DepositBody, model.Amount));
+          await  EmailSender(leadDto, EmailMessages.DepositSubject, string.Format(EmailMessages.DepositBody, model.Amount));
             var dto = new CommissionFeeDto
             { LeadId = leadDto.Id, AccountId = model.AccountId, TransactionId = transactionId, Role = leadDto.Role, CommissionAmount = commission, TransactionType = TransactionType.Deposit };
 
@@ -106,7 +107,7 @@ namespace CRM.Business.Services
 
             _accountValidationHelper.CheckForDuplicateTransaction(transactionId,accountModel);
 
-            EmailSender(leadDto, EmailMessages.WithdrawSubject, string.Format(EmailMessages.WithdrawBody, model.Amount));
+           await EmailSender(leadDto, EmailMessages.WithdrawSubject, string.Format(EmailMessages.WithdrawBody, model.Amount));
 
             var dto = new CommissionFeeDto
             { LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = leadInfo.Role, CommissionAmount = commission, TransactionType = TransactionType.Withdraw };
@@ -147,7 +148,7 @@ namespace CRM.Business.Services
                 throw new Exception("tstore slomalsy");
             }
             var transactionId = result.Data.First();
-            EmailSender(leadDto, EmailMessages.TransferSubject, string.Format(EmailMessages.TransferBody, model.Amount, model.Currency, model.RecipientCurrency));
+           await EmailSender(leadDto, EmailMessages.TransferSubject, string.Format(EmailMessages.TransferBody, model.Amount, model.Currency, model.RecipientCurrency));
 
             var dto = new CommissionFeeDto
             { LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = leadInfo.Role, CommissionAmount = commission, TransactionType = TransactionType.Transfer };
@@ -157,12 +158,23 @@ namespace CRM.Business.Services
             return dto;
         }
 
-        public async Task CheckTransactionAndSendEmailAsync(TransactionBusinessModel model, LeadIdentityInfo leadInfo)
+
+        public async Task CheckDepositTransactionAndSendEmailAsync(TransactionBusinessModel model, LeadIdentityInfo leadInfo)
+        {
+            var leadDto = await _leadRepository.GetLeadByIdAsync(leadInfo.LeadId);
+            var account = await _accountService.GetAccountWithTransactionsAsync(model.AccountId, leadInfo);
+            model.TransactionType = TransactionType.Deposit;
+            await EmailSender(leadDto, EmailMessages.TwoFactorAuthSubject, EmailMessages.TwoFactorAuthBody);
+            cache.Set($"{leadInfo.LeadId}", model, policy);
+        }
+
+        public async Task CheckWithdrawTransactionAndSendEmailAsync(TransactionBusinessModel model, LeadIdentityInfo leadInfo)
         {
             var leadDto = await _leadRepository.GetLeadByIdAsync(leadInfo.LeadId);
             var account = await _accountService.GetAccountWithTransactionsAsync(model.AccountId, leadInfo);
             _accountValidationHelper.CheckBalance(account, model.Amount);
-            EmailSender(leadDto, EmailMessages.TwoFactorAuthSubject, EmailMessages.TwoFactorAuthBody);
+            model.TransactionType = TransactionType.Withdraw;
+            await EmailSender(leadDto, EmailMessages.TwoFactorAuthSubject, EmailMessages.TwoFactorAuthBody);
             cache.Set($"{leadInfo.LeadId}", model, policy);
         }
 
@@ -172,28 +184,15 @@ namespace CRM.Business.Services
             var recipientAccount = await CheckAccessAndReturnAccount(model.RecipientAccountId, leadInfo);
             var account = await _accountService.GetAccountWithTransactionsAsync(model.AccountId, leadInfo);
             _accountValidationHelper.CheckBalance(account, model.Amount);
-            EmailSender(leadDto, EmailMessages.TwoFactorAuthSubject, EmailMessages.TwoFactorAuthBody);
+            model.TransactionType = TransactionType.Transfer;
+            _i = 3;
+            await EmailSender(leadDto, EmailMessages.TwoFactorAuthSubject, EmailMessages.TwoFactorAuthBody);
             cache.Set($"{leadInfo.LeadId}", model, policy);
         }
 
         public async Task<CommissionFeeDto> ContinueTransaction(LeadIdentityInfo leadInfo)
         {
-            var model = (TransferBusinessModel)cache[$"{leadInfo.LeadId}"];
-            if (model.RecipientAccountId != 0)
-            {
-                return await AddTransferAsync(model, leadInfo);
-            }
-            else
-            {
-                if (model.TransactionType == TransactionType.Withdraw)
-                {
-                return await AddWithdrawAsync((TransactionBusinessModel)model, leadInfo);
-                }
-                else
-                {
-                    return await AddDepositAsync((TransactionBusinessModel)model, leadInfo);
-                }
-            }
+            return
         }
 
         private async Task<AccountDto> CheckAccessAndReturnAccount(int accountId, LeadIdentityInfo leadInfo)
@@ -213,9 +212,9 @@ namespace CRM.Business.Services
             return leadInfo.IsVip() ? amount * _vipCommission : amount * _commission;
         }
 
-        private void EmailSender(LeadDto dto, string subject, string body)
+        private async Task EmailSender(LeadDto dto, string subject, string body)
         {
-            _publishEndpoint.Publish<IMailExchangeModel>(new
+           await _publishEndpoint.Publish<IMailExchangeModel>(new
             {
                 Subject = subject,
                 Body = $"{dto.LastName} {dto.FirstName} {body}",
