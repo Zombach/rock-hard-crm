@@ -17,6 +17,7 @@ using MailExchange;
 using MassTransit;
 using static CRM.Business.Constants.TransactionEndpoint;
 using System.Threading.Tasks;
+using CRM.Business.Serialization;
 
 namespace CRM.Business.Services
 {
@@ -45,6 +46,7 @@ namespace CRM.Business.Services
         )
         {
             _client = new RestClient(connectionOptions.Value.TransactionStoreUrl);
+            _client.AddHandler("application/json", () => NewtonsoftJsonSerializer.Default);
             _commission = commissionOptions.Value.Commission;
             _vipCommission = commissionOptions.Value.VipCommission;
             _commissionModifier = commissionOptions.Value.CommissionModifier;
@@ -76,7 +78,7 @@ namespace CRM.Business.Services
             var transactionId = result.Data;
             EmailSender(leadDto, EmailMessages.DepositSubject, string.Format(EmailMessages.DepositBody, model.Amount));
             var dto = new CommissionFeeDto
-            { LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = leadInfo.Role, CommissionAmount = commission, TransactionType = TransactionType.Deposit };
+            { LeadId = leadDto.Id, AccountId = model.AccountId, TransactionId = transactionId, Role = leadDto.Role, CommissionAmount = commission, TransactionType = TransactionType.Deposit };
 
             AddCommissionFee(dto);
 
@@ -90,6 +92,12 @@ namespace CRM.Business.Services
             _accountValidationHelper.CheckForVipAccess(accountModel.Currency, leadInfo);
             var commission = CalculateCommission(model.Amount, leadInfo);
 
+            var transferLastDate = accountModel.Transfers.Last().Date;
+            var transactionLastDate = accountModel.Transactions.Last().Date;
+            model.Date = transferLastDate > transactionLastDate ? transferLastDate : transactionLastDate;
+
+            var format = "yyyy-MM-dd HH:mm:ss:fffffff";
+            var la= model.Date.ToString(format);
             CheckBalance(accountModel, model.Amount);
 
             model.Amount -= commission;

@@ -15,7 +15,7 @@
         public const string CityIdRequired = "CityId must be provided";
         public const string BirthDateRequired = "BirthDate must be provided";
         public const string PhoneNumberRequired = "PhoneNumber must be provided";
-        public const string DateToRequired = "Date must be provided";
+        public const string DateToRequired = "Date to must be provided";
         public const string DateFromRequired = "From Date must be provided";
 
         public const string WrongFormatAmount = "CommissionAmount must be integer from 1 to int.MaxValue";
