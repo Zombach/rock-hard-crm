@@ -14,6 +14,7 @@ using Microsoft.Extensions.Options;
 using RestSharp;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
 using static CRM.Business.Constants.TransactionEndpoint;
@@ -140,6 +141,7 @@ namespace CRM.Business.Services
             var request = _requestHelper.CreatePostRequest($"{GetTransactionsByAccountIdsForTwoMonthsEndpoint}", accountIds);
 
             var response = _client.Execute<string>(request);
+            if(response.StatusCode != HttpStatusCode.OK) throw new Exception($"{response.ErrorMessage}");
 
             return JsonSerializer.Deserialize<List<TransactionBusinessModel>>(response.Data);
         }
