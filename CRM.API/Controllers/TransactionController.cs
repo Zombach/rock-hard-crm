@@ -39,13 +39,11 @@ namespace CRM.API.Controllers
         [HttpPost("deposit")]
         [Description("Add deposit")]
         [ProducesResponseType(typeof(CommissionFeeShortOutputModel), StatusCodes.Status201Created)]
-        public async Task<ActionResult<CommissionFeeShortOutputModel>> AddDepositAsync([FromBody] TransactionInputModel inputModel)
+        public async Task AddDepositAsync([FromBody] TransactionInputModel inputModel)
         {
             var leadInfo = this.GetLeadInfo();
             var model = _mapper.Map<TransactionBusinessModel>(inputModel);
-            var commissionModel = await _transactionService.AddDepositAsync(model, leadInfo);
-            var output = _mapper.Map<CommissionFeeShortOutputModel>(commissionModel);
-            return StatusCode(201, output);
+            await _transactionService.CheckTransactionAndSendEmailAsync(model, leadInfo);
         }
 
         // api/transaction/withdraw
@@ -55,7 +53,7 @@ namespace CRM.API.Controllers
         public async Task AddWithdrawAsync([FromBody] TransactionInputModel inputModel)
         {
             var leadInfo = this.GetLeadInfo();
-            var model = _mapper.Map<TransferBusinessModel>(inputModel);
+            var model = _mapper.Map<TransactionBusinessModel>(inputModel);
             await _transactionService.CheckTransactionAndSendEmailAsync(model, leadInfo);
         }
 
@@ -85,7 +83,7 @@ namespace CRM.API.Controllers
                 var output = _mapper.Map<CommissionFeeShortOutputModel>(commissionModel);
                 return StatusCode(201, output);
             }
-            return StatusCode(401);
+            return Unauthorized();
         }
     }
 }

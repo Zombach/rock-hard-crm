@@ -3,9 +3,8 @@
     public static class EmailMessages
     {
         public const string RegistrationSubject = "Registration account on CRM";
-        public const string RegistrationBody = "Congratulations on your registration. " +
-                                               "Please download google authenticator and scan QR" +
-                                               "<html><body><p><img src={0}/></p></body></html>";
+        public const string RegistrationBody = "Congratulations on your registration. Please download google authenticator and scan QR";
+        public const string QRCode = "<html><body><p><img src=\"{0}\"/></p></body></html>";
         public const string DeleteLeadSubject = "Delete account on CRM";
         public const string DeleteLeadBody = "you deleted your account, write to us for recovery.";
         public const string AccountAddedSubject = "New account added";

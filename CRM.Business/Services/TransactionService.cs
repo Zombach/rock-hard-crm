@@ -65,8 +65,6 @@ namespace CRM.Business.Services
             var leadDto = await _leadRepository.GetLeadByIdAsync(leadInfo.LeadId);
             var account = await CheckAccessAndReturnAccount(model.AccountId, leadInfo);
             _accountValidationHelper.CheckForVipAccess(account.Currency, leadInfo);
-
-            var m = cache["1"];
             var commission = CalculateCommission(model.Amount, leadInfo);
 
             model.Amount -= commission;
@@ -122,8 +120,7 @@ namespace CRM.Business.Services
         {
             var leadDto = await _leadRepository.GetLeadByIdAsync(leadInfo.LeadId);
             var accountModel = await _accountService.GetAccountWithTransactionsAsync(model.AccountId, leadInfo);
-            var recipientAccount = await CheckAccessAndReturnAccount(model.RecipientAccountId, leadInfo);
-            CheckBalance(account, model.Amount);
+            var recipientAccount = await CheckAccessAndReturnAccount(model.RecipientAccountId, leadInfo);           
             var commission = CalculateCommission(model.Amount, leadInfo);
             _accountValidationHelper.CheckBalance(accountModel, model.Amount);
             model.Date = _accountValidationHelper.GetTransactionsLastDateAndThrowIfNotFound(accountModel);
@@ -162,33 +159,40 @@ namespace CRM.Business.Services
 
         public async Task CheckTransactionAndSendEmailAsync(TransactionBusinessModel model, LeadIdentityInfo leadInfo)
         {
-            cache.Set("1", model, policy);
             var leadDto = await _leadRepository.GetLeadByIdAsync(leadInfo.LeadId);
             var account = await _accountService.GetAccountWithTransactionsAsync(model.AccountId, leadInfo);
-            CheckBalance(account, model.Amount);
+            _accountValidationHelper.CheckBalance(account, model.Amount);
             EmailSender(leadDto, EmailMessages.TwoFactorAuthSubject, EmailMessages.TwoFactorAuthBody);
+            cache.Set($"{leadInfo.LeadId}", model, policy);
         }
 
         public async Task CheckTransferAndSendEmailAsync(TransferBusinessModel model, LeadIdentityInfo leadInfo)
         {
-            cache.Set("1", model, policy);
             var leadDto = await _leadRepository.GetLeadByIdAsync(leadInfo.LeadId);
             var recipientAccount = await CheckAccessAndReturnAccount(model.RecipientAccountId, leadInfo);
             var account = await _accountService.GetAccountWithTransactionsAsync(model.AccountId, leadInfo);
-            CheckBalance(account, model.Amount);
+            _accountValidationHelper.CheckBalance(account, model.Amount);
             EmailSender(leadDto, EmailMessages.TwoFactorAuthSubject, EmailMessages.TwoFactorAuthBody);
+            cache.Set($"{leadInfo.LeadId}", model, policy);
         }
 
         public async Task<CommissionFeeDto> ContinueTransaction(LeadIdentityInfo leadInfo)
         {
-            var model = (TransferBusinessModel)cache["1"];
+            var model = (TransferBusinessModel)cache[$"{leadInfo.LeadId}"];
             if (model.RecipientAccountId != 0)
             {
                 return await AddTransferAsync(model, leadInfo);
             }
             else
             {
-                return await AddWithdrawAsync(model, leadInfo);
+                if (model.TransactionType == TransactionType.Withdraw)
+                {
+                return await AddWithdrawAsync((TransactionBusinessModel)model, leadInfo);
+                }
+                else
+                {
+                    return await AddDepositAsync((TransactionBusinessModel)model, leadInfo);
+                }
             }
         }
 
@@ -216,7 +220,7 @@ namespace CRM.Business.Services
                 Subject = subject,
                 Body = $"{dto.LastName} {dto.FirstName} {body}",
                 DisplayName = "Best CRM",
-                MailAddresses = $"{dto.Email}"
+                MailAddresses = $"{dto.Email}"               
             });
         }
     }

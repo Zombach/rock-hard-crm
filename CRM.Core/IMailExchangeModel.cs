@@ -7,5 +7,6 @@
         public string DisplayName { get; set; }
         public string MailAddresses { get; set; }
         public bool IsBodyHtml { get; set; }
+        public string Base64String { get; set; }
     }
 }

@@ -46,6 +46,7 @@ namespace CRM.Business.Services
             var tfaModel = _twoFactorAuthService.GetTwoFactorAuthenticatorKey();
             SetupCode setupInfo = tfaModel.Tfa.GenerateSetupCode("CRM", dto.Email, tfaModel.Key, false, 3);
             var qrCodeImageUrl = setupInfo.QrCodeSetupImageUrl;
+         
 
             dto.Password = _authenticationService.HashPassword(dto.Password);
             dto.Role = Role.Regular;
@@ -54,7 +55,7 @@ namespace CRM.Business.Services
             dto.BirthDay = dto.BirthDate.Day;
             var leadId = await _leadRepository.AddLeadAsync(dto);
             var keyId = AddTwoFactorKeyToLeadAsync(leadId, tfaModel.Key);
-            await EmailSender(dto, EmailMessages.RegistrationSubject, string.Format(EmailMessages.RegistrationBody, qrCodeImageUrl), true);
+            await EmailSender(dto, EmailMessages.RegistrationSubject, EmailMessages.RegistrationBody, string.Format(EmailMessages.QRCode,qrCodeImageUrl));
             await _accountRepository.AddAccountAsync(new AccountDto { LeadId = leadId, Currency = Currency.RUB });
 
             return await _leadRepository.GetLeadByIdAsync(leadId);
@@ -79,7 +80,7 @@ namespace CRM.Business.Services
         public async Task DeleteLeadAsync(int leadId)
         {
             var dto = await _leadValidationHelper.GetLeadByIdAndThrowIfNotFoundAsync(leadId);
-            await EmailSender(dto, EmailMessages.DeleteLeadSubject, EmailMessages.DeleteLeadBody, false);
+            await EmailSender(dto, EmailMessages.DeleteLeadSubject, EmailMessages.DeleteLeadBody,"");
             await _leadRepository.DeleteLeadAsync(leadId);
         }
 
@@ -95,15 +96,15 @@ namespace CRM.Business.Services
             return await _leadRepository.GetAllLeadsAsync();
         }
 
-        private async Task EmailSender(LeadDto dto, string subject, string body, bool isBodyHtml)
+        private async Task EmailSender(LeadDto dto, string subject, string body, string base64Image)
         {
-            await _publishEndpoint.Publish<IMailExchangeModel>(new
+          await  _publishEndpoint.Publish<IMailExchangeModel>(new
             {
                 Subject = subject,
                 Body = $"{dto.LastName} {dto.FirstName} {body}",
                 DisplayName = "Best CRM",
                 MailAddresses = $"{dto.Email}",
-                IsBodyHtml = isBodyHtml
+                Base64String = base64Image
             });
         }
 
