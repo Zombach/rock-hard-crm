@@ -11,10 +11,10 @@ namespace CRM.Business.Services
     {
         private int _maxSizeList = 20000;
 
-        private static List<TransferBusinessModel> _transfers = new();
-        private static List<TransactionBusinessModel> _transactions = new();
+        private static readonly Dictionary<string, List<TransferBusinessModel>> _transfers = new();
+        private static readonly Dictionary<string, List<TransactionBusinessModel>> _transactions = new();
 
-        public async Task<T> AddDeserializedTransactionsAsync<T>(T model, string json) where T : class
+        public async Task<T> AddDeserializedTransactionsAsync<T>(T model, string json, string leadId) where T : class
         {
             JToken jToken;
 
@@ -22,34 +22,34 @@ namespace CRM.Business.Services
             {
                 case List<AccountBusinessModel> when json != "[]":
                     jToken = GetJToken(json);
-                    await GetListModels(jToken);
+                    await GetListModels(jToken, leadId);
                     break;
                 case List<AccountBusinessModel> businessModels:
                     {
                         var listIds = new List<int>();
-                        listIds.AddRange(_transactions.Select(item => item.AccountId).Distinct());
-                        listIds.AddRange(_transfers.Select(item => item.AccountId).Distinct());
+                        listIds.AddRange(_transactions[leadId].Select(item => item.AccountId).Distinct());
+                        listIds.AddRange(_transfers[leadId].Select(item => item.AccountId).Distinct());
                         List<int> ids = listIds.Distinct().ToList();
                         ids.Sort();
-                        _transactions = _transactions.OrderBy(t => t.AccountId).ToList();
-                        _transfers = _transfers.OrderBy(t => t.AccountId).ToList();
+                        _transactions[leadId] = _transactions[leadId].OrderBy(t => t.AccountId).ToList();
+                        _transfers[leadId] = _transfers[leadId].OrderBy(t => t.AccountId).ToList();
                         businessModels = await GetAccountsInfoAsync(ids);
                         businessModels = businessModels.OrderBy(b => b.Id).ToList();
 
-                        return await GroupsTransactionsAndTransfers(businessModels) as T;
+                        return await GroupsTransactionsAndTransfers(businessModels, leadId) as T;
                     }
                 case AccountBusinessModel businessModel:
                     {
                         jToken = GetJToken(json);
-                        await GetListModels(jToken);
+                        await GetListModels(jToken, leadId);
                         if (jToken == null)
                         {
                             throw new Exception("tstore slomalsya");
                         }
-                        await GetListModels(jToken);
+                        await GetListModels(jToken, leadId);
 
-                        businessModel.Transactions = _transactions;
-                        businessModel.Transfers = _transfers;
+                        businessModel.Transactions = _transactions[leadId];
+                        businessModel.Transfers = _transfers[leadId];
                         return businessModel as T;
                     }
             }
@@ -57,15 +57,15 @@ namespace CRM.Business.Services
             return model;
         }
 
-        private async Task<List<AccountBusinessModel>> GroupsTransactionsAndTransfers(List<AccountBusinessModel> accounts)
+        private async Task<List<AccountBusinessModel>> GroupsTransactionsAndTransfers(List<AccountBusinessModel> accounts, string leadId)
         {
             int i = 0;
             List<TransferBusinessModel> tmpTransfer = new();
             List<TransactionBusinessModel> tmpTransaction = new();
             do
             {
-                GetValuesForList(tmpTransfer, out tmpTransfer);
-                GetValuesForList(tmpTransaction, out tmpTransaction);
+                GetValuesForList(tmpTransfer, out tmpTransfer, leadId);
+                GetValuesForList(tmpTransaction, out tmpTransaction, leadId);
 
                 if (tmpTransaction.Count != 0 && tmpTransfer.Count != 0)
                 {
@@ -78,7 +78,7 @@ namespace CRM.Business.Services
 
 
                 if (tmpTransaction.Count != 0 && tmpTransfer.Count != 0) continue;
-                if (_transactions.Count != 0 || _transfers.Count != 0) continue;
+                if (_transactions[leadId].Count != 0 || _transfers[leadId].Count != 0) continue;
                 for (; i < accounts.Count; i++)
                 {
                     if (tmpTransaction.Count == 0)
@@ -98,16 +98,16 @@ namespace CRM.Business.Services
             return accounts;
         }
 
-        private void GetValuesForList<T>(T models, out T result) where T : class
+        private void GetValuesForList<T>(T models, out T result, string leadId) where T : class
         {
             if (models is List<TransferBusinessModel> transfers)
             {
-                GetTransfersForList(transfers, out transfers);
+                GetTransfersForList(transfers, out transfers, leadId);
                 result = transfers as T;
             }
             else if (models is List<TransactionBusinessModel> transaction)
             {
-                GetTransactionForList(transaction, out transaction);
+                GetTransactionForList(transaction, out transaction, leadId);
                 result = transaction as T;
             }
             else
@@ -132,29 +132,29 @@ namespace CRM.Business.Services
             await Task.WhenAll(tasks);
         }
 
-        private void GetTransfersForList(List<TransferBusinessModel> transfers, out List<TransferBusinessModel> result)
+        private void GetTransfersForList(List<TransferBusinessModel> transfers, out List<TransferBusinessModel> result, string leadId)
         {
             if (transfers.Count == 0)
             {
                 if (_transfers.Count != 0)
                 {
-                    int transfersCount = _transfers.Count >= _maxSizeList ? _maxSizeList : _transfers.Count;
-                    transfers = _transfers.GetRange(0, transfersCount);
-                    _transfers.RemoveRange(0, transfersCount);
+                    var transfersCount = _transfers[leadId].Count >= _maxSizeList ? _maxSizeList : _transfers[leadId].Count;
+                    transfers = _transfers[leadId].GetRange(0, transfersCount);
+                    _transfers[leadId].RemoveRange(0, transfersCount);
                 }
             }
             result = transfers;
         }
 
-        private void GetTransactionForList(List<TransactionBusinessModel> transactions, out List<TransactionBusinessModel> result)
+        private void GetTransactionForList(List<TransactionBusinessModel> transactions, out List<TransactionBusinessModel> result, string leadId)
         {
             if (transactions.Count == 0)
             {
                 if (_transactions.Count != 0)
                 {
-                    int transactionsCount = _transactions.Count >= _maxSizeList ? _maxSizeList : _transactions.Count;
-                    transactions = _transactions.GetRange(0, transactionsCount);
-                    _transactions.RemoveRange(0, transactionsCount);
+                    int transactionsCount = _transactions[leadId].Count >= _maxSizeList ? _maxSizeList : _transactions[leadId].Count;
+                    transactions = _transactions[leadId].GetRange(0, transactionsCount);
+                    _transactions[leadId].RemoveRange(0, transactionsCount);
                 }
             }
             result = transactions;
@@ -201,7 +201,7 @@ namespace CRM.Business.Services
             }
         }
 
-        private async Task GetListModels(JToken jToken)
+        private async Task GetListModels(JToken jToken, string leadId)
         {
             List<Task> tasks = new()
             {
@@ -209,13 +209,28 @@ namespace CRM.Business.Services
                 {
                     List<TransferBusinessModel> transfersJToken = jToken.Where(j => j.SelectToken(@"$.RecipientAccountId") != null)
                         .Select(t => t.ToObject<TransferBusinessModel>()).ToList();
-                    _transfers.AddRange(transfersJToken);
+                    if (_transfers.ContainsKey(leadId))
+                    {
+                        _transfers[leadId].AddRange(transfersJToken);
+                    }
+                    else
+                    {
+                        _transfers.Add(leadId, transfersJToken);
+                    }
+
                 }),
                 Task.Run(() =>
                 {
                     List<TransactionBusinessModel> transactionsJToken = jToken.Where(j => j.SelectToken(@"$.RecipientAccountId") == null)
                         .Select(t => t.ToObject<TransactionBusinessModel>()).ToList();
-                    _transactions.AddRange(transactionsJToken);
+                    if (_transactions.ContainsKey(leadId))
+                    {
+                        _transactions[leadId].AddRange(transactionsJToken);
+                    }
+                    else
+                    {
+                        _transactions.Add(leadId, transactionsJToken);
+                    }
                 })
             };
             await Task.WhenAll(tasks);
@@ -246,10 +261,16 @@ namespace CRM.Business.Services
             return _mapper.Map<List<AccountBusinessModel>>(dto);
         }
 
-        private void CleanListModels()
+        private void CleanListModels(string leadId)
         {
-            _transfers.Clear();
-            _transactions.Clear();
+            if (_transfers.ContainsKey(leadId))
+            {
+                _transfers.Remove(leadId);
+            }
+            if (_transactions.ContainsKey(leadId))
+            {
+                _transactions.Remove(leadId);
+            }
         }
     }
 }

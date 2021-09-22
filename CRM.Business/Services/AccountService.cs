@@ -81,7 +81,8 @@ namespace CRM.Business.Services
 
         public async Task<AccountBusinessModel> GetAccountWithTransactionsAsync(int accountId, LeadIdentityInfo leadInfo)
         {
-            CleanListModels();
+            var leadId = leadInfo.LeadId.ToString();
+            CleanListModels(leadId);
             var dto = await _accountValidationHelper.GetAccountByIdAndThrowIfNotFoundAsync(accountId);
             if (!leadInfo.IsAdmin())
                 _accountValidationHelper.CheckLeadAccessToAccount(dto.LeadId, leadInfo.LeadId);
@@ -91,14 +92,16 @@ namespace CRM.Business.Services
 
             var response = _client.Execute<string>(request);
 
-            var model = await Task.Run(async () => await AddDeserializedTransactionsAsync(accountModel, response.Data));
+            var model = await Task.Run(async () => await AddDeserializedTransactionsAsync(accountModel, response.Data, leadId));
 
+            CleanListModels(leadId);
             return BalanceCalculation(model, accountId);
         }
 
         public async Task<List<AccountBusinessModel>> GetTransactionsByPeriodAndPossiblyAccountIdAsync(TimeBasedAcquisitionBusinessModel model, LeadIdentityInfo leadInfo)
         {
-            CleanListModels();
+            string leadId = leadInfo.LeadId.ToString();
+            CleanListModels(leadId);
             List<AccountBusinessModel> models = new();
             if (model.AccountId != null)
             {
@@ -114,17 +117,18 @@ namespace CRM.Business.Services
             }
 
             var request = _requestHelper.CreatePostRequest($"{GetTransactionsByPeriodEndpoint}", model);
-            request.AddHeader("LeadId", leadInfo.LeadId.ToString());
+            request.AddHeader("LeadId", leadId);
             request.Timeout = 3000000;
 
             do
             {
                 var response = await _client.ExecuteAsync<string>(request);
-                models = await Task.Run(async () => await AddDeserializedTransactionsAsync(models, response.Data));
+                models = await Task.Run(async () => await AddDeserializedTransactionsAsync(models, response.Data, leadId));
                 if (response.Data == FinishResponse) break;
             }
             while (true);
 
+            CleanListModels(leadId);
             return models;
         }
 
