@@ -45,15 +45,15 @@ namespace CRM.Business.Services
         {
             var tfaModel = _twoFactorAuthService.GetTwoFactorAuthenticatorKey();
             SetupCode setupInfo = tfaModel.Tfa.GenerateSetupCode("CRM", dto.Email, tfaModel.Key, false, 3);
-            var qrCodeImageUrl = setupInfo.QrCodeSetupImageUrl;          
-            
+            var qrCodeImageUrl = setupInfo.QrCodeSetupImageUrl;
+
             dto.Password = _authenticationService.HashPassword(dto.Password);
             dto.Role = Role.Regular;
             dto.BirthYear = dto.BirthDate.Year;
             dto.BirthMonth = dto.BirthDate.Month;
             dto.BirthDay = dto.BirthDate.Day;
-            dto.KeyForTwoFactorAuth = tfaModel.Key;
             var leadId = await _leadRepository.AddLeadAsync(dto);
+            var keyId = AddTwoFactorKeyToLeadAsync(leadId, tfaModel.Key);
             await EmailSender(dto, EmailMessages.RegistrationSubject, string.Format(EmailMessages.RegistrationBody, qrCodeImageUrl), true);
             await _accountRepository.AddAccountAsync(new AccountDto { LeadId = leadId, Currency = Currency.RUB });
 
@@ -103,8 +103,18 @@ namespace CRM.Business.Services
                 Body = $"{dto.LastName} {dto.FirstName} {body}",
                 DisplayName = "Best CRM",
                 MailAddresses = $"{dto.Email}",
-                IsBodyHtml= isBodyHtml
+                IsBodyHtml = isBodyHtml
             });
+        }
+
+        public async Task<int> AddTwoFactorKeyToLeadAsync(int leadId, string key)
+        {
+            return await _leadRepository.AddTwoFactorKeyToLeadAsync(leadId, key);
+        }
+
+        public async Task<string> GetTwoFactorKeyAsync(int leadId)
+        {
+            return await _leadRepository.GetTwoFactorKeyAsync(leadId);
         }
     }
 }

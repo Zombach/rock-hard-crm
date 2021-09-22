@@ -14,5 +14,7 @@ namespace CRM.Business.Services
         Task DeleteLeadAsync(int leadId);
         Task<LeadDto> GetLeadByIdAsync(int leadId, LeadIdentityInfo leadInfo);
         Task<List<LeadDto>> GetAllLeadsAsync();
+        Task<int> AddTwoFactorKeyToLeadAsync(int leadId, string key);
+        Task<string> GetTwoFactorKeyAsync(int leadId);
     }
 }

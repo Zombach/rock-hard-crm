@@ -19,17 +19,20 @@ namespace CRM.API.Controllers
         private readonly IMapper _mapper;
         private readonly ITransactionService _transactionService;
         private readonly ITwoFactorAuthenticatorService _twoFactorAuthService;
+        private readonly ILeadService _leadService;
 
         public TransactionController
             (
             IMapper mapper,
             ITransactionService transactionService,
-            ITwoFactorAuthenticatorService twoFactorAuthService
+            ITwoFactorAuthenticatorService twoFactorAuthService,
+            ILeadService leadService
             )
         {
             _mapper = mapper;
             _transactionService = transactionService;
             _twoFactorAuthService = twoFactorAuthService;
+            _leadService = leadService;
         }
 
         // api/transaction/deposit
@@ -71,17 +74,18 @@ namespace CRM.API.Controllers
         [HttpPost("two-factor-authentication/{pinCode}")]
         [Description("Two factor authentication")]
         [ProducesResponseType(typeof(CommissionFeeShortOutputModel), StatusCodes.Status201Created)]
-        public async Task<ActionResult<CommissionFeeShortOutputModel>> TwoFactorAuthentication(TwoFactorAuthenticatorModel tfaModel, string pinCode)
+        public async Task<ActionResult<CommissionFeeShortOutputModel>> TwoFactorAuthentication(string pinCode)
         {
             var leadInfo = this.GetLeadInfo();
-            var isValid = _twoFactorAuthService.ValidateTwoFactorPIN(tfaModel.Key, pinCode);
-            if (!isValid)
+            var key = await _leadService.GetTwoFactorKeyAsync(leadInfo.LeadId);
+            var isValid = _twoFactorAuthService.ValidateTwoFactorPIN(key, pinCode);
+            if (isValid)
             {
-                return Redirect("two-factor-authentication/{pinCode}");
+                var commissionModel = await _transactionService.ContinueTransaction(leadInfo);
+                var output = _mapper.Map<CommissionFeeShortOutputModel>(commissionModel);
+                return StatusCode(201, output);
             }
-            var commissionModel = await _transactionService.ContinueTransaction(leadInfo);
-            var output = _mapper.Map<CommissionFeeShortOutputModel>(commissionModel);
-            return StatusCode(201, output);
+            return StatusCode(401);
         }
     }
 }
