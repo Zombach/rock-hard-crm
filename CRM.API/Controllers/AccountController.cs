@@ -56,9 +56,7 @@ namespace CRM.API.Controllers
         public async Task<ActionResult> RestoreAccountAsync(int accountId)
         {
             var leadInfo = this.GetLeadInfo();
-            /*var output =*/
             await _accountService.RestoreAccountAsync(accountId, leadInfo.LeadId);
-            //return StatusCode(201, output);
             return NoContent();
         }
 
