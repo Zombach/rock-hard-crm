@@ -3,6 +3,7 @@ using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using Dapper;
 using Microsoft.Extensions.Options;
+using SqlKata;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -18,7 +19,10 @@ namespace CRM.DAL.Repositories
         private const string _deleteLeadByIdProcedure = "dbo.Lead_Delete";
         private const string _getLeadByEmailProcedure = "dbo.Lead_SelectByEmail";
         private const string _getAllLeadsProcedure = "dbo.Lead_SelectAll";
+        private const string _getAllLeadsByBatchesProcedure = "dbo.Lead_SelectAllByBatchesWithoutAdmins";
         private const string _updateLeadRoleProcedure = "dbo.Lead_UpdateRole";
+        private const string _updateListRoleLeadsProcedure = "dbo.LeadsList_Role_Update";
+        private const string _LeadDtoType = "dbo.LeadDtoType";
 
         public LeadRepository(IOptions<DatabaseSettings> options) : base(options) { }
 
@@ -74,6 +78,24 @@ namespace CRM.DAL.Repositories
                 },
                 commandType: CommandType.StoredProcedure
             );
+        }
+
+        public void ChangeRoleForLeads(List<LeadDto> listLeadDtos)
+        {
+            var dt = new DataTable();
+            dt.Columns.Add("LeadId");
+            dt.Columns.Add("Role");
+
+            foreach (var lead in listLeadDtos)
+            {
+                dt.Rows.Add(lead.Id, (int)lead.Role);
+            }
+
+            _connection.Execute(
+                _updateListRoleLeadsProcedure,
+                    new { tblLeadDto = dt.AsTableValuedParameter(_LeadDtoType) },
+                    commandType: CommandType.StoredProcedure
+                    );
         }
 
         public async Task<int> DeleteLeadAsync(int id)
@@ -148,6 +170,52 @@ namespace CRM.DAL.Repositories
                     },
                     splitOn: "id",
                     commandType: CommandType.StoredProcedure))
+                .Distinct()
+                .ToList();
+        }
+
+        public List<LeadDto> GetLeadsByFilters(SqlResult sqlResult)
+        {
+            var result = _connection
+                .Query<LeadDto, CityDto, Role, LeadDto>(
+                sqlResult.Sql,
+                (lead, city, role) =>
+                {
+                    lead.Role = role;
+                    lead.City = city;
+                    return lead;
+                },
+                param: sqlResult.NamedBindings,
+                splitOn: "id",
+                commandType: CommandType.Text)
+                .ToList();
+            return result;
+        }
+
+        public List<LeadDto> GetAllLeadsByBatches(int lastLeadId)
+        {
+            var leadDictionary = new Dictionary<int, LeadDto>();
+
+            return _connection
+                .Query<LeadDto, AccountDto, Role, LeadDto>(
+                    _getAllLeadsByBatchesProcedure,
+                    (lead, account, role) =>
+                    {
+
+                        if (!leadDictionary.TryGetValue(lead.Id, out var leadEntry))
+                        {
+                            leadEntry = lead;
+                            leadEntry.Role = role;
+                            leadEntry.Accounts = new List<AccountDto>();
+                            leadDictionary.Add(lead.Id, leadEntry);
+                        }
+                        leadEntry.Accounts.Add(account);
+
+                        return leadEntry;
+                    },
+                    new { lastLeadId },
+                    splitOn: "id",
+                    commandType: CommandType.StoredProcedure)
                 .Distinct()
                 .ToList();
         }

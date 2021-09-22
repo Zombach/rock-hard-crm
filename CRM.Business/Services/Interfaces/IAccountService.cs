@@ -14,5 +14,6 @@ namespace CRM.Business.Services
         Task<AccountBusinessModel> GetAccountWithTransactionsAsync(int accountId, LeadIdentityInfo leadInfo);
         Task<List<AccountBusinessModel>> GetTransactionsByPeriodAndPossiblyAccountIdAsync(TimeBasedAcquisitionBusinessModel model, LeadIdentityInfo leadInfo);
         Task<AccountBusinessModel> GetLeadBalanceAsync(int leadId, LeadIdentityInfo leadInfo);
+        Task<List<TransactionBusinessModel>> GetTransactionsByAccountIdsForTwoMonthsAsync(List<int> accountIds, LeadIdentityInfo leadInfo);
     }
 }

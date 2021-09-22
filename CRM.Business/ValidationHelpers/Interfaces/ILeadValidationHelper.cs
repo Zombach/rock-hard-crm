@@ -1,6 +1,6 @@
-﻿using System.Threading.Tasks;
-using CRM.Business.IdentityInfo;
+﻿using CRM.Business.IdentityInfo;
 using CRM.DAL.Models;
+using System.Threading.Tasks;
 
 namespace CRM.Business.ValidationHelpers
 {

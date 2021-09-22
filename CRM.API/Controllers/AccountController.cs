@@ -81,6 +81,17 @@ namespace CRM.API.Controllers
             return await _accountService.GetTransactionsByPeriodAndPossiblyAccountIdAsync(dto, leadInfo);
         }
 
+        // api/account/by-accountIds
+        [HttpPost("by-accountIds")]
+        [Description("Get transactions by two months and account ids")]
+        [ProducesResponseType(typeof(List<TransactionOutputModel>), StatusCodes.Status200OK)]
+        public async Task<List<TransactionOutputModel>> GetTransactionsByTwoMonthAndAccountIdsAsync([FromBody] List<int> accounts)
+        {
+            var leadInfo = this.GetLeadInfo();
+            var output = await _accountService.GetTransactionsByAccountIdsForTwoMonthsAsync(accounts, leadInfo);
+            return _mapper.Map<List<TransactionOutputModel>>(output);
+        }
+
         // api/account/lead/{leadId}
         [HttpGet("lead/{leadId}")]
         [Description("Get account with transactions")]

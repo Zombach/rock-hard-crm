@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
-using CRM.Core;
+﻿using CRM.Core;
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using Dapper;
 using Microsoft.Extensions.Options;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;

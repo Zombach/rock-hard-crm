@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using CRM.DAL.Models;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using CRM.DAL.Models;
 
 namespace CRM.DAL.Repositories
 {

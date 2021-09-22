@@ -14,6 +14,8 @@ using Microsoft.Extensions.Options;
 using RestSharp;
 using System;
 using System.Collections.Generic;
+using System.Net;
+using System.Text.Json;
 using System.Threading.Tasks;
 using CRM.DAL.Enums;
 using static CRM.Business.Constants.TransactionEndpoint;
@@ -130,6 +132,23 @@ namespace CRM.Business.Services
 
             CleanListModels(leadId);
             return models;
+        }
+
+        public async Task<List<TransactionBusinessModel>> GetTransactionsByAccountIdsForTwoMonthsAsync(List<int> accountIds, LeadIdentityInfo leadInfo)
+        {
+            foreach (int accountId in accountIds)
+            {
+                var dto = await _accountValidationHelper.GetAccountByIdAndThrowIfNotFoundAsync(accountId);
+                if (!leadInfo.IsAdmin())
+                    _accountValidationHelper.CheckLeadAccessToAccount(dto.LeadId, leadInfo.LeadId);
+            }
+
+            var request = _requestHelper.CreatePostRequest($"{GetTransactionsByAccountIdsForTwoMonthsEndpoint}", accountIds);
+
+            var response = _client.Execute<string>(request);
+            if(response.StatusCode != HttpStatusCode.OK) throw new Exception($"{response.ErrorMessage}");
+
+            return JsonSerializer.Deserialize<List<TransactionBusinessModel>>(response.Data);
         }
 
         public async Task<AccountBusinessModel> GetLeadBalanceAsync(int leadId, LeadIdentityInfo leadInfo)
