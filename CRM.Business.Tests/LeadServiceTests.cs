@@ -6,7 +6,6 @@ using CRM.Business.Services;
 using CRM.Business.Tests.TestsDataHelpers;
 using CRM.Business.ValidationHelpers;
 using CRM.DAL.Enums;
-using CRM.DAL.Models;
 using CRM.DAL.Repositories;
 using MassTransit;
 using Moq;
