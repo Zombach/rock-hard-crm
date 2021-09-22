@@ -91,8 +91,8 @@ namespace CRM.Business.Services
             var accountModel = await _accountService.GetAccountWithTransactionsAsync(model.AccountId, leadInfo);
             _accountValidationHelper.CheckForVipAccess(accountModel.Currency, leadInfo);
             var commission = CalculateCommission(model.Amount, leadInfo);
-            CheckBalance(accountModel, model.Amount);
-            model.Date = CheckTransactionsLastDate(accountModel);
+            _accountValidationHelper.CheckBalance(accountModel, model.Amount);
+            model.Date = _accountValidationHelper.GetTransactionsLastDateAndThrowIfNotFound(accountModel);
 
             model.Amount -= commission;
             model.AccountId = accountModel.Id;
@@ -102,6 +102,7 @@ namespace CRM.Business.Services
             var result = _client.Execute<long>(request);
             var transactionId = result.Data;
 
+            _accountValidationHelper.CheckForDuplicateTransaction(transactionId,accountModel);
 
             EmailSender(leadDto, EmailMessages.WithdrawSubject, string.Format(EmailMessages.WithdrawBody, model.Amount));
 
@@ -119,8 +120,8 @@ namespace CRM.Business.Services
             var accountModel = await _accountService.GetAccountWithTransactionsAsync(model.AccountId, leadInfo);
             var recipientAccount = await CheckAccessAndReturnAccount(model.RecipientAccountId, leadInfo);
             var commission = CalculateCommission(model.Amount, leadInfo);
-            CheckBalance(accountModel, model.Amount);
-            model.Date = CheckTransactionsLastDate(accountModel);
+            _accountValidationHelper.CheckBalance(accountModel, model.Amount);
+            model.Date = _accountValidationHelper.GetTransactionsLastDateAndThrowIfNotFound(accountModel);
 
             if (accountModel.Currency != Currency.RUB && accountModel.Currency != Currency.USD && !leadInfo.IsVip())
             {
@@ -169,14 +170,6 @@ namespace CRM.Business.Services
             return leadInfo.IsVip() ? amount * _vipCommission : amount * _commission;
         }
 
-        private static void CheckBalance(AccountBusinessModel account, decimal amount)
-        {
-            if (account.Balance - amount < 0)
-            {
-                throw new ValidationException(nameof(amount), string.Format(ServiceMessages.DoesNotHaveEnoughMoney, account.Id, account.Balance));
-            }
-        }
-
         private void EmailSender(LeadDto dto, string subject, string body)
         {
             _publishEndpoint.Publish<IMailExchangeModel>(new
@@ -186,23 +179,6 @@ namespace CRM.Business.Services
                 DisplayName = "Best CRM",
                 MailAddresses = $"{dto.Email}"
             });
-        }
-
-        private static DateTime CheckTransactionsLastDate(AccountBusinessModel account)
-        {
-            if (account.Transfers.Count == 0 && account.Transactions.Count == 0)
-                throw new ValidationException(nameof(account),
-                    string.Format(ServiceMessages.DoesNotHaveTransactions, account.Id));
-
-            if (account.Transfers.Count == 0)
-                return account.Transactions.Last().Date;
-
-            if (account.Transactions.Count == 0)
-                return account.Transfers.Last().Date;
-
-            var transferLastDate = account.Transfers.Last().Date;
-            var transactionLastDate = account.Transactions.Last().Date;
-            return transferLastDate > transactionLastDate ? transferLastDate : transactionLastDate;
         }
     }
 }
