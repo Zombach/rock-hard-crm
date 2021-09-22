@@ -1,12 +1,17 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Threading.Tasks;
 using AutoMapper;
 using CRM.Business.Constants;
 using CRM.Business.Exceptions;
 using CRM.Business.Models;
+using CRM.Business.Requests;
 using CRM.Business.Services;
 using CRM.Business.Tests.TestsDataHelpers;
 using CRM.Business.ValidationHelpers;
 using CRM.DAL.Repositories;
+using FluentAssertions;
 using MassTransit;
 using Moq;
 using NUnit.Framework;
@@ -22,11 +27,13 @@ namespace CRM.Business.Tests
         private Mock<IMapper> _mapperMock;
         private Mock<RestClient> _clientMock;
         private Mock<IPublishEndpoint> _publishEndPointMock;
+        private Mock<RequestHelper> _requestHekperMock;
         private AccountService _sut;
 
         [SetUp]
         public void SetUp()
         {
+            _requestHekperMock = new Mock<RequestHelper>();
             _leadRepoMock = new Mock<ILeadRepository>();
             _clientMock = new Mock<RestClient>();
             _mapperMock = new Mock<IMapper>();
@@ -218,38 +225,123 @@ namespace CRM.Business.Tests
             _leadRepoMock.Verify(x => x.GetLeadByIdAsync(leadDto.Id), Times.Once);
         }
 
-        //[Test]
-        //public async Task GetTransactionsByPeriodAndPossiblyAccountIdAsync()
-        //{
-        //    //Given
-        //    var leadInfo = LeadIdentityInfoData.GetRegularLeadIdentityInfo();
-        //    var account = AccountData.GetUsdAccountDto();
-        //    var model = new TimeBasedAcquisitionBusinessModel()
-        //    {
-        //        AccountId = account.Id,
-        //        From = "01.09.2021 00:00",
-        //        To = "02.09.2021 00:00"
-        //    };
+        [Test]
+        public async Task GetTransactionsByPeriodAndPossiblyAccountIdAsync_NullContent_ReturnException()
+        {
+            //Given
+            var leadInfo = LeadIdentityInfoData.GetRegularLeadIdentityInfo();
+            var account = AccountData.GetUsdAccountDto();
+            var excpected = "все упало";
+            var model = new TimeBasedAcquisitionBusinessModel()
+            {
+                AccountId = account.Id,
+                From = "01.09.2021 00:00",
+                To = "02.09.2021 00:00"
+            };
 
-        //    var request = // _requestHelper.CreatePostRequest($"{GetTransactionsByPeriodEndpoint}", model);
+            account.LeadId = leadInfo.LeadId;
 
-        //    account.LeadId = leadInfo.LeadId;
-        //    _accountRepoMock.Setup(x => x.GetAccountByIdAsync(account.Id)).ReturnsAsync(account);
-        //    //_clientMock
-        //    //    .Setup(x => x.ExecuteAsync<string>("csa"))
-        //    //    .ReturnsAsync(new RestResponse<string>()
-        //    //    {
+            _accountRepoMock.Setup(x => x.GetAccountByIdAsync(account.Id)).ReturnsAsync(account);
+            _clientMock
+                .Setup(x => x.ExecuteAsync(
+                    It.IsAny<IRestRequest>(),
+                    It.IsAny<Action<IRestResponse<string>, RestRequestAsyncHandle>>()))
+                .Callback<IRestRequest, Action<IRestResponse<string>, RestRequestAsyncHandle>>((request, callback) =>
+                {
+                    callback(new RestResponse<string>
+                    {
+                        Data = "",
+                        StatusCode = HttpStatusCode.OK
+                    }, null);
+                });
 
-        //    //    });
+            //When
+            var ex = Assert.ThrowsAsync<Exception>(
+                async () => await _sut.GetTransactionsByPeriodAndPossiblyAccountIdAsync(model, leadInfo));
 
-        //    //When
+            //Then
+            Assert.AreEqual(excpected, ex.Message);
+            _accountRepoMock.Verify(x => x.GetAccountByIdAsync(account.Id), Times.Once);
+        }
 
-        //     var actual = await _sut.GetTransactionsByPeriodAndPossiblyAccountIdAsync(model, leadInfo);
+        [Test]
+        public async Task GetTransactionsByPeriodAndPossiblyAccountIdAsync()
+        {
+            //Given
+            var leadInfo = LeadIdentityInfoData.GetRegularLeadIdentityInfo();
+            var account = AccountData.GetUsdAccountDto();
+            var listAccountDtos = AccountData.GetListAccountDtos();
+            var listAccountBusinessModels = AccountData.GetListAccountBusinessModels();
+            var data = AccountData.GetData();
+            var count = 0;
+            var ids = new List<int> { 2, 652731, 1958795 };
+            var excpected = AccountData.GetSthngStrange();
+            var model = new TimeBasedAcquisitionBusinessModel()
+            {
+                AccountId = account.Id,
+                From = "01.09.2021 00:00",
+                To = "02.09.2021 00:00"
+            };
 
-        //    //Then
-        //    Assert.AreEqual(model, actual);
-        //    _accountRepoMock.Verify(x => x.GetAccountByIdAsync(account.Id), Times.Once);
+            account.LeadId = leadInfo.LeadId;
 
-        //}
+            _mapperMock.Setup(x => x.Map<List<AccountBusinessModel>>(listAccountDtos)).Returns(listAccountBusinessModels);
+            _accountRepoMock.Setup(x => x.GetAccountByIdAsync(account.Id)).ReturnsAsync(account);
+            _accountRepoMock.Setup(x => x.GetAccountsByListIdAsync(ids)).ReturnsAsync(listAccountDtos);
+            _clientMock
+                .Setup(x => x.ExecuteAsync(
+                    It.IsAny<IRestRequest>(),
+                    It.IsAny<Action<IRestResponse<string>, RestRequestAsyncHandle>>()))
+                .Callback<IRestRequest, Action<IRestResponse<string>, RestRequestAsyncHandle>>((request, callback) =>
+                {
+                    callback(new RestResponse<string>
+                    {
+                        Data = count++ < 1 ? data : "[]",
+                        StatusCode = HttpStatusCode.OK
+                    }, null);
+                });
+
+            //When
+            var actual = await _sut.GetTransactionsByPeriodAndPossiblyAccountIdAsync(model, leadInfo);
+
+            //Then
+            actual.Should().BeEquivalentTo(excpected, options => options
+                .Excluding(obj => obj.CreatedOn));
+            _accountRepoMock.Verify(x => x.GetAccountByIdAsync(account.Id), Times.Once);
+        }
+
+        [Test]
+        public async Task GetTransactionsByPeriodAndPossiblyAccountIdAsync_NotAdminTryGetTransactions_ReturnException()
+        {
+            //Given
+            var leadInfo = LeadIdentityInfoData.GetRegularLeadIdentityInfo();
+            var excpected = $"{ServiceMessages.NoAdminRights}";
+            var model = new TimeBasedAcquisitionBusinessModel()
+            {
+                AccountId = null,
+                From = "01.09.2021 00:00",
+                To = "02.09.2021 00:00"
+            };
+
+            _clientMock
+                .Setup(x => x.ExecuteAsync(
+                    It.IsAny<IRestRequest>(),
+                    It.IsAny<Action<IRestResponse<string>, RestRequestAsyncHandle>>()))
+                .Callback<IRestRequest, Action<IRestResponse<string>, RestRequestAsyncHandle>>((request, callback) =>
+                {
+                    callback(new RestResponse<string>
+                    {
+                        Data = "",
+                        StatusCode = HttpStatusCode.OK
+                    }, null);
+                });
+
+            //When
+            var ex = Assert.ThrowsAsync<AuthorizationException>(
+                async () => await _sut.GetTransactionsByPeriodAndPossiblyAccountIdAsync(model, leadInfo));
+
+            //Then
+            Assert.AreEqual(excpected, ex.Message);
+        }
     }
 }

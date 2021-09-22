@@ -242,7 +242,8 @@ namespace CRM.Business.Services
         private async Task<List<AccountBusinessModel>> GetAccountsInfoAsync(List<int> ids)
         {
             var dto = await _accountRepository.GetAccountsByListIdAsync(ids);
-            return _mapper.Map<List<AccountBusinessModel>>(dto);
+            var aaa = _mapper.Map<List<AccountBusinessModel>>(dto);
+            return aaa;
         }
 
         private void CleanListModels()

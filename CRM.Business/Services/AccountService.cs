@@ -13,6 +13,7 @@ using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using static CRM.Business.Constants.TransactionEndpoint;
 
 namespace CRM.Business.Services
@@ -105,6 +106,7 @@ namespace CRM.Business.Services
                 var dto = await _accountValidationHelper.GetAccountByIdAndThrowIfNotFoundAsync((int)model.AccountId);
                 if (!leadInfo.IsAdmin())
                     _accountValidationHelper.CheckLeadAccessToAccount(dto.LeadId, leadInfo.LeadId);
+
                 var accountModel = _mapper.Map<AccountBusinessModel>(dto);
                 models.Add(accountModel);
             }
@@ -125,6 +127,7 @@ namespace CRM.Business.Services
             }
             while (true);
 
+            var qq = JsonConvert.SerializeObject(models);
             return models;
         }
 
