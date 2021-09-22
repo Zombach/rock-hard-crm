@@ -1,4 +1,5 @@
-﻿using CRM.Business.Services;
+﻿using System.Threading.Tasks;
+using CRM.Business.Services;
 using CRM.Business.Tests.TestsDataHelpers;
 using CRM.DAL.Repositories;
 using Moq;
@@ -19,14 +20,14 @@ namespace CRM.Business.Tests
         }
 
         [Test]
-        public void GetAllCities_NoEntry_ListCityDto()
+        public async Task GetAllCities_NoEntry_ListCityDto()
         {
             //Given
             var expectedCites = CityData.GetListCityDto();
             _mock.Setup(x => x.GetAllCitiesAsync()).ReturnsAsync(expectedCites);
 
             //When
-            var actualCites = _sut.GetAllCities();
+            var actualCites = await _sut.GetAllCities();
 
             //Then
             Assert.AreEqual(expectedCites, actualCites);

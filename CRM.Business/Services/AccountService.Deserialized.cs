@@ -76,7 +76,6 @@ namespace CRM.Business.Services
                     }
                 }
 
-
                 if (tmpTransaction.Count != 0 && tmpTransfer.Count != 0) continue;
                 if (_transactions.Count != 0 || _transfers.Count != 0) continue;
                 for (; i < accounts.Count; i++)

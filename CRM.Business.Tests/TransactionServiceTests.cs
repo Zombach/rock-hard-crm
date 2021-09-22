@@ -1,4 +1,5 @@
-﻿using CRM.Business.Services;
+﻿using System.Threading.Tasks;
+using CRM.Business.Services;
 using CRM.Business.Tests.TestsDataHelpers;
 using CRM.Business.ValidationHelpers;
 using CRM.Core;
@@ -50,12 +51,12 @@ namespace CRM.Business.Tests
         }
 
         [Test]
-        public void AddDeposit()
+        public async Task AddDeposit()
         {
             //Given
             var expected = 234324243L;
             var model = TransactionData.GeTransactionBusinessModel();
-            var account = AccountData.GetAccountDto();
+            var account = AccountData.GetUsdAccountDto();
             var leadInfo = LeadIdentityInfoData.GetRegularLeadIdentityInfo();
             _accountRepoMock.Setup(x => x
                 .GetAccountByIdAsync(account.Id))
@@ -68,7 +69,7 @@ namespace CRM.Business.Tests
                 });
 
             //When
-            var actual = _sut.AddDepositAsync(model, leadInfo);
+            var actual = await _sut.AddDepositAsync(model, leadInfo);
 
             //Then
             Assert.AreEqual(expected, actual);
@@ -81,7 +82,7 @@ namespace CRM.Business.Tests
             //Given
             var expected = 2344243L;
             var model = TransactionData.GeTransactionBusinessModel();
-            var account = AccountData.GetAccountDto();
+            var account = AccountData.GetUsdAccountDto();
             var leadInfo = LeadIdentityInfoData.GetRegularLeadIdentityInfo();
 
             _accountRepoMock
@@ -108,8 +109,8 @@ namespace CRM.Business.Tests
             //Given
             var expected = "Transaction";
             var model = TransactionData.GetTransferBusinessModel();
-            var account = AccountData.GetAccountDto();
-            var accountAnother = AccountData.GetAnotherAccountDto();
+            var account = AccountData.GetUsdAccountDto();
+            var accountAnother = AccountData.GetEurAccountDto();
             var leadInfo = LeadIdentityInfoData.GetRegularLeadIdentityInfo();
 
             model.Currency = account.Currency;

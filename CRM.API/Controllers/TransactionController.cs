@@ -3,7 +3,6 @@ using CRM.API.Extensions;
 using CRM.API.Models;
 using CRM.Business.Models;
 using CRM.Business.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel;

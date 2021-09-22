@@ -7,7 +7,7 @@ namespace CRM.Business.Tests.TestsDataHelpers
 {
     public static class AccountData
     {
-        public static AccountDto GetAccountDto()
+        public static AccountDto GetUsdAccountDto()
         {
             return new()
             {
@@ -19,7 +19,19 @@ namespace CRM.Business.Tests.TestsDataHelpers
             };
         }
 
-        public static AccountDto GetAnotherAccountDto()
+        public static AccountDto GetRubAccountDto()
+        {
+            return new()
+            {
+                Id = 1,
+                LeadId = 1,
+                Currency = Currency.RUB,
+                CreatedOn = DateTime.Now.AddYears(-1),
+                IsDeleted = false
+            };
+        }
+
+        public static AccountDto GetEurAccountDto()
         {
             return new()
             {

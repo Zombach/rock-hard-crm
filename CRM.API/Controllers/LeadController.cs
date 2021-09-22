@@ -95,7 +95,7 @@ namespace CRM.API.Controllers
         {
             var leadInfo = this.GetLeadInfo();
             var dto = _mapper.Map<AccountDto>(inputModel);
-            var accountId = _accountService.AddAccount(dto, leadInfo);
+            var accountId = _accountService.AddAccountAsync(dto, leadInfo);
             return StatusCode(201, accountId);
         }
 
@@ -106,7 +106,7 @@ namespace CRM.API.Controllers
         public ActionResult DeleteAccountById(int id)
         {
             var leadId = this.GetLeadId();
-            _accountService.DeleteAccount(id, leadId);
+            _accountService.DeleteAccountAsync(id, leadId);
             return NoContent();
         }
     }

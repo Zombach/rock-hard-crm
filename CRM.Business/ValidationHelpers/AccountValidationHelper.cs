@@ -23,6 +23,7 @@ namespace CRM.Business.ValidationHelpers
             var account = await _accountRepository.GetAccountByIdAsync(accountId);
             if (account == default)
                 throw new EntityNotFoundException(string.Format(ServiceMessages.EntityNotFoundMessage, nameof(account), accountId));
+            
             return account;
         }
 

@@ -5,12 +5,10 @@ using CRM.Business.IdentityInfo;
 using CRM.Business.Models;
 using CRM.Business.Requests;
 using CRM.Business.ValidationHelpers;
-using CRM.Core;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
 using MailExchange;
 using MassTransit;
-using Microsoft.Extensions.Options;
 using RestSharp;
 using System;
 using System.Collections.Generic;
@@ -66,6 +64,7 @@ namespace CRM.Business.Services
         {
             var leadDto = await _leadRepository.GetLeadByIdAsync(leadId);
             var accountDto = await _accountValidationHelper.GetAccountByIdAndThrowIfNotFoundAsync(accountId);
+
             _accountValidationHelper.CheckLeadAccessToAccount(accountDto.LeadId, leadId);
             await EmailSenderAsync(leadDto, EmailMessages.AccountDeleteSubject, EmailMessages.AccountDeleteBody, accountDto);
             await _accountRepository.DeleteAccountAsync(accountId);
@@ -75,6 +74,7 @@ namespace CRM.Business.Services
         {
             var leadDto = await _leadRepository.GetLeadByIdAsync(leadId);
             var accountDto = await _accountValidationHelper.GetAccountByIdAndThrowIfNotFoundAsync(accountId);
+
             _accountValidationHelper.CheckLeadAccessToAccount(accountDto.LeadId, leadId);
             await EmailSenderAsync(leadDto, EmailMessages.AccountRestoreSubject, EmailMessages.AccountRestoreBody, accountDto);
             await _accountRepository.RestoreAccountAsync(accountId);
