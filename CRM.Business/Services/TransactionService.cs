@@ -143,6 +143,7 @@ namespace CRM.Business.Services
                 throw new Exception("tstore slomalsy");
             }
             var transactionId = result.Data.First();
+            _accountValidationHelper.CheckForDuplicateTransaction(transactionId, accountModel);
             EmailSender(leadDto, EmailMessages.TransferSubject, string.Format(EmailMessages.TransferBody, model.Amount, model.Currency, model.RecipientCurrency));
 
             var dto = new CommissionFeeDto
