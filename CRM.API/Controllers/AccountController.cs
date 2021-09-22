@@ -3,13 +3,13 @@ using CRM.API.Extensions;
 using CRM.API.Models;
 using CRM.Business.Models;
 using CRM.Business.Services;
-using CRM.DAL.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using CRM.DAL.Enums;
 
 namespace CRM.API.Controllers
 {
@@ -28,14 +28,13 @@ namespace CRM.API.Controllers
         }
 
         // api/account/create
-        [HttpPost("account/create")]
+        [HttpPost("create")]
         [Description("Create lead account")]
         [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
-        public async Task<ActionResult<int>> AddAccountAsync([FromBody] AccountInputModel inputModel)
+        public async Task<ActionResult<int>> AddAccountAsync(Currency currency)
         {
             var leadInfo = this.GetLeadInfo();
-            var dto = _mapper.Map<AccountDto>(inputModel);
-            var accountId = await _accountService.AddAccountAsync(dto, leadInfo);
+            var accountId = await _accountService.AddAccountAsync(currency, leadInfo);
             return StatusCode(201, accountId);
         }
 
@@ -57,9 +56,7 @@ namespace CRM.API.Controllers
         public async Task<ActionResult> RestoreAccountAsync(int accountId)
         {
             var leadInfo = this.GetLeadInfo();
-            /*var output =*/
             await _accountService.RestoreAccountAsync(accountId, leadInfo.LeadId);
-            //return StatusCode(201, output);
             return NoContent();
         }
 
@@ -81,8 +78,7 @@ namespace CRM.API.Controllers
         {
             var leadInfo = this.GetLeadInfo();
             var dto = _mapper.Map<TimeBasedAcquisitionBusinessModel>(model);
-            var output = await _accountService.GetTransactionsByPeriodAndPossiblyAccountIdAsync(dto, leadInfo);
-            return _mapper.Map<List<AccountBusinessModel>>(output);
+            return await _accountService.GetTransactionsByPeriodAndPossiblyAccountIdAsync(dto, leadInfo);
         }
 
         // api/account/by-accountIds
