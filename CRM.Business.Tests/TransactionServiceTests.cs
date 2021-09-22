@@ -1,4 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Threading.Tasks;
+using CRM.Business.Constants;
+using CRM.Business.Exceptions;
 using CRM.Business.Services;
 using CRM.Business.Tests.TestsDataHelpers;
 using CRM.Business.ValidationHelpers;
@@ -6,6 +11,7 @@ using CRM.Core;
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
+using FluentAssertions;
 using MassTransit;
 using Microsoft.Extensions.Options;
 using Moq;
@@ -65,7 +71,6 @@ namespace CRM.Business.Tests
             var lead = LeadData.GetLeadDto();
             var commission = new CommissionFeeDto
             {
-                Id = 123,
                 LeadId = leadInfo.LeadId,
                 AccountId = model.AccountId,
                 TransactionId = data,
@@ -89,73 +94,232 @@ namespace CRM.Business.Tests
             var actual = await _sut.AddDepositAsync(model, leadInfo);
 
             //Then
-            Assert.AreEqual(commission, actual);
+            actual.Should().BeEquivalentTo(commission);
             _accountRepoMock.Verify(x => x.GetAccountByIdAsync(account.Id), Times.Once);
             _leadRepoMock.Verify(x => x.GetLeadByIdAsync(leadInfo.LeadId), Times.Once);
-            _commissionFeeServiceMock.Verify(x => x.AddCommissionFeeAsync(commission), Times.Once);
+            _commissionFeeServiceMock.Verify(x => x.AddCommissionFeeAsync(commission), Times.Never);
 
         }
 
         [Test]
-        public void AddWithdraw()
+        public async Task AddWithdraw()
         {
             //Given
-            var expected = 2344243L;
+            const long data = 21321L;
             var model = TransactionData.GeTransactionBusinessModel();
-            var account = AccountData.GetUsdAccountDto();
             var leadInfo = LeadIdentityInfoData.GetRegularLeadIdentityInfo();
+            var account = AccountData.GetUsdAccountDto();
+            var lead = LeadData.GetLeadDto();
+            var expectedList = TransactionData.GetJSONstring();
+            var accountBusinessModel = TransactionData.GetAccountBusinessModel();
+            var commission = new CommissionFeeDto
+            {
+                LeadId = leadInfo.LeadId,
+                AccountId = model.AccountId,
+                TransactionId = data,
+                Role = leadInfo.Role,
+                CommissionAmount = 0.2m,
+                TransactionType = TransactionType.Withdraw
+            };
+            account.LeadId = leadInfo.LeadId;
 
-            _accountRepoMock
-                .Setup(x => x.GetAccountByIdAsync(account.Id))
-                .ReturnsAsync(account);
+            _leadRepoMock.Setup(x => x.GetLeadByIdAsync(leadInfo.LeadId)).ReturnsAsync(lead);
+            _accountServiceMock.Setup(x => x.GetAccountWithTransactionsAsync(account.Id, leadInfo)).ReturnsAsync(accountBusinessModel);
+            _commissionFeeServiceMock.Setup(x => x.AddCommissionFeeAsync(commission)).ReturnsAsync(commission.Id);
+            _clientMock
+                .Setup(x => x.Execute<string>(It.IsAny<IRestRequest>()))
+                .Returns(new RestResponse<string>
+                {
+                    Data = expectedList
+                });
             _clientMock
                 .Setup(x => x.Execute<long>(It.IsAny<IRestRequest>()))
                 .Returns(new RestResponse<long>
                 {
-                    Data = expected
+                    Data = data
                 });
 
             //When
-            var actual = _sut.AddWithdrawAsync(model, leadInfo);
+            var actual = await _sut.AddWithdrawAsync(model, leadInfo);
 
             //Then
-            Assert.AreEqual(expected, actual);
-            _accountRepoMock.Verify(x => x.GetAccountByIdAsync(account.Id), Times.Once);
+            actual.Should().BeEquivalentTo(commission);
+            _leadRepoMock.Verify(x => x.GetLeadByIdAsync(leadInfo.LeadId), Times.Once);
+            _commissionFeeServiceMock.Verify(x => x.AddCommissionFeeAsync(commission), Times.Never);
+
         }
 
         [Test]
-        public void AddTransfer()
+        public async Task AddTransfer()
         {
             //Given
-            var expected = "Transaction";
+            var lead = LeadData.GetLeadWithTwoAccountsDto();
+            var accountBusinessModel = TransactionData.GetAccountBusinessModel();
+            const long transactionId = 21321L;
+            const decimal commissionAmount = 4.2m;
             var model = TransactionData.GetTransferBusinessModel();
             var account = AccountData.GetUsdAccountDto();
             var accountAnother = AccountData.GetEurAccountDto();
             var leadInfo = LeadIdentityInfoData.GetRegularLeadIdentityInfo();
+            var data = new List<long>
+            {
+                transactionId,
+                213123121L
+            };
+            var commission = new CommissionFeeDto
+            {
+                LeadId = leadInfo.LeadId,
+                AccountId = model.AccountId,
+                TransactionId = transactionId,
+                Role = leadInfo.Role,
+                CommissionAmount = commissionAmount,
+                TransactionType = TransactionType.Transfer
+            };
 
+            account.LeadId = leadInfo.LeadId;
+            model.Amount = 21m;
             model.Currency = account.Currency;
             model.RecipientCurrency = accountAnother.Currency;
-            _accountRepoMock.Setup(x => x
-                    .GetAccountByIdAsync(model.RecipientAccountId))
-                .ReturnsAsync(account);
-            _accountRepoMock.Setup(x => x
-                    .GetAccountByIdAsync(model.AccountId))
-                .ReturnsAsync(accountAnother);
 
-            _clientMock.Setup(x => x
-                      .Execute<string>(It.IsAny<IRestRequest>()))
-                  .Returns(new RestResponse<string>
-                  {
-                      Data = expected
-                  });
+            _leadRepoMock.Setup(x => x.GetLeadByIdAsync(leadInfo.LeadId)).ReturnsAsync(lead);
+            _accountServiceMock.Setup(x => x.GetAccountWithTransactionsAsync(model.AccountId, leadInfo)).ReturnsAsync(accountBusinessModel);
+            _accountRepoMock.Setup(x => x.GetAccountByIdAsync(model.RecipientAccountId)).ReturnsAsync(account);
+            _clientMock
+                .Setup(x => x.ExecuteAsync<List<long>>(
+                    It.IsAny<IRestRequest>(),
+                    It.IsAny<Action<IRestResponse<List<long>>, RestRequestAsyncHandle>>()))
+                .Callback<IRestRequest, Action<IRestResponse<List<long>>, RestRequestAsyncHandle>>((request, callback) =>
+                    {
+                        callback(new RestResponse<List<long>>
+                        {
+                            Data = data,
+                            StatusCode = HttpStatusCode.OK
+                        }, null);
+                    });
 
             //When
-            var actual = _sut.AddTransferAsync(model, leadInfo);
+            var actual = await _sut.AddTransferAsync(model, leadInfo);
 
             //Then
-            Assert.AreEqual(expected, actual);
-            _accountRepoMock.Verify(x => x.GetAccountByIdAsync(model.AccountId), Times.Once);
-            _accountRepoMock.Verify(x => x.GetAccountByIdAsync(model.RecipientAccountId), Times.Once);
+            actual.Should().BeEquivalentTo(commission);
+            _leadRepoMock.Verify(x => x.GetLeadByIdAsync(leadInfo.LeadId),Times.Once);
+        }
+
+        [Test]
+        public async Task AddTransferAsync_DoesNotHaveLongInDatabase_ReturnException()
+        {
+            //Given
+            var lead = LeadData.GetLeadWithTwoAccountsDto();
+            var accountBusinessModel = TransactionData.GetAccountBusinessModel();
+            var model = TransactionData.GetTransferBusinessModel();
+            var account = AccountData.GetUsdAccountDto();
+            var accountAnother = AccountData.GetEurAccountDto();
+            var leadInfo = LeadIdentityInfoData.GetRegularLeadIdentityInfo();
+            var excpected = "tstore slomalsy";
+
+            account.LeadId = leadInfo.LeadId;
+            model.Amount = 21m;
+            model.Currency = account.Currency;
+            model.RecipientCurrency = accountAnother.Currency;
+
+            _leadRepoMock.Setup(x => x.GetLeadByIdAsync(leadInfo.LeadId)).ReturnsAsync(lead);
+            _accountServiceMock.Setup(x => x.GetAccountWithTransactionsAsync(model.AccountId, leadInfo)).ReturnsAsync(accountBusinessModel);
+            _accountRepoMock.Setup(x => x.GetAccountByIdAsync(model.RecipientAccountId)).ReturnsAsync(account);
+            _clientMock
+                .Setup(x => x.ExecuteAsync<List<long>>(
+                    It.IsAny<IRestRequest>(),
+                    It.IsAny<Action<IRestResponse<List<long>>, RestRequestAsyncHandle>>()))
+                .Callback<IRestRequest, Action<IRestResponse<List<long>>, RestRequestAsyncHandle>>((request, callback) =>
+                    {
+                        callback(new RestResponse<List<long>>
+                        {
+                            StatusCode = HttpStatusCode.OK
+                        }, null);
+                    });
+
+            //When
+            var ex = Assert.ThrowsAsync<Exception>(
+                () => _sut.AddTransferAsync(model, leadInfo));
+
+
+            //Then
+            Assert.AreEqual(excpected,ex.Message);
+            _leadRepoMock.Verify(x => x.GetLeadByIdAsync(leadInfo.LeadId),Times.Once);
+        }
+
+        [Test]
+        public async Task AddTransferAsync_DoesNotHaveMoneyOnBalance_ReturnException()
+        {
+            //Given
+            var lead = LeadData.GetLeadWithTwoAccountsDto();
+            var accountBusinessModel = TransactionData.GetAccountBusinessModel();
+            var model = TransactionData.GetTransferBusinessModel();
+            var account = AccountData.GetUsdAccountDto();
+            var accountAnother = AccountData.GetEurAccountDto();
+            var leadInfo = LeadIdentityInfoData.GetRegularLeadIdentityInfo();
+            var excpected = string.Format(ServiceMessages.DoesNotHaveEnoughMoney, account.Id, accountBusinessModel.Balance);
+
+            account.LeadId = leadInfo.LeadId;
+            model.Amount = 10221m;
+            model.Currency = account.Currency;
+            model.RecipientCurrency = accountAnother.Currency;
+            accountBusinessModel.Balance = 1000;
+
+            _leadRepoMock.Setup(x => x.GetLeadByIdAsync(leadInfo.LeadId)).ReturnsAsync(lead);
+            _accountServiceMock.Setup(x => x.GetAccountWithTransactionsAsync(model.AccountId, leadInfo)).ReturnsAsync(accountBusinessModel);
+            _accountRepoMock.Setup(x => x.GetAccountByIdAsync(model.RecipientAccountId)).ReturnsAsync(account);
+
+            //When
+            var ex = Assert.ThrowsAsync<ValidationException>(
+                () => _sut.AddTransferAsync(model, leadInfo));
+
+
+            //Then
+            Assert.AreEqual(excpected, ex.Message);
+            _leadRepoMock.Verify(x => x.GetLeadByIdAsync(leadInfo.LeadId), Times.Once);
+        }
+
+        [Test]
+        public async Task AddTransferAsync_DoesNotHaveMoneyOnBalancedwq_ReturnException()
+        {
+            //Given
+            var lead = LeadData.GetLeadWithTwoAccountsDto();
+            var accountBusinessModel = TransactionData.GetEurAccountBusinessModel();
+            var model = TransactionData.GetTransferBusinessModel();
+            var account = AccountData.GetUsdAccountDto();
+            var accountAnother = AccountData.GetEurAccountDto();
+            var leadInfo = LeadIdentityInfoData.GetRegularLeadIdentityInfo();
+            var excpected = $"{ServiceMessages.IncompleteTransfer}";
+
+            account.LeadId = leadInfo.LeadId;
+            model.Amount = 21m;
+            model.Currency = account.Currency;
+            model.RecipientCurrency = accountAnother.Currency;
+            accountBusinessModel.Balance = 22m;
+
+            _leadRepoMock.Setup(x => x.GetLeadByIdAsync(leadInfo.LeadId)).ReturnsAsync(lead);
+            _accountServiceMock.Setup(x => x.GetAccountWithTransactionsAsync(model.AccountId, leadInfo)).ReturnsAsync(accountBusinessModel);
+            _accountRepoMock.Setup(x => x.GetAccountByIdAsync(model.RecipientAccountId)).ReturnsAsync(account);
+            _clientMock
+                .Setup(x => x.ExecuteAsync<List<long>>(
+                    It.IsAny<IRestRequest>(),
+                    It.IsAny<Action<IRestResponse<List<long>>, RestRequestAsyncHandle>>()))
+                .Callback<IRestRequest, Action<IRestResponse<List<long>>, RestRequestAsyncHandle>>((request, callback) =>
+                    {
+                        callback(new RestResponse<List<long>>
+                        {
+                            StatusCode = HttpStatusCode.OK
+                        }, null);
+                    });
+
+            //When
+            var ex = Assert.ThrowsAsync<ValidationException>(
+                () => _sut.AddTransferAsync(model, leadInfo));
+
+
+            //Then
+            Assert.AreEqual(excpected, ex.Message);
+            _leadRepoMock.Verify(x => x.GetLeadByIdAsync(leadInfo.LeadId), Times.Once);
         }
     }
 }

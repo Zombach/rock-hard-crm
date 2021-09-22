@@ -69,11 +69,8 @@ namespace CRM.Business.Services
 
             var request = _requestHelper.CreatePostRequest(AddDepositEndpoint, model);
             var result = _client.Execute<long>(request);
-            //if (!result.IsSuccessful)
-            //{
-            //    throw new Exception($"{result.ErrorMessage} {_client.BaseUrl}");
-            //}
             var transactionId = result.Data;
+
             EmailSender(leadDto, EmailMessages.DepositSubject, string.Format(EmailMessages.DepositBody, model.Amount));
             var dto = new CommissionFeeDto
             {
@@ -133,7 +130,9 @@ namespace CRM.Business.Services
 
             CheckBalance(account, model.Amount);
 
-            if (account.Currency != Currency.RUB && account.Currency != Currency.USD && !leadInfo.IsVip())
+            if (account.Currency != Currency.RUB &&
+                account.Currency != Currency.USD && 
+                !leadInfo.IsVip())
             {
                 commission *= _commissionModifier;
                 if (account.Balance != model.Amount)
@@ -156,9 +155,16 @@ namespace CRM.Business.Services
             EmailSender(leadDto, EmailMessages.TransferSubject, string.Format(EmailMessages.TransferBody, model.Amount, model.Currency, model.RecipientCurrency));
 
             var dto = new CommissionFeeDto
-            { LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = leadInfo.Role, CommissionAmount = commission, TransactionType = TransactionType.Transfer };
+            {
+                LeadId = leadInfo.LeadId, 
+                AccountId = model.AccountId, 
+                TransactionId = transactionId,
+                Role = leadInfo.Role, 
+                CommissionAmount = commission, 
+                TransactionType = TransactionType.Transfer
+            };
 
-            await AddCommissionFee(dto);
+          await AddCommissionFee(dto);
 
             return dto;
         }

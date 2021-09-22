@@ -19,18 +19,26 @@ namespace CRM.Business.Tests.TestsDataHelpers
             Balance = 1000
         };
 
-        public static TransactionBusinessModel GeTransactionBusinessModel()
+        public static AccountBusinessModel GetEurAccountBusinessModel() => new()
         {
-            return new()
-            {
-                Id = 1,
-                AccountId = 1,
-                Currency = Currency.RUB,
-                TransactionType = TransactionType.Deposit,
-                Date = DateTime.Now,
-                Amount = decimal.One
-            };
-        }
+            Id = 1,
+            LeadId = 1,
+            Currency = Currency.EUR,
+            CreatedOn = DateTime.Now.AddYears(-1),
+            IsDeleted = false,
+            Transactions = GetListTransactionBusinessModel(),
+            Balance = 1000
+        };
+
+        public static TransactionBusinessModel GeTransactionBusinessModel() => new()
+        {
+            Id = 1,
+            AccountId = 1,
+            Currency = Currency.RUB,
+            TransactionType = TransactionType.Deposit,
+            Date = DateTime.Now,
+            Amount = decimal.One
+        };
 
         public static TransferBusinessModel GetTransferBusinessModel()
         {

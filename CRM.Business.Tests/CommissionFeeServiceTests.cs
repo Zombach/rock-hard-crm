@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using CRM.Business.Services;
 using CRM.Business.Tests.TestsDataHelpers;
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
+using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 
@@ -52,7 +50,9 @@ namespace CRM.Business.Tests
             var actual = await _sut.GetCommissionFeesByAccountIdAsync(account.Id);
 
             //Then
-            Assert.AreEqual(account.Id, actual);
+            //Assert.AreEqual(account.Id, actual);
+
+            //actual.Should().BeEquivalentTo(account.Id);
             _commissionFeeRepoMock.Verify(x => x.GetCommissionFeesByAccountIdAsync(account.LeadId), Times.Once);
         }
 

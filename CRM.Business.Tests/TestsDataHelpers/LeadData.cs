@@ -37,6 +37,43 @@ namespace CRM.Business.Tests.TestsDataHelpers
             };
         }
 
+        public static LeadDto GetLeadWithTwoAccountsDto()
+        {
+            return new LeadDto
+            {
+                Id = 1,
+                FirstName = "QQQ",
+                LastName = "QQQ",
+                Patronymic = "QQQ",
+                RegistrationDate = DateTime.Now,
+                Email = $"QQQ{DateTime.Now}@QQQ.qqq",
+                PhoneNumber = "+7QQQqqqQQqq",
+                Password = "QQQ",
+                IsDeleted = false,
+                BirthDate = DateTime.Now.AddYears(-18),
+                Role = Role.Regular,
+                City = CityData.GetCityDto(),
+                Accounts = new List<AccountDto>
+                {
+                    new()
+                    {
+                        Id = 1,
+                        LeadId = 1,
+                        Currency = Currency.RUB,
+                        CreatedOn = DateTime.Now.AddYears(-1),
+                        IsDeleted = false
+                    },new()
+                    {
+                        Id = 2,
+                        LeadId = 1,
+                        Currency = Currency.USD,
+                        CreatedOn = DateTime.Now.AddYears(-1),
+                        IsDeleted = false
+                    }
+                }
+            };
+        }
+
         public static LeadDto GetAnotherLeadDto()
         {
             return new LeadDto
