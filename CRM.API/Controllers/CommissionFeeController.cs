@@ -41,7 +41,7 @@ namespace CRM.API.Controllers
         [HttpGet]
         [Description("Return all commission fees")]
         [ProducesResponseType(typeof(List<CommissionFeeOutputModel>), StatusCodes.Status200OK)]
-        public async Task< List<CommissionFeeOutputModel>> GetAllCommissionFeesAsync()
+        public async Task<List<CommissionFeeOutputModel>> GetAllCommissionFeesAsync()
         {
             var listDto = await _commissionFeeService.GetAllCommissionFeesAsync();
             return _mapper.Map<List<CommissionFeeOutputModel>>(listDto);

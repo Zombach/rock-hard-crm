@@ -14,5 +14,8 @@ namespace CRM.Business.Services
         Task DeleteLeadAsync(int leadId);
         Task<LeadDto> GetLeadByIdAsync(int leadId, LeadIdentityInfo leadInfo);
         Task<List<LeadDto>> GetAllLeadsAsync();
+        void ChangeRoleForLeads(List<LeadDto> listLeadDtos);
+        List<LeadDto> GetLeadsByFilters(LeadFiltersDto filter);
+        List<LeadDto> GetAllLeadsByBatches(int cursorId);
     }
 }

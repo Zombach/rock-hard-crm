@@ -7,16 +7,17 @@ using CRM.Business.ValidationHelpers;
 using CRM.Core;
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
+using CRM.DAL.Repositories;
+using MailExchange;
+using MassTransit;
 using Microsoft.Extensions.Options;
 using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using CRM.DAL.Repositories;
-using MailExchange;
-using MassTransit;
-using static CRM.Business.Constants.TransactionEndpoint;
 using System.Threading.Tasks;
+using CRM.Business.Serialization;
+using static CRM.Business.Constants.TransactionEndpoint;
 
 namespace CRM.Business.Services
 {
@@ -36,6 +37,7 @@ namespace CRM.Business.Services
         public TransactionService
         (
             IOptions<CommissionSettings> commissionOptions,
+            IOptions<ConnectionSettings> connectionOptions,
             IAccountValidationHelper accountValidationHelper,
             IAccountService accountService,
             ICommissionFeeService commissionFeeService,
@@ -44,7 +46,8 @@ namespace CRM.Business.Services
             RestClient restClient
         )
         {
-            _client = restClient;
+            _client = new RestClient(connectionOptions.Value.TransactionStoreUrl);
+            _client.AddHandler("application/json", () => NewtonsoftJsonSerializer.Default);
             _commission = commissionOptions.Value.Commission;
             _vipCommission = commissionOptions.Value.VipCommission;
             _commissionModifier = commissionOptions.Value.CommissionModifier;
@@ -82,7 +85,7 @@ namespace CRM.Business.Services
                 TransactionType = TransactionType.Deposit
             };
 
-            await AddCommissionFee(dto);
+            dto.Id = await AddCommissionFee(dto);
 
             return dto;
         }
@@ -93,8 +96,8 @@ namespace CRM.Business.Services
             var accountModel = await _accountService.GetAccountWithTransactionsAsync(model.AccountId, leadInfo);
             _accountValidationHelper.CheckForVipAccess(accountModel.Currency, leadInfo);
             var commission = CalculateCommission(model.Amount, leadInfo);
-
-            CheckBalance(accountModel, model.Amount);
+            _accountValidationHelper.CheckBalance(accountModel, model.Amount);
+            model.Date = _accountValidationHelper.GetTransactionsLastDateAndThrowIfNotFound(accountModel);
 
             model.Amount -= commission;
             model.AccountId = accountModel.Id;
@@ -103,6 +106,8 @@ namespace CRM.Business.Services
             var request = _requestHelper.CreatePostRequest(AddWithdrawEndpoint, model);
             var result = _client.Execute<long>(request);
             var transactionId = result.Data;
+
+            _accountValidationHelper.CheckForDuplicateTransaction(transactionId,accountModel);
 
             EmailSender(leadDto, EmailMessages.WithdrawSubject, string.Format(EmailMessages.WithdrawBody, model.Amount));
 
@@ -116,7 +121,7 @@ namespace CRM.Business.Services
                 TransactionType = TransactionType.Withdraw
             };
 
-            await AddCommissionFee(dto);
+            dto.Id = await AddCommissionFee(dto);
 
             return dto;
         }
@@ -124,25 +129,25 @@ namespace CRM.Business.Services
         public async Task<CommissionFeeDto> AddTransferAsync(TransferBusinessModel model, LeadIdentityInfo leadInfo)
         {
             var leadDto = await _leadRepository.GetLeadByIdAsync(leadInfo.LeadId);
-            var account = await _accountService.GetAccountWithTransactionsAsync(model.AccountId, leadInfo);
+            var accountModel = await _accountService.GetAccountWithTransactionsAsync(model.AccountId, leadInfo);
             var recipientAccount = await CheckAccessAndReturnAccount(model.RecipientAccountId, leadInfo);
             var commission = CalculateCommission(model.Amount, leadInfo);
+            _accountValidationHelper.CheckBalance(accountModel, model.Amount);
+            model.Date = _accountValidationHelper.GetTransactionsLastDateAndThrowIfNotFound(accountModel);
 
-            CheckBalance(account, model.Amount);
-
-            if (account.Currency != Currency.RUB &&
-                account.Currency != Currency.USD && 
+            if (accountModel.Currency != Currency.RUB &&
+                accountModel.Currency != Currency.USD && 
                 !leadInfo.IsVip())
             {
                 commission *= _commissionModifier;
-                if (account.Balance != model.Amount)
+                if (accountModel.Balance != model.Amount)
                 {
                     throw new ValidationException(nameof(model.Amount), $"{ServiceMessages.IncompleteTransfer}");
                 }
             }
 
             model.Amount -= commission;
-            model.Currency = account.Currency;
+            model.Currency = accountModel.Currency;
             model.RecipientCurrency = recipientAccount.Currency;
             var request = _requestHelper.CreatePostRequest(AddTransferEndpoint, model);
             var result = await _client.ExecuteAsync<List<long>>(request);
@@ -164,7 +169,7 @@ namespace CRM.Business.Services
                 TransactionType = TransactionType.Transfer
             };
 
-          await AddCommissionFee(dto);
+            dto.Id=await AddCommissionFee(dto);
 
             return dto;
         }
@@ -184,14 +189,6 @@ namespace CRM.Business.Services
         private decimal CalculateCommission(decimal amount, LeadIdentityInfo leadInfo)
         {
             return leadInfo.IsVip() ? amount * _vipCommission : amount * _commission;
-        }
-
-        private static void CheckBalance(AccountBusinessModel account, decimal amount)
-        {
-            if (account.Balance - amount < 0)
-            {
-                throw new ValidationException(nameof(amount), string.Format(ServiceMessages.DoesNotHaveEnoughMoney, account.Id, account.Balance));
-            }
         }
 
         private void EmailSender(LeadDto dto, string subject, string body)

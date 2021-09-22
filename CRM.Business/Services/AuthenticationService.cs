@@ -35,7 +35,7 @@ namespace CRM.Business.Services
             return Convert.ToBase64String(hashBytes);
         }
 
-        public async Task<string> SignIn (LeadDto dto)
+        public async Task<string> SignIn(LeadDto dto)
         {
             var identity = await GetIdentity(dto.Email, dto.Password);
             if (identity == default)

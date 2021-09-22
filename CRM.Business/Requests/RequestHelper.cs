@@ -1,4 +1,5 @@
-﻿using RestSharp;
+﻿using CRM.Business.Serialization;
+using RestSharp;
 
 namespace CRM.Business.Requests
 {
@@ -6,7 +7,11 @@ namespace CRM.Business.Requests
     {
         public IRestRequest CreateRequest(Method httpMethod, string endPoint)
         {
-            return new RestRequest(endPoint, httpMethod);
+            return new RestRequest(endPoint, httpMethod)
+            {
+                RequestFormat = DataFormat.Json,
+                JsonSerializer = NewtonsoftJsonSerializer.Default
+            };
         }
     }
 }

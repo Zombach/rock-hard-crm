@@ -1,10 +1,10 @@
-﻿using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using CRM.API.Models;
 using CRM.Business.Services;
 using CRM.DAL.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace CRM.API.Controllers
 {

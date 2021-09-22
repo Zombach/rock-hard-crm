@@ -4,6 +4,7 @@ using System.Net;
 using System.Threading.Tasks;
 using CRM.Business.Constants;
 using CRM.Business.Exceptions;
+using CRM.Business.Serialization;
 using CRM.Business.Services;
 using CRM.Business.Tests.TestsDataHelpers;
 using CRM.Business.ValidationHelpers;
@@ -43,21 +44,26 @@ namespace CRM.Business.Tests
             _accountValidationHelper = new AccountValidationHelper(_accountRepoMock.Object);
 
             var optionsMock = new Mock<IOptions<CommissionSettings>>();
+            var optionSettingsMock = new Mock<IOptions<ConnectionSettings>>();
             optionsMock.Setup(x => x.Value).Returns(new CommissionSettings
             {
                 Commission = 0.2m,
                 CommissionModifier = 1.5m,
                 VipCommission = 0.1m
             });
+            var qq= _clientMock.Object;
+
+            qq.AddHandler("application/json", () => NewtonsoftJsonSerializer.Default);
 
             _sut = new TransactionService(
                 optionsMock.Object,
+                optionSettingsMock.Object,
                 _accountValidationHelper,
                 _accountServiceMock.Object,
                 _commissionFeeServiceMock.Object,
                 _publishEndPointMock.Object,
                 _leadRepoMock.Object,
-                _clientMock.Object);
+                qq);
         }
 
         [Test]

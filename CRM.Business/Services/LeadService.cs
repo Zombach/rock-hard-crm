@@ -1,13 +1,16 @@
-﻿using CRM.Business.IdentityInfo;
+﻿using CRM.Business.Constants;
+using CRM.Business.Extensions;
+using CRM.Business.IdentityInfo;
 using CRM.Business.ValidationHelpers;
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
 using MailExchange;
 using MassTransit;
+using SqlKata;
+using SqlKata.Compilers;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using CRM.Business.Constants;
 
 namespace CRM.Business.Services
 {
@@ -65,6 +68,11 @@ namespace CRM.Business.Services
             return await _leadRepository.GetLeadByIdAsync(leadId);
         }
 
+        public void ChangeRoleForLeads(List<LeadDto> listLeadDtos)
+        {
+            _leadRepository.ChangeRoleForLeads(listLeadDtos);
+        }
+
         public async Task DeleteLeadAsync(int leadId)
         {
             var dto = await _leadValidationHelper.GetLeadByIdAndThrowIfNotFoundAsync(leadId);
@@ -79,9 +87,44 @@ namespace CRM.Business.Services
             return dto;
         }
 
+        public List<LeadDto> GetLeadsByFilters(LeadFiltersDto filter)
+        {
+            var compiler = new SqlServerCompiler();
+
+            var query = new Query("Lead as l").Select("l.Id",
+                                                 "l.FirstName",
+                                                 "l.LastName",
+                                                 "l.Patronymic",
+                                                 "l.Email",
+                                                 "l.BirthDate",
+                                                 "City.Id",
+                                                 "City.Name",
+                                                 "l.Role as Id");
+
+            query = this.FilterByName(query, filter.FirstName, filter.SearchTypeForFirstName, "FirstName");
+            query = this.FilterByName(query, filter.LastName, filter.SearchTypeForLastName, "LastName");
+            query = this.FilterByName(query, filter.Patronymic, filter.SearchTypeForPatronymic, "Patronymic");
+            query = this.FilterByRole(query, filter);
+            query = this.FilterByCity(query, filter);
+            query = this.FilterByBirthDate(query, filter);
+
+            query = query
+                .Where("l.IsDeleted", 0)
+                .Join("City", "City.Id", "l.CityId");
+
+            SqlResult sqlResult = compiler.Compile(query);
+
+            return _leadRepository.GetLeadsByFilters(sqlResult);
+        }
+
         public async Task<List<LeadDto>> GetAllLeadsAsync()
         {
             return await _leadRepository.GetAllLeadsAsync();
+        }
+
+        public List<LeadDto> GetAllLeadsByBatches(int lastLeadId)
+        {
+            return _leadRepository.GetAllLeadsByBatches(lastLeadId);
         }
 
         private async Task EmailSender(LeadDto dto, string subject, string body)

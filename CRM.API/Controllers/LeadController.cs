@@ -52,6 +52,44 @@ namespace CRM.API.Controllers
             return _mapper.Map<LeadOutputModel>(dto);
         }
 
+        // api/lead/by-filters
+        [AuthorizeRoles(Role.Admin)]
+        [HttpPost("by-filters")]
+        [Description("Get all Leads by filters")]
+        [ProducesResponseType(typeof(List<LeadByFiltersOutputModel>), StatusCodes.Status200OK)]
+        public List<LeadByFiltersOutputModel> GetAllLeadsByFilters(
+            [FromBody] LeadFiltersInputModel leadFilter)
+        {
+            var filter = _mapper.Map<LeadFiltersDto>(leadFilter);
+            var leads = _leadService.GetLeadsByFilters(filter);
+            var result = _mapper.Map<List<LeadByFiltersOutputModel>>(leads);
+            return result;
+        }
+
+        // api/lead/by-batches/0
+        [AuthorizeRoles(Role.Admin)]
+        [HttpGet("by-batches/cursorId/{lastLeadId}")]
+        [Description("Get all Leads by batches")]
+        [ProducesResponseType(typeof(List<LeadByBatchesOutputModel>), StatusCodes.Status200OK)]
+        public List<LeadByBatchesOutputModel> GetAllLeadsByBatсhes(int lastLeadId)
+        {
+            var leads = _leadService.GetAllLeadsByBatches(lastLeadId);
+            var result = _mapper.Map<List<LeadByBatchesOutputModel>>(leads);
+            return result;
+        }
+
+        // api/lead/change-role-leads
+        [AuthorizeRoles(Role.Admin)]
+        [HttpPut("change-role-leads")]
+        [Description("Change role for leads list")]
+        [ProducesResponseType(typeof(LeadOutputModel), StatusCodes.Status200OK)]
+        public ActionResult<int> ChangeRoleForLeads([FromBody] List<LeadIdAndRoleInputModel> model)
+        {
+            var dto = _mapper.Map<List<LeadDto>>(model);
+            _leadService.ChangeRoleForLeads(dto);
+            return StatusCodes.Status200OK;
+        }
+
         // api/lead
         [HttpDelete]
         [Description("Delete lead")]
@@ -95,7 +133,7 @@ namespace CRM.API.Controllers
         {
             var leadInfo = this.GetLeadInfo();
             var dto = _mapper.Map<AccountDto>(inputModel);
-            var accountId = _accountService.AddAccountAsync(dto, leadInfo);
+            var accountId = _accountService.AddAccountAsync(dto.Currency, leadInfo);
             return StatusCode(201, accountId);
         }
 

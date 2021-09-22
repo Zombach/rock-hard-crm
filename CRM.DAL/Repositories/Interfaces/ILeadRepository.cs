@@ -1,4 +1,5 @@
 ﻿using CRM.DAL.Models;
+using SqlKata;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -13,5 +14,8 @@ namespace CRM.DAL.Repositories
         Task<LeadDto> GetLeadByIdAsync(int id);
         Task<LeadDto> GetLeadByEmailAsync(string email);
         Task<List<LeadDto>> GetAllLeadsAsync();
+        void ChangeRoleForLeads(List<LeadDto> listLeadDtos);
+        List<LeadDto> GetLeadsByFilters(SqlResult sqlResult);
+        List<LeadDto> GetAllLeadsByBatches(int cursorId);
     }
 }

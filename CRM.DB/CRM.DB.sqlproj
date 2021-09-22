@@ -91,8 +91,12 @@
     <Build Include="StoredProcedures\CommissionFee\CommissionFee_Insert.sql" />
     <Build Include="StoredProcedures\Lead\Lead_UpdateRole.sql" />
     <Build Include="StoredProcedures\Account\Account_Restore.sql" />
+    <Build Include="Types\User-Defined Table Types\LeadDtoType.sql" />
+    <Build Include="StoredProcedures\Lead\Lead_SelectAllByBatchesWithoutAdmins.sql" />
+    <Build Include="StoredProcedures\Lead\Lead_SelectAllByBatchesWithoutAdmins.sql" />
     <Build Include="Types\User-Defined Table Types\AccountIdType.sql" />
     <Build Include="StoredProcedures\Account\Account_SelectByListId.sql" />
+    <Build Include="StoredProcedures\Lead\Lead_UpdateRoleByIds.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

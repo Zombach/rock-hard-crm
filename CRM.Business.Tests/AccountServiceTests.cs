@@ -63,7 +63,7 @@ namespace CRM.Business.Tests
             _leadRepoMock.Setup(x => x.GetLeadByIdAsync(leadInfo.LeadId)).ReturnsAsync(lead);
 
             //When
-            var actualId = _sut.AddAccountAsync(expectedAccount, leadInfo);
+            var actualId = _sut.AddAccountAsync(expectedAccount.Currency, leadInfo);
 
             //Then
             Assert.AreEqual(expectedAccount.Id, actualId.Result);
@@ -84,7 +84,7 @@ namespace CRM.Business.Tests
 
             //When
             var ex = Assert.ThrowsAsync<ValidationException>(
-                () => _sut.AddAccountAsync(expectedAccount, leadInfo));
+                () => _sut.AddAccountAsync(expectedAccount.Currency, leadInfo));
 
             //Then
             Assert.AreEqual(expectedException, ex.Message);
@@ -105,7 +105,7 @@ namespace CRM.Business.Tests
 
             //When
             var ex = Assert.ThrowsAsync<AuthorizationException>(
-                () => _sut.AddAccountAsync(expectedAccount, leadInfo));
+                () => _sut.AddAccountAsync(expectedAccount.Currency, leadInfo));
 
             //Then
             Assert.AreEqual(expectedException, ex.Message);
