@@ -80,7 +80,7 @@ namespace CRM.Business.Services
             var dto = new CommissionFeeDto
             { LeadId = leadDto.Id, AccountId = model.AccountId, TransactionId = transactionId, Role = leadDto.Role, CommissionAmount = commission, TransactionType = TransactionType.Deposit };
 
-            AddCommissionFee(dto);
+            dto.Id = await AddCommissionFee(dto);
 
             return dto;
         }
@@ -109,7 +109,7 @@ namespace CRM.Business.Services
             var dto = new CommissionFeeDto
             { LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = leadInfo.Role, CommissionAmount = commission, TransactionType = TransactionType.Withdraw };
 
-            AddCommissionFee(dto);
+            dto.Id = await AddCommissionFee(dto);
 
             return dto;
         }
@@ -148,7 +148,7 @@ namespace CRM.Business.Services
             var dto = new CommissionFeeDto
             { LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = leadInfo.Role, CommissionAmount = commission, TransactionType = TransactionType.Transfer };
 
-            AddCommissionFee(dto);
+            dto.Id=await AddCommissionFee(dto);
 
             return dto;
         }
@@ -160,9 +160,9 @@ namespace CRM.Business.Services
             return account;
         }
 
-        private void AddCommissionFee(CommissionFeeDto dto)
+        private async Task<int> AddCommissionFee(CommissionFeeDto dto)
         {
-            _commissionFeeService.AddCommissionFeeAsync(dto);
+            return await _commissionFeeService.AddCommissionFeeAsync(dto);
         }
 
         private decimal CalculateCommission(decimal amount, LeadIdentityInfo leadInfo)

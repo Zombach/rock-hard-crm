@@ -3,7 +3,6 @@ using CRM.API.Extensions;
 using CRM.API.Models;
 using CRM.Business.Models;
 using CRM.Business.Services;
-using CRM.DAL.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -76,13 +75,12 @@ namespace CRM.API.Controllers
         // api/account/by-period
         [HttpPost("by-period")]
         [Description("Get transactions by period or period and account id")]
-        [ProducesResponseType(typeof(List<TransactionOutputModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<AccountBusinessModel>), StatusCodes.Status200OK)]
         public async Task<List<AccountBusinessModel>> GetTransactionsByPeriodAndPossiblyAccountIdAsync([FromBody] TimeBasedAcquisitionInputModel model)
         {
             var leadInfo = this.GetLeadInfo();
             var dto = _mapper.Map<TimeBasedAcquisitionBusinessModel>(model);
-            var output = await _accountService.GetTransactionsByPeriodAndPossiblyAccountIdAsync(dto, leadInfo);
-            return _mapper.Map<List<AccountBusinessModel>>(output);
+            return await _accountService.GetTransactionsByPeriodAndPossiblyAccountIdAsync(dto, leadInfo);
         }
 
         // api/account/lead/{leadId}
