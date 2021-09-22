@@ -96,6 +96,7 @@
     <Build Include="StoredProcedures\Lead\Lead_SelectAllByBatchesWithoutAdmins.sql" />
     <Build Include="Types\User-Defined Table Types\AccountIdType.sql" />
     <Build Include="StoredProcedures\Account\Account_SelectByListId.sql" />
+    <Build Include="StoredProcedures\Lead\Lead_UpdateRoleByIds.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
