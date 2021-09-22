@@ -280,7 +280,7 @@ namespace CRM.Business.Tests
         }
 
         [Test]
-        public async Task AddTransferAsync_DoesNotHaveMoneyOnBalancedwq_ReturnException()
+        public async Task AddTransferAsync_LeadNotVipTransferToInvalidCurrency_ReturnException()
         {
             //Given
             var lead = LeadData.GetLeadWithTwoAccountsDto();
