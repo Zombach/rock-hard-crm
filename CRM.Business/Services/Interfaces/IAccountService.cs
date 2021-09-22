@@ -13,6 +13,6 @@ namespace CRM.Business.Services
         Task RestoreAccountAsync(int accountId, int leadId);
         Task<AccountBusinessModel> GetAccountWithTransactionsAsync(int accountId, LeadIdentityInfo leadInfo);
         Task<List<AccountBusinessModel>> GetTransactionsByPeriodAndPossiblyAccountIdAsync(TimeBasedAcquisitionBusinessModel model, LeadIdentityInfo leadInfo);
-        Task<AccountBusinessModel> GetLeadBalanceAsync(int leadId, LeadIdentityInfo leadInfo);
+        Task<decimal> GetLeadBalanceAsync(int leadId, LeadIdentityInfo leadInfo);
     }
 }

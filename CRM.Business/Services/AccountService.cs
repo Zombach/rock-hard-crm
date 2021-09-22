@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System;
+using AutoMapper;
 using CRM.Business.Constants;
 using CRM.Business.Exceptions;
 using CRM.Business.IdentityInfo;
@@ -12,7 +13,6 @@ using MailExchange;
 using MassTransit;
 using Microsoft.Extensions.Options;
 using RestSharp;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using CRM.DAL.Enums;
@@ -128,10 +128,18 @@ namespace CRM.Business.Services
             return models;
         }
 
-        public async Task<AccountBusinessModel> GetLeadBalanceAsync(int leadId, LeadIdentityInfo leadInfo)
+        public async Task<decimal> GetLeadBalanceAsync(int leadId, LeadIdentityInfo leadInfo)
         {
-            await Task.Run(() => throw new NotImplementedException());
-            return null;
+            var leadDto = await _leadRepository.GetLeadByIdAsync(leadId);
+            decimal balance = 0;
+            var request = _requestHelper.CreateGetRequest(GetCurrentCurrenciesRatesEndpoint);
+            var rates = _client.Execute<RatesExchangeBusinessModel>(request).Data;
+            foreach (var account in leadDto.Accounts)
+            {
+                var accountBusinessModel= GetAccountWithTransactionsAsync(account.Id, leadInfo).Result;
+                balance += ConvertToRubble(accountBusinessModel, rates);
+            }
+            return balance;
         }
 
         private async Task EmailSenderAsync(LeadDto dto, string subject, string body, AccountDto accountDto)
@@ -143,6 +151,22 @@ namespace CRM.Business.Services
                 DisplayName = "Best CRM",
                 MailAddresses = $"{dto.Email}"
             });
+        }
+
+        public decimal ConvertToRubble(AccountBusinessModel account, RatesExchangeBusinessModel rates)
+        {
+            var senderCurrency = account.Currency.ToString();
+            var recipientCurrency = Currency.RUB.ToString();
+            if (account.Currency == Currency.RUB) return account.Balance;
+
+            var baseCurrency = rates.BaseCurrency;
+            rates.Rates.TryGetValue($"{baseCurrency}{senderCurrency}", out var senderCurrencyValue);
+            rates.Rates.TryGetValue($"{baseCurrency}{recipientCurrency}", out var recipientCurrencyValue);
+            if (senderCurrency == baseCurrency)
+                senderCurrencyValue = 1m;
+            if (recipientCurrency == baseCurrency)
+                recipientCurrencyValue = 1m;
+            return decimal.Round((recipientCurrencyValue / senderCurrencyValue * account.Balance), 3);
         }
     }
 }

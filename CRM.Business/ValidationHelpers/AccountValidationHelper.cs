@@ -6,7 +6,6 @@ using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
 using System.Linq;
-using System.Net.Sockets;
 using System.Threading.Tasks;
 using CRM.Business.Models;
 

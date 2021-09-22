@@ -82,10 +82,10 @@ namespace CRM.API.Controllers
         }
 
         // api/account/lead/{leadId}
-        [HttpGet("lead/{leadId}")]
-        [Description("Get account with transactions")]
-        [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
-        public async Task<ActionResult<AccountBusinessModel>> GetLeadBalanceAsync(int leadId)
+        [HttpGet("lead/{leadId}/balance")]
+        [Description("Get lead balance transactions")]
+        [ProducesResponseType(typeof(decimal), StatusCodes.Status200OK)]
+        public async Task<ActionResult<decimal>> GetLeadBalanceAsync(int leadId)
         {
             var leadInfo = this.GetLeadInfo();
             var output = await _accountService.GetLeadBalanceAsync(leadId, leadInfo);
