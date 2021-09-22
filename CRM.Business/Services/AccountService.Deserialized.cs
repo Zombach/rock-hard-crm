@@ -22,7 +22,7 @@ namespace CRM.Business.Services
             {
                 case List<AccountBusinessModel> when json != "[]":
                     jToken = GetJToken(json);
-                    await GetListModels(jToken , leadId);
+                    await GetListModels(jToken, leadId);
                     break;
                 case List<AccountBusinessModel> businessModels:
                     {
@@ -78,7 +78,7 @@ namespace CRM.Business.Services
 
 
                 if (tmpTransaction.Count != 0 && tmpTransfer.Count != 0) continue;
-                if (_transactions.Count != 0 || _transfers.Count != 0) continue;
+                if (_transactions[leadId].Count != 0 || _transfers[leadId].Count != 0) continue;
                 for (; i < accounts.Count; i++)
                 {
                     if (tmpTransaction.Count == 0)
@@ -138,7 +138,7 @@ namespace CRM.Business.Services
             {
                 if (_transfers.Count != 0)
                 {
-                    int transfersCount = _transfers.Count >= _maxSizeList ? _maxSizeList : _transfers.Count;
+                    int transfersCount = _transfers[leadId].Count >= _maxSizeList ? _maxSizeList : _transfers[leadId].Count;
                     transfers = _transfers[leadId].GetRange(0, transfersCount);
                     _transfers[leadId].RemoveRange(0, transfersCount);
                 }
@@ -152,7 +152,7 @@ namespace CRM.Business.Services
             {
                 if (_transactions.Count != 0)
                 {
-                    int transactionsCount = _transactions.Count >= _maxSizeList ? _maxSizeList : _transactions.Count;
+                    int transactionsCount = _transactions[leadId].Count >= _maxSizeList ? _maxSizeList : _transactions[leadId].Count;
                     transactions = _transactions[leadId].GetRange(0, transactionsCount);
                     _transactions[leadId].RemoveRange(0, transactionsCount);
                 }
@@ -217,13 +217,13 @@ namespace CRM.Business.Services
                     {
                         _transfers.Add(leadId, transfersJToken);
                     }
-                    
+
                 }),
                 Task.Run(() =>
                 {
                     List<TransactionBusinessModel> transactionsJToken = jToken.Where(j => j.SelectToken(@"$.RecipientAccountId") == null)
                         .Select(t => t.ToObject<TransactionBusinessModel>()).ToList();
-                    if (_transfers.ContainsKey(leadId))
+                    if (_transactions.ContainsKey(leadId))
                     {
                         _transactions[leadId].AddRange(transactionsJToken);
                     }
