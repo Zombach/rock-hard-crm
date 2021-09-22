@@ -42,8 +42,7 @@ namespace CRM.Business.Services
             IAccountService accountService,
             ICommissionFeeService commissionFeeService,
             IPublishEndpoint publishEndpoint,
-            ILeadRepository leadRepository,
-            RestClient restClient
+            ILeadRepository leadRepository
         )
         {
             _client = new RestClient(connectionOptions.Value.TransactionStoreUrl);
