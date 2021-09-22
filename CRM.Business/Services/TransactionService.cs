@@ -91,14 +91,8 @@ namespace CRM.Business.Services
             var accountModel = await _accountService.GetAccountWithTransactionsAsync(model.AccountId, leadInfo);
             _accountValidationHelper.CheckForVipAccess(accountModel.Currency, leadInfo);
             var commission = CalculateCommission(model.Amount, leadInfo);
-
-            var transferLastDate = accountModel.Transfers.Last().Date;
-            var transactionLastDate = accountModel.Transactions.Last().Date;
-            model.Date = transferLastDate > transactionLastDate ? transferLastDate : transactionLastDate;
-
-            var format = "yyyy-MM-dd HH:mm:ss:fffffff";
-            var la= model.Date.ToString(format);
             CheckBalance(accountModel, model.Amount);
+            model.Date = CheckTransactionsLastDate(accountModel);
 
             model.Amount -= commission;
             model.AccountId = accountModel.Id;
@@ -122,23 +116,23 @@ namespace CRM.Business.Services
         public async Task<CommissionFeeDto> AddTransferAsync(TransferBusinessModel model, LeadIdentityInfo leadInfo)
         {
             var leadDto = await _leadRepository.GetLeadByIdAsync(leadInfo.LeadId);
-            var account = await _accountService.GetAccountWithTransactionsAsync(model.AccountId, leadInfo);
+            var accountModel = await _accountService.GetAccountWithTransactionsAsync(model.AccountId, leadInfo);
             var recipientAccount = await CheckAccessAndReturnAccount(model.RecipientAccountId, leadInfo);
             var commission = CalculateCommission(model.Amount, leadInfo);
+            CheckBalance(accountModel, model.Amount);
+            model.Date = CheckTransactionsLastDate(accountModel);
 
-            CheckBalance(account, model.Amount);
-
-            if (account.Currency != Currency.RUB && account.Currency != Currency.USD && !leadInfo.IsVip())
+            if (accountModel.Currency != Currency.RUB && accountModel.Currency != Currency.USD && !leadInfo.IsVip())
             {
                 commission *= _commissionModifier;
-                if (account.Balance != model.Amount)
+                if (accountModel.Balance != model.Amount)
                 {
                     throw new ValidationException(nameof(model.Amount), $"{ServiceMessages.IncompleteTransfer}");
                 }
             }
 
             model.Amount -= commission;
-            model.Currency = account.Currency;
+            model.Currency = accountModel.Currency;
             model.RecipientCurrency = recipientAccount.Currency;
             var request = _requestHelper.CreatePostRequest(AddTransferEndpoint, model);
             var result = await _client.ExecuteAsync<List<long>>(request);
@@ -192,6 +186,23 @@ namespace CRM.Business.Services
                 DisplayName = "Best CRM",
                 MailAddresses = $"{dto.Email}"
             });
+        }
+
+        private static DateTime CheckTransactionsLastDate(AccountBusinessModel account)
+        {
+            if (account.Transfers.Count == 0 && account.Transactions.Count == 0)
+                throw new ValidationException(nameof(account),
+                    string.Format(ServiceMessages.DoesNotHaveTransactions, account.Id));
+
+            if (account.Transfers.Count == 0)
+                return account.Transactions.Last().Date;
+
+            if (account.Transactions.Count == 0)
+                return account.Transfers.Last().Date;
+
+            var transferLastDate = account.Transfers.Last().Date;
+            var transactionLastDate = account.Transactions.Last().Date;
+            return transferLastDate > transactionLastDate ? transferLastDate : transactionLastDate;
         }
     }
 }

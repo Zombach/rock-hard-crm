@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using CRM.DAL.Enums;
 
 namespace CRM.API.Controllers
 {
@@ -28,14 +29,13 @@ namespace CRM.API.Controllers
         }
 
         // api/account/create
-        [HttpPost("account/create")]
+        [HttpPost("create")]
         [Description("Create lead account")]
         [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
-        public async Task<ActionResult<int>> AddAccountAsync([FromBody] AccountInputModel inputModel)
+        public async Task<ActionResult<int>> AddAccountAsync(Currency currency)
         {
             var leadInfo = this.GetLeadInfo();
-            var dto = _mapper.Map<AccountDto>(inputModel);
-            var accountId = await _accountService.AddAccountAsync(dto, leadInfo);
+            var accountId = await _accountService.AddAccountAsync(currency, leadInfo);
             return StatusCode(201, accountId);
         }
 
