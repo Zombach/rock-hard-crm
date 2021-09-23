@@ -9,8 +9,6 @@ using CRM.Core;
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
-using MailExchange;
-using MassTransit;
 using Microsoft.Extensions.Options;
 using RestSharp;
 using System;
@@ -26,31 +24,31 @@ namespace CRM.Business.Services
     public partial class AccountService : IAccountService
     {
         private const string FinishResponse = "[]";
+        private readonly IEmailSenderService _emailSenderService;
         private readonly IAccountRepository _accountRepository;
         private readonly IMapper _mapper;
         private readonly RestClient _client;
         private readonly RequestHelper _requestHelper;
         private readonly IAccountValidationHelper _accountValidationHelper;
         private readonly ILeadValidationHelper _leadValidationHelper;
-        private readonly IPublishEndpoint _publishEndpoint;
 
         public AccountService
         (
+            IEmailSenderService emailSenderService,
             IAccountRepository accountRepository,
             IOptions<ConnectionSettings> options,
             IMapper mapper,
             IAccountValidationHelper accountValidationHelper,
-            ILeadValidationHelper leadValidationHelper,
-            IPublishEndpoint publishEndpoint
+            ILeadValidationHelper leadValidationHelper
         )
         {
+            _emailSenderService = emailSenderService;
             _accountRepository = accountRepository;
             _mapper = mapper;
             _client = new RestClient(options.Value.TransactionStoreUrl);
             _requestHelper = new RequestHelper();
             _accountValidationHelper = accountValidationHelper;
             _leadValidationHelper = leadValidationHelper;
-            _publishEndpoint = publishEndpoint;
         }
 
         public async Task<int> AddAccountAsync(Currency currency, LeadIdentityInfo leadInfo)
@@ -60,7 +58,7 @@ namespace CRM.Business.Services
             _accountValidationHelper.CheckForVipAccess(currency, leadInfo);
             var accountDto = new AccountDto { LeadId = leadInfo.LeadId, Currency = currency };
             var accountId = await _accountRepository.AddAccountAsync(accountDto);
-            await EmailSenderAsync(leadDto, EmailMessages.AccountAddedSubject, EmailMessages.AccountAddedBody, accountDto);
+            await _emailSenderService.EmailSenderAsync(leadDto, EmailMessages.AccountAddedSubject, string.Format(EmailMessages.AccountRestoreBody, accountDto));
             return accountId;
         }
 
@@ -69,7 +67,7 @@ namespace CRM.Business.Services
             var leadDto = await _leadValidationHelper.GetLeadByIdAndThrowIfNotFoundAsync(leadId);
             var accountDto = await _accountValidationHelper.GetAccountByIdAndThrowIfNotFoundAsync(accountId);
             _accountValidationHelper.CheckLeadAccessToAccount(accountDto.LeadId, leadId);
-            await EmailSenderAsync(leadDto, EmailMessages.AccountDeleteSubject, EmailMessages.AccountDeleteBody, accountDto);
+            await _emailSenderService.EmailSenderAsync(leadDto, EmailMessages.AccountDeleteSubject, string.Format(EmailMessages.AccountRestoreBody, accountDto));
             await _accountRepository.DeleteAccountAsync(accountId);
         }
 
@@ -78,7 +76,7 @@ namespace CRM.Business.Services
             var leadDto = await _leadValidationHelper.GetLeadByIdAndThrowIfNotFoundAsync(leadId);
             var accountDto = await _accountValidationHelper.GetAccountByIdAndThrowIfNotFoundAsync(accountId);
             _accountValidationHelper.CheckLeadAccessToAccount(accountDto.LeadId, leadId);
-            await EmailSenderAsync(leadDto, EmailMessages.AccountRestoreSubject, EmailMessages.AccountRestoreBody, accountDto);
+            await _emailSenderService.EmailSenderAsync(leadDto, EmailMessages.AccountRestoreSubject, string.Format(EmailMessages.AccountRestoreBody, accountDto));
             await _accountRepository.RestoreAccountAsync(accountId);
         }
 
@@ -156,7 +154,7 @@ namespace CRM.Business.Services
         {
             var leadDto = await _leadValidationHelper.GetLeadByIdAndThrowIfNotFoundAsync(leadId);
             if (!leadInfo.IsAdmin())
-                _leadValidationHelper.CheckAccessToLead(leadId,leadInfo);
+                _leadValidationHelper.CheckAccessToLead(leadId, leadInfo);
             var request = _requestHelper.CreateGetRequest(GetCurrentCurrenciesRatesEndpoint);
             var rates = _client.Execute<RatesExchangeBusinessModel>(request).Data;
 
@@ -164,17 +162,6 @@ namespace CRM.Business.Services
                 .Select(account => GetAccountWithTransactionsAsync(account.Id, leadInfo).Result)
                 .Select(accountBusinessModel => _accountValidationHelper.ConvertToRubble(accountBusinessModel, rates))
                 .Sum();
-        }
-
-        private async Task EmailSenderAsync(LeadDto dto, string subject, string body, AccountDto accountDto)
-        {
-            await _publishEndpoint.Publish<IMailExchangeModel>(new
-            {
-                Subject = subject,
-                Body = $"{dto.LastName} {dto.FirstName} {body} {accountDto.Currency}",
-                DisplayName = "Best CRM",
-                MailAddresses = $"{dto.Email}"
-            });
         }
     }
 }
