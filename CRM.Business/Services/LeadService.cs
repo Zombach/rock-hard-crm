@@ -5,8 +5,6 @@ using CRM.Business.ValidationHelpers;
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
-using MailExchange;
-using MassTransit;
 using SqlKata;
 using SqlKata.Compilers;
 using System.Collections.Generic;
@@ -19,23 +17,23 @@ namespace CRM.Business.Services
         private readonly ILeadRepository _leadRepository;
         private readonly IAccountRepository _accountRepository;
         private readonly IAuthenticationService _authenticationService;
+        private readonly IEmailSenderService _emailSenderService;
         private readonly ILeadValidationHelper _leadValidationHelper;
-        private readonly IPublishEndpoint _publishEndpoint;
 
         public LeadService
         (
+            IEmailSenderService emailSenderService,
             ILeadRepository leadRepository,
             IAccountRepository accountRepository,
             IAuthenticationService authenticationService,
-            ILeadValidationHelper leadValidationHelper,
-            IPublishEndpoint publishEndpoint
+            ILeadValidationHelper leadValidationHelper
         )
         {
+            _emailSenderService = emailSenderService;
             _leadRepository = leadRepository;
             _accountRepository = accountRepository;
             _authenticationService = authenticationService;
             _leadValidationHelper = leadValidationHelper;
-            _publishEndpoint = publishEndpoint;
         }
 
         public async Task<LeadDto> AddLeadAsync(LeadDto dto)
@@ -47,7 +45,7 @@ namespace CRM.Business.Services
             dto.BirthDay = dto.BirthDate.Day;
             var leadId = await _leadRepository.AddLeadAsync(dto);
             await _accountRepository.AddAccountAsync(new AccountDto { LeadId = leadId, Currency = Currency.RUB });
-            await EmailSender(dto, EmailMessages.RegistrationSubject, EmailMessages.RegistrationBody);
+            await _emailSenderService.EmailSenderAsync(dto, EmailMessages.RegistrationSubject, EmailMessages.RegistrationBody);
 
             return await _leadRepository.GetLeadByIdAsync(leadId);
         }
@@ -76,15 +74,16 @@ namespace CRM.Business.Services
         public async Task DeleteLeadAsync(int leadId)
         {
             var dto = await _leadValidationHelper.GetLeadByIdAndThrowIfNotFoundAsync(leadId);
-            await EmailSender(dto, EmailMessages.DeleteLeadSubject, EmailMessages.DeleteLeadBody);
+            await _emailSenderService.EmailSenderAsync(dto, EmailMessages.DeleteLeadSubject, EmailMessages.DeleteLeadBody);
             await _leadRepository.DeleteLeadAsync(leadId);
         }
 
         public async Task<LeadDto> GetLeadByIdAsync(int leadId, LeadIdentityInfo leadInfo)
         {
-            var dto = await _leadValidationHelper.GetLeadByIdAndThrowIfNotFoundAsync(leadId);
-            _leadValidationHelper.CheckAccessToLead(leadId, leadInfo);
-            return dto;
+            if (!leadInfo.IsAdmin())
+                _leadValidationHelper.CheckAccessToLead(leadId, leadInfo);
+
+            return await _leadValidationHelper.GetLeadByIdAndThrowIfNotFoundAsync(leadId);
         }
 
         public List<LeadDto> GetLeadsByFilters(LeadFiltersDto filter)
@@ -125,17 +124,6 @@ namespace CRM.Business.Services
         public List<LeadDto> GetAllLeadsByBatches(int lastLeadId)
         {
             return _leadRepository.GetAllLeadsByBatches(lastLeadId);
-        }
-
-        private async Task EmailSender(LeadDto dto, string subject, string body)
-        {
-            await _publishEndpoint.Publish<IMailExchangeModel>(new
-            {
-                Subject = subject,
-                Body = $"{dto.LastName} {dto.FirstName} {body}",
-                DisplayName = "Best CRM",
-                MailAddresses = $"{dto.Email}"
-            });
         }
     }
 }

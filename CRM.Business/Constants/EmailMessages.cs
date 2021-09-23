@@ -7,11 +7,11 @@
         public const string DeleteLeadSubject = "Delete account on CRM";
         public const string DeleteLeadBody = "you deleted your account, write to us for recovery.";
         public const string AccountAddedSubject = "New account added";
-        public const string AccountAddedBody = "you have opened a new account in currency";
+        public const string AccountAddedBody = "you have opened a new account in currency {0}";
         public const string AccountDeleteSubject = "Account deleted";
-        public const string AccountDeleteBody = "you have deleted your account in currency";
+        public const string AccountDeleteBody = "you have deleted your account in currency {0}";
         public const string AccountRestoreSubject = "Account restored";
-        public const string AccountRestoreBody = "you have restored your account in currency";
+        public const string AccountRestoreBody = "you have restored your account in currency {0}";
         public const string DepositSubject = "Deposit";
         public const string DepositBody = "you put on your account {0}";
         public const string WithdrawSubject = "Deposit";
