@@ -3,13 +3,13 @@ using CRM.API.Extensions;
 using CRM.API.Models;
 using CRM.Business.Models;
 using CRM.Business.Services;
+using CRM.DAL.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
-using CRM.DAL.Enums;
 
 namespace CRM.API.Controllers
 {
@@ -81,11 +81,22 @@ namespace CRM.API.Controllers
             return await _accountService.GetTransactionsByPeriodAndPossiblyAccountIdAsync(dto, leadInfo);
         }
 
+        // api/account/by-accountIds
+        [HttpPost("by-accountIds")]
+        [Description("Get transactions by two months and account ids")]
+        [ProducesResponseType(typeof(List<TransactionOutputModel>), StatusCodes.Status200OK)]
+        public async Task<List<TransactionOutputModel>> GetTransactionsByTwoMonthAndAccountIdsAsync([FromBody] List<int> accounts)
+        {
+            var leadInfo = this.GetLeadInfo();
+            var output = await _accountService.GetTransactionsByAccountIdsForTwoMonthsAsync(accounts, leadInfo);
+            return _mapper.Map<List<TransactionOutputModel>>(output);
+        }
+
         // api/account/lead/{leadId}
-        [HttpGet("lead/{leadId}")]
-        [Description("Get account with transactions")]
-        [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
-        public async Task<ActionResult<AccountBusinessModel>> GetLeadBalanceAsync(int leadId)
+        [HttpGet("lead/{leadId}/balance")]
+        [Description("Get lead balance")]
+        [ProducesResponseType(typeof(decimal), StatusCodes.Status200OK)]
+        public async Task<ActionResult<decimal>> GetLeadBalanceAsync(int leadId)
         {
             var leadInfo = this.GetLeadInfo();
             var output = await _accountService.GetLeadBalanceAsync(leadId, leadInfo);

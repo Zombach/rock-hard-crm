@@ -2,6 +2,8 @@
 using CRM.API.Models;
 using CRM.Business.Models;
 using CRM.DAL.Models;
+using System;
+using System.Globalization;
 
 namespace CRM.API.Configuration
 {
@@ -23,9 +25,13 @@ namespace CRM.API.Configuration
             CreateMap<TimeBasedAcquisitionSearchingInputModes, TimeBasedAcquisitionDto>();
             CreateMap<AccountInputModel, AccountDto>();
             CreateMap<LeadSignInModel, LeadDto>();
+            CreateMap<LeadUpdateInputModel, LeadDto>();
             CreateMap<LeadInputModel, LeadDto>()
                 .ForMember(dest => dest.City, opt => opt.MapFrom(src => new CityDto { Id = src.CityId }));
-            CreateMap<LeadUpdateInputModel, LeadDto>();
+            CreateMap<LeadFiltersInputModel, LeadFiltersDto>()
+                .ForMember(dest => dest.BirthDateFrom, opt => opt.MapFrom(src => DateTime.ParseExact(src.BirthDateFrom, _dateFormat, CultureInfo.InvariantCulture)))
+                .ForMember(dest => dest.BirthDateTo, opt => opt.MapFrom(src => DateTime.ParseExact(src.BirthDateTo, _dateFormat, CultureInfo.InvariantCulture)));
+            CreateMap<LeadIdAndRoleInputModel, LeadDto>();
         }
 
         private void CreateMappingFromDto()
@@ -38,6 +44,11 @@ namespace CRM.API.Configuration
             CreateMap<LeadDto, LeadOutputModel>()
                 .ForMember(dest => dest.RegistrationDate, opt => opt.MapFrom(src => src.RegistrationDate.ToString(_dateFormat)))
                 .ForMember(dest => dest.BirthDate, opt => opt.MapFrom(src => src.BirthDate.ToString(_dateFormat)));
+            CreateMap<LeadDto, LeadByFiltersOutputModel>()
+                .ForMember(dest => dest.BirthDate, opt => opt.MapFrom(src => src.BirthDate.ToString(_dateFormat)));
+            CreateMap<LeadDto, LeadByBatchesOutputModel>()
+                .ForMember(dest => dest.BirthDate, opt => opt.MapFrom(src => src.BirthDate.ToString(_dateFormat)));
+            CreateMap<TransactionBusinessModel, TransactionOutputModel>();
         }
 
         private void CreateMappingToBusiness()

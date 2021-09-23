@@ -1,9 +1,9 @@
-﻿using System;
-using CRM.Business.IdentityInfo;
+﻿using CRM.Business.IdentityInfo;
+using CRM.Business.Models;
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
+using System;
 using System.Threading.Tasks;
-using CRM.Business.Models;
 
 namespace CRM.Business.ValidationHelpers
 {
@@ -16,5 +16,6 @@ namespace CRM.Business.ValidationHelpers
         void CheckForDuplicateTransaction(long transactionId, AccountBusinessModel account);
         void CheckBalance(AccountBusinessModel account, decimal amount);
         DateTime GetTransactionsLastDateAndThrowIfNotFound(AccountBusinessModel account);
+        decimal ConvertToRubble(AccountBusinessModel account, RatesExchangeBusinessModel rates);
     }
 }

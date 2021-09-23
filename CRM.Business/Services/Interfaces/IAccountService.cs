@@ -1,8 +1,8 @@
 ﻿using CRM.Business.IdentityInfo;
 using CRM.Business.Models;
+using CRM.DAL.Enums;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using CRM.DAL.Enums;
 
 namespace CRM.Business.Services
 {
@@ -12,7 +12,8 @@ namespace CRM.Business.Services
         Task DeleteAccountAsync(int accountId, int leadId);
         Task RestoreAccountAsync(int accountId, int leadId);
         Task<AccountBusinessModel> GetAccountWithTransactionsAsync(int accountId, LeadIdentityInfo leadInfo);
-        Task<List<AccountBusinessModel>> GetTransactionsByPeriodAndPossiblyAccountIdAsync(TimeBasedAcquisitionBusinessModel model, LeadIdentityInfo leadInfo);
-        Task<AccountBusinessModel> GetLeadBalanceAsync(int leadId, LeadIdentityInfo leadInfo);
+        Task<List<AccountBusinessModel>> GetTransactionsByPeriodAndPossiblyAccountIdAsync(TimeBasedAcquisitionBusinessModel timeBasedModel, LeadIdentityInfo leadInfo);
+        Task<List<TransactionBusinessModel>> GetTransactionsByAccountIdsForTwoMonthsAsync(List<int> accountIds, LeadIdentityInfo leadInfo);
+        Task<decimal> GetLeadBalanceAsync(int leadId, LeadIdentityInfo leadInfo);
     }
 }

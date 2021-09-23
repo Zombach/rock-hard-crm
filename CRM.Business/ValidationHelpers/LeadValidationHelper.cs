@@ -1,9 +1,9 @@
-﻿using System.Threading.Tasks;
-using CRM.Business.Constants;
+﻿using CRM.Business.Constants;
 using CRM.Business.Exceptions;
 using CRM.Business.IdentityInfo;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
+using System.Threading.Tasks;
 
 namespace CRM.Business.ValidationHelpers
 {
@@ -26,9 +26,8 @@ namespace CRM.Business.ValidationHelpers
 
         public void CheckAccessToLead(int leadId, LeadIdentityInfo leadInfo)
         {
-            if (leadInfo.IsAdmin()) return;
             if (leadInfo.LeadId != leadId)
-                throw new EntityNotFoundException(string.Format(ServiceMessages.LeadHasNoAccessMessageToLead, leadInfo.LeadId));
+                throw new AuthorizationException(string.Format(ServiceMessages.LeadHasNoAccessMessageToLead, leadInfo.LeadId));
         }
     }
 }

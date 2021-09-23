@@ -7,6 +7,7 @@
         public const string AddTransferEndpoint = "/api/Transaction/transfer";
         public const string GetTransactionsByAccountIdEndpoint = "/api/Transaction/by-account/";
         public const string GetTransactionsByPeriodEndpoint = "/api/Transaction/by-period";
+        public const string GetTransactionsByAccountIdsForTwoMonthsEndpoint = "/api/Transaction/by-accountIds";
         public const string GetCurrentCurrenciesRatesEndpoint = "/api/Transaction/currency-rates";
     }
 }

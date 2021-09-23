@@ -1,17 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Operations Version="1.0" xmlns="http://schemas.microsoft.com/sqlserver/dac/Serialization/2012/02">
-  <Operation Name="Rename Refactor" Key="b4412775-df63-4161-8896-5b0af4ca476e" ChangeDateTime="09/22/2021 06:48:57">
-    <Property Name="ElementName" Value="[dbo].[Table1].[KeyForTwoFactorAuth]" />
+  <Operation Name="Rename Refactor" Key="9267bfff-b363-4438-bcd6-e27fde25392e" ChangeDateTime="08/21/2021 09:30:25">
+    <Property Name="ElementName" Value="[dbo].[Lead].[BIrthDate]" />
     <Property Name="ElementType" Value="SqlSimpleColumn" />
-    <Property Name="ParentElementName" Value="[dbo].[Table1]" />
+    <Property Name="ParentElementName" Value="[dbo].[Lead]" />
     <Property Name="ParentElementType" Value="SqlTable" />
-    <Property Name="NewName" Value="Key" />
-  </Operation>
-  <Operation Name="Rename Refactor" Key="cbca022f-e83b-4a98-a021-9121c36025c1" ChangeDateTime="09/22/2021 10:28:47">
-    <Property Name="ElementName" Value="[dbo].[TwoFactorAuth].[Key]" />
-    <Property Name="ElementType" Value="SqlSimpleColumn" />
-    <Property Name="ParentElementName" Value="[dbo].[TwoFactorAuth]" />
-    <Property Name="ParentElementType" Value="SqlTable" />
-    <Property Name="NewName" Value="TwoFactorKey" />
+    <Property Name="NewName" Value="BirthDate" />
   </Operation>
 </Operations>

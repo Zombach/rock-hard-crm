@@ -16,5 +16,8 @@ namespace CRM.Business.Services
         Task<List<LeadDto>> GetAllLeadsAsync();
         Task<int> AddTwoFactorKeyToLeadAsync(int leadId, string key);
         Task<string> GetTwoFactorKeyAsync(int leadId);
+        void ChangeRoleForLeads(List<LeadDto> listLeadDtos);
+        List<LeadDto> GetLeadsByFilters(LeadFiltersDto filter);
+        List<LeadDto> GetAllLeadsByBatches(int cursorId);
     }
 }
