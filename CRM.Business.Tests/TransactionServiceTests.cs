@@ -25,8 +25,10 @@ namespace CRM.Business.Tests
         private Mock<RestClient> _clientMock;
         private Mock<IAccountRepository> _accountRepoMock;
         private Mock<IAccountService> _accountServiceMock;
+        private Mock<IEmailSenderService> _emailSenderServiceMock;
         private TransactionService _sut;
         private IAccountValidationHelper _accountValidationHelper;
+        private ILeadValidationHelper _leadValidationHelper;
         private Mock<ICommissionFeeService> _commissionFeeServiceMock;
         private Mock<ILeadRepository> _leadRepoMock;
         private Mock<IPublishEndpoint> _publishEndPointMock;
@@ -37,10 +39,12 @@ namespace CRM.Business.Tests
             _commissionFeeServiceMock = new Mock<ICommissionFeeService>();
             _accountRepoMock = new Mock<IAccountRepository>();
             _accountServiceMock = new Mock<IAccountService>();
+            _emailSenderServiceMock = new Mock<IEmailSenderService>();
             _publishEndPointMock = new Mock<IPublishEndpoint>();
             _leadRepoMock = new Mock<ILeadRepository>();
             _clientMock = new Mock<RestClient>();
             _accountValidationHelper = new AccountValidationHelper(_accountRepoMock.Object);
+            _leadValidationHelper = new LeadValidationHelper(_leadRepoMock.Object);
 
             var optionsMock = new Mock<IOptions<CommissionSettings>>();
             optionsMock.Setup(x => x.Value).Returns(new CommissionSettings
@@ -59,10 +63,10 @@ namespace CRM.Business.Tests
                 optionsMock.Object,
                 optionSettingsMock.Object,
                 _accountValidationHelper,
+                _leadValidationHelper,
                 _accountServiceMock.Object,
-                _commissionFeeServiceMock.Object,
-                _publishEndPointMock.Object,
-                _leadRepoMock.Object);
+                _emailSenderServiceMock.Object,
+                _commissionFeeServiceMock.Object);
         }
 
         [Test]

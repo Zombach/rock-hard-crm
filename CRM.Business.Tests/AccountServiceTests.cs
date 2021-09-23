@@ -21,7 +21,9 @@ namespace CRM.Business.Tests
 {
     public class AccountServiceTests
     {
+        private Mock<IEmailSenderService> _emailSenderServiceMock;
         private IAccountValidationHelper _accountValidationHelper;
+        private ILeadValidationHelper _leadValidationHelper;
         private Mock<IAccountRepository> _accountRepoMock;
         private Mock<ILeadRepository> _leadRepoMock;
         private Mock<IMapper> _mapperMock;
@@ -33,6 +35,7 @@ namespace CRM.Business.Tests
         [SetUp]
         public void SetUp()
         {
+            _emailSenderServiceMock = new Mock<IEmailSenderService>();
             _requestHekperMock = new Mock<RequestHelper>();
             _leadRepoMock = new Mock<ILeadRepository>();
             _clientMock = new Mock<RestClient>();
@@ -40,14 +43,14 @@ namespace CRM.Business.Tests
             _accountRepoMock = new Mock<IAccountRepository>();
             _publishEndPointMock = new Mock<IPublishEndpoint>();
             _accountValidationHelper = new AccountValidationHelper(_accountRepoMock.Object);
+            _leadValidationHelper = new LeadValidationHelper(_leadRepoMock.Object);
             _sut = new AccountService
             (
+                _emailSenderServiceMock.Object,
                 _accountRepoMock.Object,
-                _leadRepoMock.Object,
                 _mapperMock.Object,
                 _accountValidationHelper,
-                _publishEndPointMock.Object,
-                _clientMock.Object);
+                _leadValidationHelper);
         }
 
         [Test]

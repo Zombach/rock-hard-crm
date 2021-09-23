@@ -36,7 +36,6 @@ namespace CRM.Business.Services
         (
             IEmailSenderService emailSenderService,
             IAccountRepository accountRepository,
-            IOptions<ConnectionSettings> options,
             IMapper mapper,
             IAccountValidationHelper accountValidationHelper,
             ILeadValidationHelper leadValidationHelper
@@ -45,7 +44,7 @@ namespace CRM.Business.Services
             _emailSenderService = emailSenderService;
             _accountRepository = accountRepository;
             _mapper = mapper;
-            _client = restClient;
+            _client = new RestClient();
             _requestHelper = new RequestHelper();
             _accountValidationHelper = accountValidationHelper;
             _leadValidationHelper = leadValidationHelper;
