@@ -83,7 +83,7 @@ namespace CRM.API.Controllers
 
         // api/account/lead/{leadId}
         [HttpGet("lead/{leadId}/balance")]
-        [Description("Get lead balance transactions")]
+        [Description("Get lead balance")]
         [ProducesResponseType(typeof(decimal), StatusCodes.Status200OK)]
         public async Task<ActionResult<decimal>> GetLeadBalanceAsync(int leadId)
         {

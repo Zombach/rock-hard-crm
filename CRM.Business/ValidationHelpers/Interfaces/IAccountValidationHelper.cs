@@ -16,5 +16,6 @@ namespace CRM.Business.ValidationHelpers
         void CheckForDuplicateTransaction(long transactionId, AccountBusinessModel account);
         void CheckBalance(AccountBusinessModel account, decimal amount);
         DateTime GetTransactionsLastDateAndThrowIfNotFound(AccountBusinessModel account);
+        decimal ConvertToRubble(AccountBusinessModel account, RatesExchangeBusinessModel rates);
     }
 }

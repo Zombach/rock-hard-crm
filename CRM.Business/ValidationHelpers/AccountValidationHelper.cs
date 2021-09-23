@@ -80,5 +80,21 @@ namespace CRM.Business.ValidationHelpers
             var transactionLastDate = account.Transactions.Last().Date;
             return transferLastDate > transactionLastDate ? transferLastDate : transactionLastDate;
         }
+
+        public decimal ConvertToRubble(AccountBusinessModel account, RatesExchangeBusinessModel rates)
+        {
+            var senderCurrency = account.Currency.ToString();
+            var recipientCurrency = Currency.RUB.ToString();
+            if (account.Currency == Currency.RUB) return account.Balance;
+
+            var baseCurrency = rates.BaseCurrency;
+            rates.Rates.TryGetValue($"{baseCurrency}{senderCurrency}", out var senderCurrencyValue);
+            rates.Rates.TryGetValue($"{baseCurrency}{recipientCurrency}", out var recipientCurrencyValue);
+            if (senderCurrency == baseCurrency)
+                senderCurrencyValue = 1m;
+            if (recipientCurrency == baseCurrency)
+                recipientCurrencyValue = 1m;
+            return decimal.Round((recipientCurrencyValue / senderCurrencyValue * account.Balance), 3);
+        }
     }
 }
