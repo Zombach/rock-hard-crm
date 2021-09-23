@@ -6,6 +6,7 @@ using CRM.Business.Models;
 using CRM.Business.Requests;
 using CRM.Business.ValidationHelpers;
 using CRM.Core;
+using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
 using MailExchange;
@@ -14,10 +15,10 @@ using Microsoft.Extensions.Options;
 using RestSharp;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
-using CRM.DAL.Enums;
 using static CRM.Business.Constants.TransactionEndpoint;
 
 namespace CRM.Business.Services
@@ -57,7 +58,7 @@ namespace CRM.Business.Services
             var leadDto = await _leadRepository.GetLeadByIdAsync(leadInfo.LeadId);
             _accountValidationHelper.CheckForDuplicateCurrencies(leadDto, currency);
             _accountValidationHelper.CheckForVipAccess(currency, leadInfo);
-            var accountDto = new AccountDto {LeadId = leadInfo.LeadId, Currency = currency};
+            var accountDto = new AccountDto { LeadId = leadInfo.LeadId, Currency = currency };
             var accountId = await _accountRepository.AddAccountAsync(accountDto);
             await EmailSenderAsync(leadDto, EmailMessages.AccountAddedSubject, EmailMessages.AccountAddedBody, accountDto);
             return accountId;
@@ -113,7 +114,7 @@ namespace CRM.Business.Services
                 var accountModel = _mapper.Map<AccountBusinessModel>(dto);
                 models.Add(accountModel);
             }
-            else 
+            else
             {
                 if (!leadInfo.IsAdmin()) throw new AuthorizationException($"{ServiceMessages.NoAdminRights}");
             }
@@ -146,15 +147,21 @@ namespace CRM.Business.Services
             var request = _requestHelper.CreatePostRequest($"{GetTransactionsByAccountIdsForTwoMonthsEndpoint}", accountIds);
 
             var response = _client.Execute<string>(request);
-            if(response.StatusCode != HttpStatusCode.OK) throw new Exception($"{response.ErrorMessage}");
+            if (response.StatusCode != HttpStatusCode.OK) throw new Exception($"{response.ErrorMessage}");
 
             return JsonSerializer.Deserialize<List<TransactionBusinessModel>>(response.Data);
         }
 
-        public async Task<AccountBusinessModel> GetLeadBalanceAsync(int leadId, LeadIdentityInfo leadInfo)
+        public async Task<decimal> GetLeadBalanceAsync(int leadId, LeadIdentityInfo leadInfo)
         {
-            await Task.Run(() => throw new NotImplementedException());
-            return null;
+            var leadDto = await _leadRepository.GetLeadByIdAsync(leadId);
+            var request = _requestHelper.CreateGetRequest(GetCurrentCurrenciesRatesEndpoint);
+            var rates = _client.Execute<RatesExchangeBusinessModel>(request).Data;
+
+            return leadDto.Accounts
+                .Select(account => GetAccountWithTransactionsAsync(account.Id, leadInfo).Result)
+                .Select(accountBusinessModel => _accountValidationHelper.ConvertToRubble(accountBusinessModel, rates))
+                .Sum();
         }
 
         private async Task EmailSenderAsync(LeadDto dto, string subject, string body, AccountDto accountDto)

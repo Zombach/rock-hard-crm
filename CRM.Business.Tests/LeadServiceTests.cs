@@ -1,12 +1,11 @@
 using CRM.Business.Options;
 using CRM.Business.Services;
+using CRM.Business.Tests.Data;
 using CRM.Business.ValidationHelpers;
 using CRM.DAL.Repositories;
 using MassTransit;
 using Moq;
 using NUnit.Framework;
-using MassTransit;
-using CRM.Business.Tests.Data;
 
 namespace CRM.Business.Tests
 {

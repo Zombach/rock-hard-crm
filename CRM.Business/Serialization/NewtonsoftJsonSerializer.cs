@@ -1,7 +1,7 @@
-﻿using System.IO;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using RestSharp.Deserializers;
 using RestSharp.Serializers;
+using System.IO;
 
 namespace CRM.Business.Serialization
 {

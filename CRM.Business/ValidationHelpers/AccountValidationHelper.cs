@@ -1,14 +1,13 @@
-﻿using System;
-using CRM.Business.Constants;
+﻿using CRM.Business.Constants;
 using CRM.Business.Exceptions;
 using CRM.Business.IdentityInfo;
+using CRM.Business.Models;
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
+using System;
 using System.Linq;
-using System.Net.Sockets;
 using System.Threading.Tasks;
-using CRM.Business.Models;
 
 namespace CRM.Business.ValidationHelpers
 {
@@ -80,6 +79,22 @@ namespace CRM.Business.ValidationHelpers
             var transferLastDate = account.Transfers.Last().Date;
             var transactionLastDate = account.Transactions.Last().Date;
             return transferLastDate > transactionLastDate ? transferLastDate : transactionLastDate;
+        }
+
+        public decimal ConvertToRubble(AccountBusinessModel account, RatesExchangeBusinessModel rates)
+        {
+            var senderCurrency = account.Currency.ToString();
+            var recipientCurrency = Currency.RUB.ToString();
+            if (account.Currency == Currency.RUB) return account.Balance;
+
+            var baseCurrency = rates.BaseCurrency;
+            rates.Rates.TryGetValue($"{baseCurrency}{senderCurrency}", out var senderCurrencyValue);
+            rates.Rates.TryGetValue($"{baseCurrency}{recipientCurrency}", out var recipientCurrencyValue);
+            if (senderCurrency == baseCurrency)
+                senderCurrencyValue = 1m;
+            if (recipientCurrency == baseCurrency)
+                recipientCurrencyValue = 1m;
+            return decimal.Round((recipientCurrencyValue / senderCurrencyValue * account.Balance), 3);
         }
     }
 }

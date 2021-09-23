@@ -3,6 +3,7 @@ using CRM.Business.Exceptions;
 using CRM.Business.IdentityInfo;
 using CRM.Business.Models;
 using CRM.Business.Requests;
+using CRM.Business.Serialization;
 using CRM.Business.ValidationHelpers;
 using CRM.Core;
 using CRM.DAL.Enums;
@@ -16,7 +17,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using CRM.Business.Serialization;
 using static CRM.Business.Constants.TransactionEndpoint;
 
 namespace CRM.Business.Services
@@ -102,7 +102,7 @@ namespace CRM.Business.Services
             var result = _client.Execute<long>(request);
             var transactionId = result.Data;
 
-            _accountValidationHelper.CheckForDuplicateTransaction(transactionId,accountModel);
+            _accountValidationHelper.CheckForDuplicateTransaction(transactionId, accountModel);
 
             EmailSender(leadDto, EmailMessages.WithdrawSubject, string.Format(EmailMessages.WithdrawBody, model.Amount));
 
@@ -143,12 +143,13 @@ namespace CRM.Business.Services
                 throw new Exception("tstore slomalsy");
             }
             var transactionId = result.Data.First();
+            _accountValidationHelper.CheckForDuplicateTransaction(transactionId, accountModel);
             EmailSender(leadDto, EmailMessages.TransferSubject, string.Format(EmailMessages.TransferBody, model.Amount, model.Currency, model.RecipientCurrency));
 
             var dto = new CommissionFeeDto
             { LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = leadInfo.Role, CommissionAmount = commission, TransactionType = TransactionType.Transfer };
 
-            dto.Id=await AddCommissionFee(dto);
+            dto.Id = await AddCommissionFee(dto);
 
             return dto;
         }
