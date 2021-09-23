@@ -25,12 +25,12 @@ namespace CRM.Business.Tests
             var authenticationService = new AuthenticationService(_leadRepoMock.Object, new Mock<IAuthOptions>().Object);
             var validationHelper = new LeadValidationHelper(_leadRepoMock.Object);
 
-            _sut = new LeadService(
-                _leadRepoMock.Object,
-                _accountRepoMock.Object,
-                authenticationService,
-                validationHelper,
-                _publishEndpointMock.Object);
+            //_sut = new LeadService(
+            //    _leadRepoMock.Object,
+            //    _accountRepoMock.Object,
+            //    authenticationService,
+            //    validationHelper,
+            //    _publishEndpointMock.Object);
         }
 
         [TestCaseSource(typeof(LeadData), nameof(LeadData.GetLeadFilterData))]

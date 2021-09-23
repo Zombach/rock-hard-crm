@@ -82,7 +82,7 @@ namespace CRM.DAL.Repositories
             );
         }
 
-        public void ChangeRoleForLeads(List<LeadDto> listLeadDtos)
+        public async Task UpdateLeadRoleBulkAsync(List<LeadDto> listLeadDtos)
         {
             var dt = new DataTable();
             dt.Columns.Add("LeadId");
@@ -93,7 +93,7 @@ namespace CRM.DAL.Repositories
                 dt.Rows.Add(lead.Id, (int)lead.Role);
             }
 
-            _connection.Execute(
+           await _connection.ExecuteAsync(
                 _updateListRoleLeadsProcedure,
                     new { tblLeadDto = dt.AsTableValuedParameter(_LeadDtoType) },
                     commandType: CommandType.StoredProcedure

@@ -81,9 +81,9 @@ namespace CRM.Business.Services
             return await _leadRepository.GetLeadByIdAsync(leadId);
         }
 
-        public void ChangeRoleForLeads(List<LeadDto> listLeadDtos)
+        public async Task UpdateLeadRoleBulkAsync(List<LeadDto> leads)
         {
-            _leadRepository.ChangeRoleForLeads(listLeadDtos);
+            await _leadRepository.UpdateLeadRoleBulkAsync(leads);
         }
 
         public async Task DeleteLeadAsync(int leadId)

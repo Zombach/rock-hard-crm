@@ -48,7 +48,8 @@ namespace CRM.Business.Services
             ILeadValidationHelper leadValidationHelper,
             IAccountService accountService,
             IEmailSenderService emailSenderService,
-            ICommissionFeeService commissionFeeService
+            ICommissionFeeService commissionFeeService,
+            ILeadRepository leadRepository
         )
         {
             _client = new RestClient(connectionOptions.Value.TransactionStoreUrl);
@@ -62,6 +63,7 @@ namespace CRM.Business.Services
             _accountService = accountService;
             _emailSenderService = emailSenderService;
             _commissionFeeService = commissionFeeService;
+            _leadRepository = leadRepository;
         }
 
         public async Task<CommissionFeeDto> AddDepositAsync(TransactionBusinessModel model, LeadIdentityInfo leadInfo)
@@ -163,7 +165,7 @@ namespace CRM.Business.Services
         }
 
 
-        public async Task CheckDepositTransactionAndSendEmailAsync(TransactionBusinessModel model, LeadIdentityInfo leadInfo)
+       public async Task CheckDepositTransactionAndSendEmailAsync(TransactionBusinessModel model, LeadIdentityInfo leadInfo)
         {
             var leadDto = await _leadRepository.GetLeadByIdAsync(leadInfo.LeadId);
             var account = await _accountService.GetAccountWithTransactionsAsync(model.AccountId, leadInfo);
