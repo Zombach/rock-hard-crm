@@ -82,9 +82,10 @@ namespace CRM.Business.Services
 
         public async Task<LeadDto> GetLeadByIdAsync(int leadId, LeadIdentityInfo leadInfo)
         {
-            var dto = await _leadValidationHelper.GetLeadByIdAndThrowIfNotFoundAsync(leadId);
-            _leadValidationHelper.CheckAccessToLead(leadId, leadInfo);
-            return dto;
+            if (!leadInfo.IsAdmin())
+                _leadValidationHelper.CheckAccessToLead(leadId, leadInfo);
+
+            return await _leadValidationHelper.GetLeadByIdAndThrowIfNotFoundAsync(leadId);
         }
 
         public List<LeadDto> GetLeadsByFilters(LeadFiltersDto filter)
