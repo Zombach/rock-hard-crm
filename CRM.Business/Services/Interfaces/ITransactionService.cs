@@ -10,5 +10,9 @@ namespace CRM.Business.Services
         Task<CommissionFeeDto> AddDepositAsync(TransactionBusinessModel model, LeadIdentityInfo leadInfo);
         Task<CommissionFeeDto> AddWithdrawAsync(TransactionBusinessModel model, LeadIdentityInfo leadInfo);
         Task<CommissionFeeDto> AddTransferAsync(TransferBusinessModel model, LeadIdentityInfo leadInfo);
+        Task CheckTransferAndSendEmailAsync(TransferBusinessModel model, LeadIdentityInfo leadInfo);
+        Task CheckDepositTransactionAndSendEmailAsync(TransactionBusinessModel model, LeadIdentityInfo leadInfo);
+        Task CheckWithdrawTransactionAndSendEmailAsync(TransactionBusinessModel model, LeadIdentityInfo leadInfo);
+        Task<CommissionFeeDto> ContinueTransaction(LeadIdentityInfo leadInfo);
     }
 }

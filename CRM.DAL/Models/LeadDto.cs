@@ -21,6 +21,6 @@ namespace CRM.DAL.Models
         public bool IsDeleted { get; set; }
         public Role Role { get; set; }
         public CityDto City { get; set; }
-        public List<AccountDto> Accounts { get; set; }
+        public List<AccountDto> Accounts { get; set; }        
     }
 }

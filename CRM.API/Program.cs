@@ -1,3 +1,8 @@
+using AutoMapper;
+using CRM.API.Controllers;
+using CRM.Business.IdentityInfo;
+using CRM.Business.Models;
+using CRM.Business.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
@@ -7,7 +12,9 @@ namespace CRM.API
     {
         public static void Main(string[] args)
         {
+            
             CreateHostBuilder(args).Build().Run();
+
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>

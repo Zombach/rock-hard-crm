@@ -16,12 +16,26 @@ namespace CRM.Business.Services
 
         public async Task EmailSenderAsync(LeadDto dto, string subject, string body)
         {
+            var mailBody = $"{dto.LastName} {dto.FirstName} {body}";
+            await _publishEndpoint.Publish<IMailExchangeModel>(new
+            {
+                Subject = subject,
+                Body = mailBody,
+                DisplayName = "Best CRM",
+                MailAddresses = $"{dto.Email}",
+                IsBodyHtml = false,
+                Base64String = string.Empty
+            });
+        }
+        public async Task EmailSenderAsync(LeadDto dto, string subject, string body, string base64Image)
+        {
             await _publishEndpoint.Publish<IMailExchangeModel>(new
             {
                 Subject = subject,
                 Body = $"{dto.LastName} {dto.FirstName} {body}",
                 DisplayName = "Best CRM",
-                MailAddresses = $"{dto.Email}"
+                MailAddresses = $"{dto.Email}",
+                Base64String = base64Image
             });
         }
     }

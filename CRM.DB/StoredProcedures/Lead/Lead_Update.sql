@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE dbo.Lead_Update
+﻿	CREATE PROCEDURE dbo.Lead_Update
 	@Id				INT,
 	@FirstName		nvarchar(50),
 	@LastName		nvarchar(50),

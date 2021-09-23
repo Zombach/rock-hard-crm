@@ -9,6 +9,8 @@ using SqlKata;
 using SqlKata.Compilers;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Google.Authenticator;
+using MassTransit;
 
 namespace CRM.Business.Services
 {
@@ -19,6 +21,8 @@ namespace CRM.Business.Services
         private readonly IAuthenticationService _authenticationService;
         private readonly IEmailSenderService _emailSenderService;
         private readonly ILeadValidationHelper _leadValidationHelper;
+        //private readonly IPublishEndpoint _publishEndpoint;
+        private readonly ITwoFactorAuthenticatorService _twoFactorAuthService;
 
         public LeadService
         (
@@ -26,7 +30,9 @@ namespace CRM.Business.Services
             ILeadRepository leadRepository,
             IAccountRepository accountRepository,
             IAuthenticationService authenticationService,
-            ILeadValidationHelper leadValidationHelper
+            ILeadValidationHelper leadValidationHelper,
+            //IPublishEndpoint publishEndpoint,
+            ITwoFactorAuthenticatorService twoFactorAuthService
         )
         {
             _emailSenderService = emailSenderService;
@@ -34,18 +40,26 @@ namespace CRM.Business.Services
             _accountRepository = accountRepository;
             _authenticationService = authenticationService;
             _leadValidationHelper = leadValidationHelper;
+            //_publishEndpoint = publishEndpoint;
+            _twoFactorAuthService = twoFactorAuthService;
         }
 
         public async Task<LeadDto> AddLeadAsync(LeadDto dto)
         {
+            var tfaModel = _twoFactorAuthService.GetTwoFactorAuthenticatorKey();
+            SetupCode setupInfo = tfaModel.Tfa.GenerateSetupCode("CRM", dto.Email, tfaModel.Key, false, 6);
+            var qrCodeImageUrl = setupInfo.QrCodeSetupImageUrl;
+
+
             dto.Password = _authenticationService.HashPassword(dto.Password);
             dto.Role = Role.Regular;
             dto.BirthYear = dto.BirthDate.Year;
             dto.BirthMonth = dto.BirthDate.Month;
             dto.BirthDay = dto.BirthDate.Day;
             var leadId = await _leadRepository.AddLeadAsync(dto);
+            var keyId = AddTwoFactorKeyToLeadAsync(leadId, tfaModel.Key);          
             await _accountRepository.AddAccountAsync(new AccountDto { LeadId = leadId, Currency = Currency.RUB });
-            await _emailSenderService.EmailSenderAsync(dto, EmailMessages.RegistrationSubject, EmailMessages.RegistrationBody);
+            await _emailSenderService.EmailSenderAsync(dto, EmailMessages.RegistrationSubject, EmailMessages.RegistrationBody, string.Format(EmailMessages.QRCode, qrCodeImageUrl));
 
             return await _leadRepository.GetLeadByIdAsync(leadId);
         }
@@ -66,9 +80,9 @@ namespace CRM.Business.Services
             return await _leadRepository.GetLeadByIdAsync(leadId);
         }
 
-        public void ChangeRoleForLeads(List<LeadDto> listLeadDtos)
+        public async Task UpdateLeadRoleBulkAsync(List<LeadDto> leads)
         {
-            _leadRepository.ChangeRoleForLeads(listLeadDtos);
+            await _leadRepository.UpdateLeadRoleBulkAsync(leads);
         }
 
         public async Task DeleteLeadAsync(int leadId)
@@ -124,6 +138,16 @@ namespace CRM.Business.Services
         public List<LeadDto> GetAllLeadsByBatches(int lastLeadId)
         {
             return _leadRepository.GetAllLeadsByBatches(lastLeadId);
+        }
+
+        public async Task<int>AddTwoFactorKeyToLeadAsync(int leadId, string key)
+        {
+            return await _leadRepository.AddTwoFactorKeyToLeadAsync(leadId, key);
+        }
+
+        public async Task<string> GetTwoFactorKeyAsync(int leadId)
+        {
+            return await _leadRepository.GetTwoFactorKeyAsync(leadId);
         }
     }
 }

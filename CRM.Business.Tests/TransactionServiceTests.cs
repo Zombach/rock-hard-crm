@@ -31,7 +31,6 @@ namespace CRM.Business.Tests
         private ILeadValidationHelper _leadValidationHelper;
         private Mock<ICommissionFeeService> _commissionFeeServiceMock;
         private Mock<ILeadRepository> _leadRepoMock;
-        private Mock<IPublishEndpoint> _publishEndPointMock;
 
         [SetUp]
         public void SetUp()
@@ -40,7 +39,6 @@ namespace CRM.Business.Tests
             _accountRepoMock = new Mock<IAccountRepository>();
             _accountServiceMock = new Mock<IAccountService>();
             _emailSenderServiceMock = new Mock<IEmailSenderService>();
-            _publishEndPointMock = new Mock<IPublishEndpoint>();
             _leadRepoMock = new Mock<ILeadRepository>();
             _clientMock = new Mock<RestClient>();
             _accountValidationHelper = new AccountValidationHelper(_accountRepoMock.Object);
@@ -66,7 +64,8 @@ namespace CRM.Business.Tests
                 _leadValidationHelper,
                 _accountServiceMock.Object,
                 _emailSenderServiceMock.Object,
-                _commissionFeeServiceMock.Object);
+                _commissionFeeServiceMock.Object,
+                _leadRepoMock.Object);
         }
 
         [Test]

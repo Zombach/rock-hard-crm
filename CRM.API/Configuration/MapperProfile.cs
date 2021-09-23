@@ -25,8 +25,11 @@ namespace CRM.API.Configuration
             CreateMap<TimeBasedAcquisitionSearchingInputModes, TimeBasedAcquisitionDto>();
             CreateMap<AccountInputModel, AccountDto>();
             CreateMap<LeadSignInModel, LeadDto>();
-            CreateMap<LeadUpdateInputModel, LeadDto>();
+            CreateMap<LeadUpdateInputModel, LeadDto>()
+                .ForMember(dest => dest.BirthDate, opt => opt.MapFrom(src => DateTime.ParseExact(src.BirthDate, _dateFormat, CultureInfo.InvariantCulture)))
+                .ForMember(dest => dest.City, opt => opt.MapFrom(src => new CityDto { Id = src.CityId }));
             CreateMap<LeadInputModel, LeadDto>()
+                .ForMember(dest => dest.BirthDate, opt => opt.MapFrom(src => DateTime.ParseExact(src.BirthDate, _dateFormat, CultureInfo.InvariantCulture)))
                 .ForMember(dest => dest.City, opt => opt.MapFrom(src => new CityDto { Id = src.CityId }));
             CreateMap<LeadFiltersInputModel, LeadFiltersDto>()
                 .ForMember(dest => dest.BirthDateFrom, opt => opt.MapFrom(src => DateTime.ParseExact(src.BirthDateFrom, _dateFormat, CultureInfo.InvariantCulture)))

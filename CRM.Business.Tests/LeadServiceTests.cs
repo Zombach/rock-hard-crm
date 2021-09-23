@@ -20,6 +20,7 @@ namespace CRM.Business.Tests
         private Mock<IPublishEndpoint> _publishEndpointMock;
         private IAuthenticationService _authenticationService;
         private Mock<IEmailSenderService> _emailSenderServiceMock;
+        private Mock<ITwoFactorAuthenticatorService> _twoFactorAuthenticatorServiceMock;
         private ILeadValidationHelper _leadValidationHelper;
         private readonly IAuthOptions _options;
         private LeadService _sut;
@@ -30,6 +31,7 @@ namespace CRM.Business.Tests
             _emailSenderServiceMock = new Mock<IEmailSenderService>();
             _leadRepoMock = new Mock<ILeadRepository>();
             _publishEndpointMock = new Mock<IPublishEndpoint>();
+            _twoFactorAuthenticatorServiceMock = new Mock<ITwoFactorAuthenticatorService>();
             _accountRepoMock = new Mock<IAccountRepository>();
             _leadValidationHelper = new LeadValidationHelper(_leadRepoMock.Object);
             _authenticationService = new AuthenticationService(_leadRepoMock.Object, _options);
@@ -38,7 +40,9 @@ namespace CRM.Business.Tests
                 _leadRepoMock.Object,
                 _accountRepoMock.Object,
                 _authenticationService,
-                _leadValidationHelper);
+                _leadValidationHelper,
+            //_publishEndpointMock.Object,
+            _twoFactorAuthenticatorServiceMock.Object);
         }
 
         [Test]
