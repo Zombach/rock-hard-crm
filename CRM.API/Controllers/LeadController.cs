@@ -82,10 +82,10 @@ namespace CRM.API.Controllers
         [HttpPut("change-role-leads")]
         [Description("Change role for leads list")]
         [ProducesResponseType(typeof(LeadOutputModel), StatusCodes.Status200OK)]
-        public ActionResult<int> ChangeRoleForLeads([FromBody] List<LeadIdAndRoleInputModel> model)
+        public async Task<int> ChangeRoleForLeadsBulk([FromBody] List<LeadIdAndRoleInputModel> model)
         {
             var dto = _mapper.Map<List<LeadDto>>(model);
-            _leadService.ChangeRoleForLeads(dto);
+            await _leadService.UpdateLeadRoleBulkAsync(dto);
             return StatusCodes.Status200OK;
         }
 

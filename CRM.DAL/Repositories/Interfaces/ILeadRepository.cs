@@ -14,7 +14,7 @@ namespace CRM.DAL.Repositories
         Task<LeadDto> GetLeadByIdAsync(int id);
         Task<LeadDto> GetLeadByEmailAsync(string email);
         Task<List<LeadDto>> GetAllLeadsAsync();
-        void ChangeRoleForLeads(List<LeadDto> listLeadDtos);
+        Task UpdateLeadRoleBulkAsync(List<LeadDto> listLeadDtos);
         List<LeadDto> GetLeadsByFilters(SqlResult sqlResult);
         List<LeadDto> GetAllLeadsByBatches(int cursorId);
     }

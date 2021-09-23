@@ -80,22 +80,23 @@ namespace CRM.DAL.Repositories
             );
         }
 
-        public void ChangeRoleForLeads(List<LeadDto> listLeadDtos)
+        public async Task UpdateLeadRoleBulkAsync(List<LeadDto> leads)
         {
             var dt = new DataTable();
             dt.Columns.Add("LeadId");
             dt.Columns.Add("Role");
 
-            foreach (var lead in listLeadDtos)
+            foreach (var lead in leads)
             {
                 dt.Rows.Add(lead.Id, (int)lead.Role);
             }
 
-            _connection.Execute(
-                _updateListRoleLeadsProcedure,
+            await _connection
+                .ExecuteAsync(
+                    _updateListRoleLeadsProcedure,
                     new { tblLeadDto = dt.AsTableValuedParameter(_LeadDtoType) },
                     commandType: CommandType.StoredProcedure
-                    );
+                 );
         }
 
         public async Task<int> DeleteLeadAsync(int id)
