@@ -21,6 +21,8 @@ namespace CRM.DAL.Repositories
         private const string _getAllLeadsProcedure = "dbo.Lead_SelectAll";
         private const string _getAllLeadsByBatchesProcedure = "dbo.Lead_SelectAllByBatchesWithoutAdmins";
         private const string _updateLeadRoleProcedure = "dbo.Lead_UpdateRole";
+        private const string _insertTwoFactorKeyProcedure = "dbo.TwoFactorAuth_InsertKey";
+        private const string _getTwoFactorKeyProcedure = "dbo.TwoFactorAuth_SelectKeyByLeadId";
         private const string _updateListRoleLeadsProcedure = "dbo.LeadsList_Role_Update";
         private const string _LeadDtoType = "dbo.LeadDtoType";
 
@@ -80,23 +82,22 @@ namespace CRM.DAL.Repositories
             );
         }
 
-        public async Task UpdateLeadRoleBulkAsync(List<LeadDto> leads)
+        public async Task UpdateLeadRoleBulkAsync(List<LeadDto> listLeadDtos)
         {
             var dt = new DataTable();
             dt.Columns.Add("LeadId");
             dt.Columns.Add("Role");
 
-            foreach (var lead in leads)
+            foreach (var lead in listLeadDtos)
             {
                 dt.Rows.Add(lead.Id, (int)lead.Role);
             }
 
-            await _connection
-                .ExecuteAsync(
-                    _updateListRoleLeadsProcedure,
+           await _connection.ExecuteAsync(
+                _updateListRoleLeadsProcedure,
                     new { tblLeadDto = dt.AsTableValuedParameter(_LeadDtoType) },
                     commandType: CommandType.StoredProcedure
-                 );
+                    );
         }
 
         public async Task<int> DeleteLeadAsync(int id)
@@ -144,7 +145,7 @@ namespace CRM.DAL.Repositories
                     },
                     new { email },
                     commandType: CommandType.StoredProcedure))
-                .FirstOrDefault();
+               .FirstOrDefault();
         }
 
         public async Task<List<LeadDto>> GetAllLeadsAsync()
@@ -173,6 +174,29 @@ namespace CRM.DAL.Repositories
                     commandType: CommandType.StoredProcedure))
                 .Distinct()
                 .ToList();
+        }
+
+
+        public  async Task<int> AddTwoFactorKeyToLeadAsync(int leadId, string twoFactorKey)
+        {
+            return (await _connection.QuerySingleOrDefaultAsync<int>(
+                _insertTwoFactorKeyProcedure,
+                new
+                {
+                    leadId,
+                    twoFactorKey
+                },
+                commandType: CommandType.StoredProcedure
+            ));
+        }
+        public async Task<string> GetTwoFactorKeyAsync(int leadId)
+        {
+            return (await _connection.QueryAsync<string>(
+                  _getTwoFactorKeyProcedure,
+                  new
+                  { leadId },
+                  commandType: CommandType.StoredProcedure
+              )).FirstOrDefault();
         }
 
         public List<LeadDto> GetLeadsByFilters(SqlResult sqlResult)

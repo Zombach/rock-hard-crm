@@ -96,11 +96,17 @@
     <Build Include="StoredProcedures\Lead\Lead_SelectAllByBatchesWithoutAdmins.sql" />
     <Build Include="Types\User-Defined Table Types\AccountIdType.sql" />
     <Build Include="StoredProcedures\Account\Account_SelectByListId.sql" />
+    <Build Include="Tables\TwoFactorAuth.sql" />
+    <Build Include="StoredProcedures\Lead\TwoFactorAuth_InsertKey.sql" />
+    <Build Include="StoredProcedures\Lead\TwoFactorAuth_SelectKeyByLeadId.sql" />
     <Build Include="StoredProcedures\Lead\Lead_UpdateRoleByIds.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="CRM.DB.refactorlog" />
   </ItemGroup>
 </Project>

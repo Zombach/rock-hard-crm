@@ -76,6 +76,7 @@ namespace CRM.API.Extensions
             services.AddScoped<ITransactionService, TransactionService>();
             services.AddScoped<ICommissionFeeService, CommissionFeeService>();
             services.AddScoped<IEmailSenderService, EmailSenderService>();
+            services.AddScoped<ITwoFactorAuthenticatorService, TwoFactorAuthenticatorService>();
 
             return services;
         }
