@@ -145,7 +145,7 @@ namespace CRM.Business.Services
             }
 
             var request = _requestHelper.CreatePostRequest($"{GetTransactionsByAccountIdsForTwoMonthsEndpoint}", accountIds);
-
+            request.Timeout = 30000;
             var response = _client.Execute<string>(request);
             if (response.StatusCode != HttpStatusCode.OK) throw new Exception($"{response.ErrorMessage}");
 
