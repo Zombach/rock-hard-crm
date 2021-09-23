@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[Lead_SelectKeyByLeadId]
+﻿CREATE PROCEDURE [dbo].[TwoFactorAuth_SelectKeyByLeadId]
 	@LeadId int	
 AS
 BEGIN

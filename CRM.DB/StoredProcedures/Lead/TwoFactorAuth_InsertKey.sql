@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[Lead_InsertTwoFactorAuthKey]
+﻿CREATE PROCEDURE [dbo].[TwoFactorAuth_InsertKey]
 	@LeadID int,
 	@TwoFactorKey nvarchar(10)
 AS

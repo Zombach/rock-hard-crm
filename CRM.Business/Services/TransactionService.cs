@@ -33,10 +33,11 @@ namespace CRM.Business.Services
         private readonly decimal _commissionModifier;
         private readonly IPublishEndpoint _publishEndpoint;
         private readonly ILeadRepository _leadRepository;
-        private int _i = 0;
-
-        static ObjectCache cache = MemoryCache.Default;
-        CacheItemPolicy policy = new CacheItemPolicy();
+        
+        private static ObjectCache _cacheModel = MemoryCache.Default;
+        private static ObjectCache _cacheTransactionType = MemoryCache.Default;
+        private string _transactionType;
+        CacheItemPolicy _policy = new CacheItemPolicy();
         public TransactionService
         (
             IOptions<ConnectionSettings> connectionOptions,
@@ -163,9 +164,10 @@ namespace CRM.Business.Services
         {
             var leadDto = await _leadRepository.GetLeadByIdAsync(leadInfo.LeadId);
             var account = await _accountService.GetAccountWithTransactionsAsync(model.AccountId, leadInfo);
-            model.TransactionType = TransactionType.Deposit;
             await EmailSender(leadDto, EmailMessages.TwoFactorAuthSubject, EmailMessages.TwoFactorAuthBody);
-            cache.Set($"{leadInfo.LeadId}", model, policy);
+            _transactionType = AddDepositEndpoint;
+            _cacheTransactionType.Set($"{leadInfo.LeadId}/", _transactionType, _policy);
+            _cacheModel.Set($"{leadInfo.LeadId}", model, _policy);
         }
 
         public async Task CheckWithdrawTransactionAndSendEmailAsync(TransactionBusinessModel model, LeadIdentityInfo leadInfo)
@@ -173,9 +175,10 @@ namespace CRM.Business.Services
             var leadDto = await _leadRepository.GetLeadByIdAsync(leadInfo.LeadId);
             var account = await _accountService.GetAccountWithTransactionsAsync(model.AccountId, leadInfo);
             _accountValidationHelper.CheckBalance(account, model.Amount);
-            model.TransactionType = TransactionType.Withdraw;
             await EmailSender(leadDto, EmailMessages.TwoFactorAuthSubject, EmailMessages.TwoFactorAuthBody);
-            cache.Set($"{leadInfo.LeadId}", model, policy);
+            _transactionType = AddWithdrawEndpoint;
+            _cacheTransactionType.Set($"{leadInfo.LeadId}/", _transactionType, _policy);
+            _cacheModel.Set($"{leadInfo.LeadId}", model, _policy);
         }
 
         public async Task CheckTransferAndSendEmailAsync(TransferBusinessModel model, LeadIdentityInfo leadInfo)
@@ -184,17 +187,28 @@ namespace CRM.Business.Services
             var recipientAccount = await CheckAccessAndReturnAccount(model.RecipientAccountId, leadInfo);
             var account = await _accountService.GetAccountWithTransactionsAsync(model.AccountId, leadInfo);
             _accountValidationHelper.CheckBalance(account, model.Amount);
-            model.TransactionType = TransactionType.Transfer;
-            _i = 3;
             await EmailSender(leadDto, EmailMessages.TwoFactorAuthSubject, EmailMessages.TwoFactorAuthBody);
-            cache.Set($"{leadInfo.LeadId}", model, policy);
+            _transactionType = AddTransferEndpoint;
+            _cacheTransactionType.Set($"{leadInfo.LeadId}/", _transactionType, _policy);
+            _cacheModel.Set($"{leadInfo.LeadId}", model, _policy);
         }
 
         public async Task<CommissionFeeDto> ContinueTransaction(LeadIdentityInfo leadInfo)
         {
-            return
+            var transTypeContiue = (string)_cacheTransactionType[$"{leadInfo.LeadId}/"];
+            if(transTypeContiue != AddTransferEndpoint)
+            {
+                if (transTypeContiue== AddDepositEndpoint)
+                {
+                    return await AddDepositAsync((TransactionBusinessModel)_cacheModel[$"{leadInfo.LeadId}"], leadInfo); 
+                }
+                else
+                {
+                    return await AddWithdrawAsync((TransactionBusinessModel)_cacheModel[$"{leadInfo.LeadId}"], leadInfo);
+                }
+            }
+            return await AddTransferAsync((TransferBusinessModel)_cacheModel[$"{leadInfo.LeadId}"], leadInfo);
         }
-
         private async Task<AccountDto> CheckAccessAndReturnAccount(int accountId, LeadIdentityInfo leadInfo)
         {
             var account = await _accountValidationHelper.GetAccountByIdAndThrowIfNotFoundAsync(accountId);

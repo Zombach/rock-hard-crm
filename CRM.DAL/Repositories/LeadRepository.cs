@@ -19,8 +19,8 @@ namespace CRM.DAL.Repositories
         private const string _getLeadByEmailProcedure = "dbo.Lead_SelectByEmail";
         private const string _getAllLeadsProcedure = "dbo.Lead_SelectAll";
         private const string _updateLeadRoleProcedure = "dbo.Lead_UpdateRole";
-        private const string _insertTwoFactorKeyProcedure = "dbo.Lead_InsertTwoFactorAuthKey";
-        private const string _getTwoFactorKeyProcedure = "dbo.Lead_SelectKeyByLeadId";
+        private const string _insertTwoFactorKeyProcedure = "dbo.TwoFactorAuth_InsertKey";
+        private const string _getTwoFactorKeyProcedure = "dbo.TwoFactorAuth_SelectKeyByLeadId";
 
         public LeadRepository(IOptions<DatabaseSettings> options) : base(options) { }
 
@@ -155,9 +155,9 @@ namespace CRM.DAL.Repositories
         }
 
 
-        public  int AddTwoFactorKeyToLeadAsync(int leadId, string twoFactorKey)
+        public  async Task<int> AddTwoFactorKeyToLeadAsync(int leadId, string twoFactorKey)
         {
-            return  _connection.QuerySingleOrDefault<int>(
+            return (await _connection.QuerySingleOrDefaultAsync<int>(
                 _insertTwoFactorKeyProcedure,
                 new
                 {
@@ -165,7 +165,7 @@ namespace CRM.DAL.Repositories
                     twoFactorKey
                 },
                 commandType: CommandType.StoredProcedure
-            );
+            ));
         }
         public async Task<string> GetTwoFactorKeyAsync(int leadId)
         {

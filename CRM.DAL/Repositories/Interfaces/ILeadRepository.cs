@@ -13,7 +13,7 @@ namespace CRM.DAL.Repositories
         Task<LeadDto> GetLeadByIdAsync(int id);
         Task<LeadDto> GetLeadByEmailAsync(string email);
         Task<List<LeadDto>> GetAllLeadsAsync();
-        int AddTwoFactorKeyToLeadAsync(int leadId, string key);
+        Task<int> AddTwoFactorKeyToLeadAsync(int leadId, string key);
         Task<string> GetTwoFactorKeyAsync(int leadId);
     }
 }
