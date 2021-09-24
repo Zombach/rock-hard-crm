@@ -5,17 +5,14 @@ using CRM.Business.IdentityInfo;
 using CRM.Business.Models;
 using CRM.Business.Requests;
 using CRM.Business.ValidationHelpers;
-using CRM.Core;
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
-using Microsoft.Extensions.Options;
 using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Text.Json;
 using System.Threading.Tasks;
 using static CRM.Business.Constants.TransactionEndpoint;
 
@@ -36,16 +33,16 @@ namespace CRM.Business.Services
         (
             IEmailSenderService emailSenderService,
             IAccountRepository accountRepository,
-            IOptions<ConnectionSettings> options,
             IMapper mapper,
             IAccountValidationHelper accountValidationHelper,
+            RestClient restClient,
             ILeadValidationHelper leadValidationHelper
         )
         {
             _emailSenderService = emailSenderService;
             _accountRepository = accountRepository;
             _mapper = mapper;
-            _client = new RestClient(options.Value.TransactionStoreUrl);
+            _client = restClient;
             _requestHelper = new RequestHelper();
             _accountValidationHelper = accountValidationHelper;
             _leadValidationHelper = leadValidationHelper;
@@ -56,6 +53,7 @@ namespace CRM.Business.Services
             var leadDto = await _leadValidationHelper.GetLeadByIdAndThrowIfNotFoundAsync(leadInfo.LeadId);
             _accountValidationHelper.CheckForDuplicateCurrencies(leadDto, currency);
             _accountValidationHelper.CheckForVipAccess(currency, leadInfo);
+
             var accountDto = new AccountDto { LeadId = leadInfo.LeadId, Currency = currency };
             var accountId = await _accountRepository.AddAccountAsync(accountDto);
             await _emailSenderService.EmailSenderAsync(leadDto, EmailMessages.AccountAddedSubject, string.Format(EmailMessages.AccountRestoreBody, accountDto));
@@ -66,6 +64,7 @@ namespace CRM.Business.Services
         {
             var leadDto = await _leadValidationHelper.GetLeadByIdAndThrowIfNotFoundAsync(leadId);
             var accountDto = await _accountValidationHelper.GetAccountByIdAndThrowIfNotFoundAsync(accountId);
+
             _accountValidationHelper.CheckLeadAccessToAccount(accountDto.LeadId, leadId);
             await _emailSenderService.EmailSenderAsync(leadDto, EmailMessages.AccountDeleteSubject, string.Format(EmailMessages.AccountRestoreBody, accountDto));
             await _accountRepository.DeleteAccountAsync(accountId);
@@ -75,6 +74,7 @@ namespace CRM.Business.Services
         {
             var leadDto = await _leadValidationHelper.GetLeadByIdAndThrowIfNotFoundAsync(leadId);
             var accountDto = await _accountValidationHelper.GetAccountByIdAndThrowIfNotFoundAsync(accountId);
+
             _accountValidationHelper.CheckLeadAccessToAccount(accountDto.LeadId, leadId);
             await _emailSenderService.EmailSenderAsync(leadDto, EmailMessages.AccountRestoreSubject, string.Format(EmailMessages.AccountRestoreBody, accountDto));
             await _accountRepository.RestoreAccountAsync(accountId);
@@ -90,7 +90,6 @@ namespace CRM.Business.Services
 
             var accountModel = _mapper.Map<AccountBusinessModel>(accountDto);
             var request = _requestHelper.CreateGetRequest($"{GetTransactionsByAccountIdEndpoint}{accountId}");
-
             var response = _client.Execute<string>(request);
 
             var accountBusinessModel = await Task.Run(async () => await AddDeserializedTransactionsAsync(accountModel, response.Data, leadId));
@@ -109,6 +108,7 @@ namespace CRM.Business.Services
                 var dto = await _accountValidationHelper.GetAccountByIdAndThrowIfNotFoundAsync((int)timeBasedModel.AccountId);
                 if (!leadInfo.IsAdmin())
                     _accountValidationHelper.CheckLeadAccessToAccount(dto.LeadId, leadInfo.LeadId);
+
                 var accountModel = _mapper.Map<AccountBusinessModel>(dto);
                 models.Add(accountModel);
             }
@@ -147,7 +147,7 @@ namespace CRM.Business.Services
             var response = _client.Execute<string>(request);
             if (response.StatusCode != HttpStatusCode.OK) throw new Exception($"{response.ErrorMessage}");
 
-            return JsonSerializer.Deserialize<List<TransactionBusinessModel>>(response.Data);
+            return System.Text.Json.JsonSerializer.Deserialize<List<TransactionBusinessModel>>(response.Data);
         }
 
         public async Task<decimal> GetLeadBalanceAsync(int leadId, LeadIdentityInfo leadInfo)
@@ -155,6 +155,7 @@ namespace CRM.Business.Services
             var leadDto = await _leadValidationHelper.GetLeadByIdAndThrowIfNotFoundAsync(leadId);
             if (!leadInfo.IsAdmin())
                 _leadValidationHelper.CheckAccessToLead(leadId, leadInfo);
+
             var request = _requestHelper.CreateGetRequest(GetCurrentCurrenciesRatesEndpoint);
             var rates = _client.Execute<RatesExchangeBusinessModel>(request).Data;
 

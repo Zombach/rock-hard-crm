@@ -76,7 +76,6 @@ namespace CRM.Business.Services
                     }
                 }
 
-
                 if (tmpTransaction.Count != 0 && tmpTransfer.Count != 0) continue;
                 if (_transactions[leadId].Count != 0 || _transfers[leadId].Count != 0) continue;
                 for (; i < accounts.Count; i++)
@@ -258,7 +257,8 @@ namespace CRM.Business.Services
         private async Task<List<AccountBusinessModel>> GetAccountsInfoAsync(List<int> ids)
         {
             var dto = await _accountRepository.GetAccountsByListIdAsync(ids);
-            return _mapper.Map<List<AccountBusinessModel>>(dto);
+            var aaa = _mapper.Map<List<AccountBusinessModel>>(dto);
+            return aaa;
         }
 
         private void CleanListModels(string leadId)

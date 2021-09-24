@@ -21,6 +21,7 @@ namespace CRM.API.Controllers
     {
         private readonly IMapper _mapper;
         private readonly ILeadService _leadService;
+        private readonly IAccountService _accountService;
 
         public LeadController(IMapper mapper, ILeadService leadService)
         {
@@ -123,6 +124,29 @@ namespace CRM.API.Controllers
             var listDto = await _leadService.GetAllLeadsAsync();
             var listOutPut = _mapper.Map<List<LeadOutputModel>>(listDto);
             return listOutPut;
+        }
+
+        // api/lead/account
+        [HttpPost("account")]
+        [Description("Create lead account")]
+        [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
+        public ActionResult<int> AddAccount([FromBody] AccountInputModel inputModel)
+        {
+            var leadInfo = this.GetLeadInfo();
+            var dto = _mapper.Map<AccountDto>(inputModel);
+            var accountId = _accountService.AddAccountAsync(dto.Currency, leadInfo);
+            return StatusCode(201, accountId);
+        }
+
+        // api/lead/account/3
+        [HttpDelete("account/{id}")]
+        [Description("Delete lead account by id")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public ActionResult DeleteAccountById(int id)
+        {
+            var leadId = this.GetLeadId();
+            _accountService.DeleteAccountAsync(id, leadId);
+            return NoContent();
         }
     }
 }

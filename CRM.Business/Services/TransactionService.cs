@@ -16,14 +16,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using static CRM.Business.Constants.TransactionEndpoint;
 using System.Runtime.Caching;
-using MassTransit;
 using CRM.DAL.Repositories;
 
 namespace CRM.Business.Services
 {
     public class TransactionService : ITransactionService
     {
-        private readonly RestClient _client;
+        private  RestClient _client;
         private readonly RequestHelper _requestHelper;
         private readonly IAccountValidationHelper _accountValidationHelper;
         private readonly ILeadValidationHelper _leadValidationHelper;
@@ -33,17 +32,17 @@ namespace CRM.Business.Services
         private readonly decimal _commission;
         private readonly decimal _vipCommission;
         private readonly decimal _commissionModifier;
-        private readonly IPublishEndpoint _publishEndpoint;
         private readonly ILeadRepository _leadRepository;
         
         private static ObjectCache _cacheModel = MemoryCache.Default;
         private static ObjectCache _cacheTransactionType = MemoryCache.Default;
         private string _transactionType;
         CacheItemPolicy _policy = new CacheItemPolicy();
+
         public TransactionService
         (
-            IOptions<ConnectionSettings> connectionOptions,
             IOptions<CommissionSettings> commissionOptions,
+            IOptions<ConnectionSettings> connectionOptions,
             IAccountValidationHelper accountValidationHelper,
             ILeadValidationHelper leadValidationHelper,
             IAccountService accountService,
@@ -79,14 +78,17 @@ namespace CRM.Business.Services
 
             var request = _requestHelper.CreatePostRequest(AddDepositEndpoint, model);
             var result = _client.Execute<long>(request);
-            if (!result.IsSuccessful)
-            {
-                throw new Exception($"{result.ErrorMessage} {_client.BaseUrl}");
-            }
             var transactionId = result.Data;
             await _emailSenderService.EmailSenderAsync(leadDto, EmailMessages.DepositSubject, string.Format(EmailMessages.DepositBody, model.Amount));
             var dto = new CommissionFeeDto
-            { LeadId = leadDto.Id, AccountId = model.AccountId, TransactionId = transactionId, Role = leadDto.Role, CommissionAmount = commission, TransactionType = TransactionType.Deposit };
+            {
+                LeadId = leadInfo.LeadId,
+                AccountId = model.AccountId,
+                TransactionId = transactionId,
+                Role = leadInfo.Role,
+                CommissionAmount = commission,
+                TransactionType = TransactionType.Deposit
+            };
 
             dto.Id = await AddCommissionFee(dto);
 
@@ -115,7 +117,14 @@ namespace CRM.Business.Services
             await _emailSenderService.EmailSenderAsync(leadDto, EmailMessages.WithdrawSubject, string.Format(EmailMessages.WithdrawBody, model.Amount));
 
             var dto = new CommissionFeeDto
-            { LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = leadInfo.Role, CommissionAmount = commission, TransactionType = TransactionType.Withdraw };
+            {
+                LeadId = leadInfo.LeadId,
+                AccountId = model.AccountId,
+                TransactionId = transactionId,
+                Role = leadInfo.Role,
+                CommissionAmount = commission,
+                TransactionType = TransactionType.Withdraw
+            };
 
             dto.Id = await AddCommissionFee(dto);
 
@@ -157,7 +166,14 @@ namespace CRM.Business.Services
             await _emailSenderService.EmailSenderAsync(leadDto, EmailMessages.TransferSubject, string.Format(EmailMessages.TransferBody, model.Amount, model.Currency, model.RecipientCurrency));
 
             var dto = new CommissionFeeDto
-            { LeadId = leadInfo.LeadId, AccountId = model.AccountId, TransactionId = transactionId, Role = leadInfo.Role, CommissionAmount = commission, TransactionType = TransactionType.Transfer };
+            {
+                LeadId = leadInfo.LeadId, 
+                AccountId = model.AccountId, 
+                TransactionId = transactionId,
+                Role = leadInfo.Role, 
+                CommissionAmount = commission, 
+                TransactionType = TransactionType.Transfer
+            };
 
             dto.Id = await AddCommissionFee(dto);
 
@@ -214,6 +230,7 @@ namespace CRM.Business.Services
             }
             return await AddTransferAsync((TransferBusinessModel)_cacheModel[$"{leadInfo.LeadId}"], leadInfo);
         }
+
         private async Task<AccountDto> CheckAccessAndReturnAccount(int accountId, LeadIdentityInfo leadInfo)
         {
             var account = await _accountValidationHelper.GetAccountByIdAndThrowIfNotFoundAsync(accountId);
@@ -229,6 +246,11 @@ namespace CRM.Business.Services
         private decimal CalculateCommission(decimal amount, LeadIdentityInfo leadInfo)
         {
             return leadInfo.IsVip() ? amount * _vipCommission : amount * _commission;
+        }
+
+        public void SetClient(RestClient restClient)
+        {
+            _client = restClient;
         }
     }
 }

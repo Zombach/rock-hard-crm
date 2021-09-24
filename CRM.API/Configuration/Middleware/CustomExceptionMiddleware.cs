@@ -12,7 +12,7 @@ namespace CRM.API.Configuration.Middleware
     public class CustomExceptionMiddleware
     {
         private readonly RequestDelegate _next;
-        private const string jsonType = "application/json";
+        private const string _jsonType = "application/json";
         private const string _messageAuthorization = "Authorization exception";
         private const string _messageValidation = "Validation exception";
         private const string _messageEntity = "Entity not found exception";
@@ -83,7 +83,7 @@ namespace CRM.API.Configuration.Middleware
 
             var result = JsonConvert.SerializeObject(error);
 
-            context.Response.ContentType = jsonType;
+            context.Response.ContentType = _jsonType;
             context.Response.StatusCode = (int)code;
 
             return context.Response.WriteAsync(result);

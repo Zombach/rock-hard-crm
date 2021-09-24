@@ -23,6 +23,7 @@ namespace CRM.Business.Services
             _leadRepository = leadRepository;
             _options = authOptions;
         }
+
         public string HashPassword(string pass, byte[] salt = default)
         {
             salt ??= GetSalt();
