@@ -9,8 +9,6 @@ using SqlKata;
 using SqlKata.Compilers;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Google.Authenticator;
-using MassTransit;
 
 namespace CRM.Business.Services
 {

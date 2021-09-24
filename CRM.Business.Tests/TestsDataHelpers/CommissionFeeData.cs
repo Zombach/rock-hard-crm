@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
-using NUnit.Framework;
 
 namespace CRM.Business.Tests.TestsDataHelpers
 {

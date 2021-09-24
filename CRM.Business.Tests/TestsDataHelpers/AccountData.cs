@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Xml.Schema;
 using CRM.Business.Models;
 using CRM.DAL.Enums;
 using CRM.DAL.Models;

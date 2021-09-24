@@ -5,7 +5,6 @@ using CRM.Business.Tests.TestsDataHelpers;
 using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
-using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 

@@ -12,7 +12,6 @@ using CRM.DAL.Enums;
 using CRM.DAL.Models;
 using CRM.DAL.Repositories;
 using FluentAssertions;
-using MassTransit;
 using Microsoft.Extensions.Options;
 using Moq;
 using NUnit.Framework;

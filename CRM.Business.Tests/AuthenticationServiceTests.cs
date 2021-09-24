@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Threading.Tasks;
 using CRM.Business.Options;
 using CRM.Business.Services;
-using CRM.Business.Tests.TestsDataHelpers;
 using CRM.DAL.Repositories;
 using Moq;
 using NUnit.Framework;
