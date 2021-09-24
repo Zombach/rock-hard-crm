@@ -7,6 +7,7 @@ namespace CRM.Business.Services
     public class TwoFactorAuthenticatorService : ITwoFactorAuthenticatorService
     {
         TwoFactorAuthenticator tfa = new TwoFactorAuthenticator();
+
         public TwoFactorAuthenticatorModel GetTwoFactorAuthenticatorKey()
         {
             string key = Guid.NewGuid().ToString().Replace("-", "").Substring(0, 10);

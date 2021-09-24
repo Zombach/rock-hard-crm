@@ -27,20 +27,15 @@ namespace CRM.Business.Tests
         private IAccountValidationHelper _accountValidationHelper;
         private ILeadValidationHelper _leadValidationHelper;
         private Mock<IAccountRepository> _accountRepoMock;
-        private Mock<ILeadService> _leadServiceMock;
         private Mock<ILeadRepository> _leadRepoMock;
         private Mock<IMapper> _mapperMock;
         private Mock<RestClient> _clientMock;
-        private Mock<IPublishEndpoint> _publishEndPointMock;
-        private Mock<RequestHelper> _requestHekperMock;
         private AccountService _sut;
 
         [SetUp]
         public void SetUp()
         {
-            _leadServiceMock = new Mock<ILeadService>();
             _emailSenderServiceMock = new Mock<IEmailSenderService>();
-            _requestHekperMock = new Mock<RequestHelper>();
             _leadRepoMock = new Mock<ILeadRepository>();
             _clientMock = new Mock<RestClient>();
             _mapperMock = new Mock<IMapper>();
@@ -357,7 +352,6 @@ namespace CRM.Business.Tests
         public async Task GetLeadBalanceAsync()
         {
             //Given
-            var excpected = 21321m;
             var leadDto = LeadData.GetLeadDto();
             var leadInfo = LeadIdentityInfoData.GetRegularLeadIdentityInfo();
             var model = new RatesExchangeBusinessModel()
@@ -370,13 +364,14 @@ namespace CRM.Business.Tests
             var accountDto = AccountData.GetUsdAccountDto();
             var expectedList = TransactionData.GetJSONstring();
             var accountBusinessModel = TransactionData.GetAccountBusinessModel();
+            var excpected = accountBusinessModel.Balance + 4; // 4 converted coins on all accounts
 
             _accountRepoMock.Setup(x => x.GetAccountByIdAsync(accountDto.Id)).ReturnsAsync(accountDto);
             _mapperMock.Setup(x => x.Map<AccountBusinessModel>(accountDto)).Returns(accountBusinessModel);
             _clientMock.Setup(x => x.Execute<string>(It.IsAny<IRestRequest>()))
                 .Returns(new RestResponse<string>
                 {
-                    Data = expectedList,
+                    Data = expectedList
                 });
 
 

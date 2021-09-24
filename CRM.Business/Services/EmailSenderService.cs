@@ -27,6 +27,7 @@ namespace CRM.Business.Services
                 Base64String = string.Empty
             });
         }
+
         public async Task EmailSenderAsync(LeadDto dto, string subject, string body, string base64Image)
         {
             await _publishEndpoint.Publish<IMailExchangeModel>(new

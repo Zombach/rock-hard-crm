@@ -73,7 +73,7 @@ namespace CRM.Business.Tests.TestsDataHelpers
                     Currency = Currency.RUB,
                     TransactionType = TransactionType.Deposit,
                     Date = DateTime.Now,
-                    Amount = decimal.One
+                    Amount = 1m
                 },
                 new()
                 {
@@ -82,7 +82,7 @@ namespace CRM.Business.Tests.TestsDataHelpers
                     Currency = Currency.USD,
                     TransactionType = TransactionType.Deposit,
                     Date = DateTime.Now,
-                    Amount = decimal.One
+                    Amount = 1m
                 }
             };
         }
@@ -91,7 +91,7 @@ namespace CRM.Business.Tests.TestsDataHelpers
         {
             return new()
             {
-               
+
             };
         }
 
