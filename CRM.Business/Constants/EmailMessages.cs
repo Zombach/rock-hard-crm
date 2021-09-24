@@ -20,6 +20,6 @@
         public const string TransferSubject = "Deposit";
         public const string TransferBody = "you have transferred {0} {1} from your account to your {2} account";
         public const string TwoFactorAuthSubject = "Confirm the operation by entering your pin";
-        public const string TwoFactorAuthBody = "transaction/two-factor-authentication/{pinCode}";
+        public const string TwoFactorAuthBody = "Please confirm the transaction https://80.78.240.16:5050/api/Transaction/two-factor-authentication/";
     }
 }
