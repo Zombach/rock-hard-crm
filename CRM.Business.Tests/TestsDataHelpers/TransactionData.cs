@@ -16,6 +16,7 @@ namespace CRM.Business.Tests.TestsDataHelpers
             CreatedOn = DateTime.Now.AddYears(-1),
             IsDeleted = false,
             Transactions = GetListTransactionBusinessModel(),
+            Transfers = GetListTransferBusinessModel(),
             Balance = 1000
         };
 
@@ -27,6 +28,7 @@ namespace CRM.Business.Tests.TestsDataHelpers
             CreatedOn = DateTime.Now.AddYears(-1),
             IsDeleted = false,
             Transactions = GetListTransactionBusinessModel(),
+            Transfers = GetListTransferBusinessModel(),
             Balance = 1000
         };
 
@@ -47,6 +49,16 @@ namespace CRM.Business.Tests.TestsDataHelpers
                 RecipientAccountId = 1,
                 RecipientAmount = 12,
                 RecipientCurrency = Currency.RUB
+            };
+        }
+
+        public static TransferBusinessModel GetTransferEurBusinessModel()
+        {
+            return new()
+            {
+                RecipientAccountId = 1,
+                RecipientAmount = 12,
+                RecipientCurrency = Currency.JPY
             };
         }
 
@@ -72,6 +84,14 @@ namespace CRM.Business.Tests.TestsDataHelpers
                     Date = DateTime.Now,
                     Amount = decimal.One
                 }
+            };
+        }
+
+        public static List<TransferBusinessModel> GetListTransferBusinessModel()
+        {
+            return new()
+            {
+               
             };
         }
 

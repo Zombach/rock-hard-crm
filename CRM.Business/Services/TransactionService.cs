@@ -16,14 +16,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using static CRM.Business.Constants.TransactionEndpoint;
 using System.Runtime.Caching;
-using MassTransit;
 using CRM.DAL.Repositories;
 
 namespace CRM.Business.Services
 {
     public class TransactionService : ITransactionService
     {
-        private readonly RestClient _client;
+        private  RestClient _client;
         private readonly RequestHelper _requestHelper;
         private readonly IAccountValidationHelper _accountValidationHelper;
         private readonly ILeadValidationHelper _leadValidationHelper;
@@ -141,9 +140,7 @@ namespace CRM.Business.Services
             _accountValidationHelper.CheckBalance(accountModel, model.Amount);
             model.Date = _accountValidationHelper.GetTransactionsLastDateAndThrowIfNotFound(accountModel);
 
-            if (accountModel.Currency != Currency.RUB &&
-                accountModel.Currency != Currency.USD && 
-                !leadInfo.IsVip())
+            if (accountModel.Currency != Currency.RUB && accountModel.Currency != Currency.USD && !leadInfo.IsVip())
             {
                 commission *= _commissionModifier;
                 if (accountModel.Balance != model.Amount)
@@ -233,6 +230,7 @@ namespace CRM.Business.Services
             }
             return await AddTransferAsync((TransferBusinessModel)_cacheModel[$"{leadInfo.LeadId}"], leadInfo);
         }
+
         private async Task<AccountDto> CheckAccessAndReturnAccount(int accountId, LeadIdentityInfo leadInfo)
         {
             var account = await _accountValidationHelper.GetAccountByIdAndThrowIfNotFoundAsync(accountId);
@@ -248,6 +246,11 @@ namespace CRM.Business.Services
         private decimal CalculateCommission(decimal amount, LeadIdentityInfo leadInfo)
         {
             return leadInfo.IsVip() ? amount * _vipCommission : amount * _commission;
+        }
+
+        public void SetClient(RestClient restClient)
+        {
+            _client = restClient;
         }
     }
 }
