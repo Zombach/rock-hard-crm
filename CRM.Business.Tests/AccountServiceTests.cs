@@ -10,6 +10,8 @@ using CRM.Business.Requests;
 using CRM.Business.Services;
 using CRM.Business.Tests.TestsDataHelpers;
 using CRM.Business.ValidationHelpers;
+using CRM.DAL.Enums;
+using CRM.DAL.Models;
 using CRM.DAL.Repositories;
 using FluentAssertions;
 using MassTransit;
@@ -25,6 +27,7 @@ namespace CRM.Business.Tests
         private IAccountValidationHelper _accountValidationHelper;
         private ILeadValidationHelper _leadValidationHelper;
         private Mock<IAccountRepository> _accountRepoMock;
+        private Mock<ILeadService> _leadServiceMock;
         private Mock<ILeadRepository> _leadRepoMock;
         private Mock<IMapper> _mapperMock;
         private Mock<RestClient> _clientMock;
@@ -35,13 +38,13 @@ namespace CRM.Business.Tests
         [SetUp]
         public void SetUp()
         {
+            _leadServiceMock = new Mock<ILeadService>();
             _emailSenderServiceMock = new Mock<IEmailSenderService>();
             _requestHekperMock = new Mock<RequestHelper>();
             _leadRepoMock = new Mock<ILeadRepository>();
             _clientMock = new Mock<RestClient>();
             _mapperMock = new Mock<IMapper>();
             _accountRepoMock = new Mock<IAccountRepository>();
-            _publishEndPointMock = new Mock<IPublishEndpoint>();
             _accountValidationHelper = new AccountValidationHelper(_accountRepoMock.Object);
             _leadValidationHelper = new LeadValidationHelper(_leadRepoMock.Object);
             _sut = new AccountService
@@ -50,6 +53,7 @@ namespace CRM.Business.Tests
                 _accountRepoMock.Object,
                 _mapperMock.Object,
                 _accountValidationHelper,
+                _clientMock.Object,
                 _leadValidationHelper);
         }
 
@@ -58,11 +62,12 @@ namespace CRM.Business.Tests
         {
             //Given
             var leadInfo = LeadIdentityInfoData.GetRegularLeadIdentityInfo();
-            var expectedAccount = AccountData.GetUsdAccountDto();
+            var expectedAccount = new AccountDto { LeadId = leadInfo.LeadId, Currency = Currency.USD };
             var lead = LeadData.GetLeadDto();
             expectedAccount.LeadId = lead.Id;
+            expectedAccount.Id = 1;
 
-            _accountRepoMock.Setup(x => x.AddAccountAsync(expectedAccount)).ReturnsAsync(expectedAccount.Id);
+            _accountRepoMock.Setup(x => x.AddAccountAsync(It.Is(expectedAccount, new AccountDtoComparer()))).ReturnsAsync(expectedAccount.Id);
             _leadRepoMock.Setup(x => x.GetLeadByIdAsync(leadInfo.LeadId)).ReturnsAsync(lead);
 
             //When
@@ -70,7 +75,7 @@ namespace CRM.Business.Tests
 
             //Then
             Assert.AreEqual(expectedAccount.Id, actualId.Result);
-            _accountRepoMock.Verify(x => x.AddAccountAsync(expectedAccount), Times.Once);
+            _accountRepoMock.Verify(x => x.AddAccountAsync(It.Is(expectedAccount, new AccountDtoComparer())), Times.Once);
             _leadRepoMock.Verify(x => x.GetLeadByIdAsync(leadInfo.LeadId), Times.Once);
         }
 
@@ -193,11 +198,12 @@ namespace CRM.Business.Tests
             _mapperMock.Setup(x => x
                 .Map<AccountBusinessModel>(accountDto))
                 .Returns(accountBusinessModel);
+
             _clientMock.Setup(x => x
                 .Execute<string>(It.IsAny<IRestRequest>()))
                 .Returns(new RestResponse<string>
                 {
-                    Data = expectedList
+                    Data = expectedList,
                 });
 
             //When
@@ -345,6 +351,50 @@ namespace CRM.Business.Tests
 
             //Then
             Assert.AreEqual(excpected, ex.Message);
+        }
+
+        [Test]
+        public async Task GetLeadBalanceAsync()
+        {
+            //Given
+            var excpected = 21321m;
+            var leadDto = LeadData.GetLeadDto();
+            var leadInfo = LeadIdentityInfoData.GetRegularLeadIdentityInfo();
+            var model = new RatesExchangeBusinessModel()
+            {
+                Updated = "account.Id,",
+                BaseCurrency = "RUB",
+                Rates = new Dictionary<string, decimal>()
+            };
+
+            var accountDto = AccountData.GetUsdAccountDto();
+            var expectedList = TransactionData.GetJSONstring();
+            var accountBusinessModel = TransactionData.GetAccountBusinessModel();
+
+            _accountRepoMock.Setup(x => x.GetAccountByIdAsync(accountDto.Id)).ReturnsAsync(accountDto);
+            _mapperMock.Setup(x => x.Map<AccountBusinessModel>(accountDto)).Returns(accountBusinessModel);
+            _clientMock.Setup(x => x.Execute<string>(It.IsAny<IRestRequest>()))
+                .Returns(new RestResponse<string>
+                {
+                    Data = expectedList,
+                });
+
+
+            _leadRepoMock.Setup(x => x.GetLeadByIdAsync(leadInfo.LeadId)).ReturnsAsync(leadDto);
+            _clientMock.Setup(x => x.Execute<RatesExchangeBusinessModel>(It.IsAny<IRestRequest>()))
+                .Returns(new RestResponse<RatesExchangeBusinessModel>
+                {
+                    Data = model,
+                });
+
+            //When
+            var actual = await _sut.GetLeadBalanceAsync(leadInfo.LeadId, leadInfo);
+
+            //Then
+            Assert.AreEqual(excpected, actual);
+            _leadRepoMock.Verify(x => x.GetLeadByIdAsync(leadInfo.LeadId), Times.Once);
+
+
         }
     }
 }

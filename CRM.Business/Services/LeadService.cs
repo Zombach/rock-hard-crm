@@ -21,7 +21,6 @@ namespace CRM.Business.Services
         private readonly IAuthenticationService _authenticationService;
         private readonly IEmailSenderService _emailSenderService;
         private readonly ILeadValidationHelper _leadValidationHelper;
-        //private readonly IPublishEndpoint _publishEndpoint;
         private readonly ITwoFactorAuthenticatorService _twoFactorAuthService;
 
         public LeadService
@@ -31,7 +30,6 @@ namespace CRM.Business.Services
             IAccountRepository accountRepository,
             IAuthenticationService authenticationService,
             ILeadValidationHelper leadValidationHelper,
-            //IPublishEndpoint publishEndpoint,
             ITwoFactorAuthenticatorService twoFactorAuthService
         )
         {
@@ -40,16 +38,14 @@ namespace CRM.Business.Services
             _accountRepository = accountRepository;
             _authenticationService = authenticationService;
             _leadValidationHelper = leadValidationHelper;
-            //_publishEndpoint = publishEndpoint;
             _twoFactorAuthService = twoFactorAuthService;
         }
 
         public async Task<LeadDto> AddLeadAsync(LeadDto dto)
         {
             var tfaModel = _twoFactorAuthService.GetTwoFactorAuthenticatorKey();
-            SetupCode setupInfo = tfaModel.Tfa.GenerateSetupCode("CRM", dto.Email, tfaModel.Key, false, 6);
+            var setupInfo = tfaModel.Tfa.GenerateSetupCode("CRM", dto.Email, tfaModel.Key, false, 6);
             var qrCodeImageUrl = setupInfo.QrCodeSetupImageUrl;
-
 
             dto.Password = _authenticationService.HashPassword(dto.Password);
             dto.Role = Role.Regular;
@@ -57,7 +53,7 @@ namespace CRM.Business.Services
             dto.BirthMonth = dto.BirthDate.Month;
             dto.BirthDay = dto.BirthDate.Day;
             var leadId = await _leadRepository.AddLeadAsync(dto);
-            var keyId = AddTwoFactorKeyToLeadAsync(leadId, tfaModel.Key);          
+            var keyId = await AddTwoFactorKeyToLeadAsync(leadId, tfaModel.Key);          
             await _accountRepository.AddAccountAsync(new AccountDto { LeadId = leadId, Currency = Currency.RUB });
             await _emailSenderService.EmailSenderAsync(dto, EmailMessages.RegistrationSubject, EmailMessages.RegistrationBody, string.Format(EmailMessages.QRCode, qrCodeImageUrl));
 

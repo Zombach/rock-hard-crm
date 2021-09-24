@@ -33,13 +33,13 @@ namespace CRM.Business.Services
         private readonly decimal _commission;
         private readonly decimal _vipCommission;
         private readonly decimal _commissionModifier;
-        //private readonly IPublishEndpoint _publishEndpoint;
         private readonly ILeadRepository _leadRepository;
         
         private static ObjectCache _cacheModel = MemoryCache.Default;
         private static ObjectCache _cacheTransactionType = MemoryCache.Default;
         private string _transactionType;
         CacheItemPolicy _policy = new CacheItemPolicy();
+
         public TransactionService
         (
             IOptions<CommissionSettings> commissionOptions,

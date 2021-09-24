@@ -38,13 +38,14 @@ namespace CRM.Business.Services
             IAccountRepository accountRepository,
             IMapper mapper,
             IAccountValidationHelper accountValidationHelper,
+            RestClient restClient,
             ILeadValidationHelper leadValidationHelper
         )
         {
             _emailSenderService = emailSenderService;
             _accountRepository = accountRepository;
             _mapper = mapper;
-            _client = new RestClient();
+            _client = restClient;
             _requestHelper = new RequestHelper();
             _accountValidationHelper = accountValidationHelper;
             _leadValidationHelper = leadValidationHelper;
@@ -55,6 +56,7 @@ namespace CRM.Business.Services
             var leadDto = await _leadValidationHelper.GetLeadByIdAndThrowIfNotFoundAsync(leadInfo.LeadId);
             _accountValidationHelper.CheckForDuplicateCurrencies(leadDto, currency);
             _accountValidationHelper.CheckForVipAccess(currency, leadInfo);
+
             var accountDto = new AccountDto { LeadId = leadInfo.LeadId, Currency = currency };
             var accountId = await _accountRepository.AddAccountAsync(accountDto);
             await _emailSenderService.EmailSenderAsync(leadDto, EmailMessages.AccountAddedSubject, string.Format(EmailMessages.AccountRestoreBody, accountDto));
@@ -156,6 +158,7 @@ namespace CRM.Business.Services
             var leadDto = await _leadValidationHelper.GetLeadByIdAndThrowIfNotFoundAsync(leadId);
             if (!leadInfo.IsAdmin())
                 _leadValidationHelper.CheckAccessToLead(leadId, leadInfo);
+
             var request = _requestHelper.CreateGetRequest(GetCurrentCurrenciesRatesEndpoint);
             var rates = _client.Execute<RatesExchangeBusinessModel>(request).Data;
 
