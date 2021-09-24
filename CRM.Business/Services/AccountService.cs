@@ -143,8 +143,8 @@ namespace CRM.Business.Services
             }
 
             var request = _requestHelper.CreatePostRequest($"{GetTransactionsByAccountIdsForTwoMonthsEndpoint}", accountIds);
-            request.Timeout = 30000;
-            var response = _client.Execute<string>(request);
+            request.Timeout = 3000000;
+            var response = await _client.ExecuteAsync<string>(request);
             if (response.StatusCode != HttpStatusCode.OK) throw new Exception($"{response.ErrorMessage}");
 
             return System.Text.Json.JsonSerializer.Deserialize<List<TransactionBusinessModel>>(response.Data);

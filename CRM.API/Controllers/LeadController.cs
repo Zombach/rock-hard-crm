@@ -85,7 +85,6 @@ namespace CRM.API.Controllers
         [ProducesResponseType(typeof(LeadOutputModel), StatusCodes.Status200OK)]
         public async Task<int> ChangeRoleForLeadsBulk([FromBody] List<LeadIdAndRoleInputModel> model)
         {
-            var lead = this.GetLeadInfo();            
             var dto = _mapper.Map<List<LeadDto>>(model);
             await _leadService.UpdateLeadRoleBulkAsync(dto);
             return StatusCodes.Status200OK;
