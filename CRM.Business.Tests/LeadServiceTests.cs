@@ -7,7 +7,6 @@ using CRM.Business.Tests.TestsDataHelpers;
 using CRM.Business.ValidationHelpers;
 using CRM.DAL.Enums;
 using CRM.DAL.Repositories;
-using MassTransit;
 using Moq;
 using NUnit.Framework;
 
@@ -17,7 +16,6 @@ namespace CRM.Business.Tests
     {
         private Mock<ILeadRepository> _leadRepoMock;
         private Mock<IAccountRepository> _accountRepoMock;
-        private Mock<IPublishEndpoint> _publishEndpointMock;
         private IAuthenticationService _authenticationService;
         private Mock<IEmailSenderService> _emailSenderServiceMock;
         private Mock<ITwoFactorAuthenticatorService> _twoFactorAuthenticatorServiceMock;
@@ -30,7 +28,6 @@ namespace CRM.Business.Tests
         {
             _emailSenderServiceMock = new Mock<IEmailSenderService>();
             _leadRepoMock = new Mock<ILeadRepository>();
-            _publishEndpointMock = new Mock<IPublishEndpoint>();
             _twoFactorAuthenticatorServiceMock = new Mock<ITwoFactorAuthenticatorService>();
             _accountRepoMock = new Mock<IAccountRepository>();
             _leadValidationHelper = new LeadValidationHelper(_leadRepoMock.Object);
@@ -41,7 +38,6 @@ namespace CRM.Business.Tests
                 _accountRepoMock.Object,
                 _authenticationService,
                 _leadValidationHelper,
-            //_publishEndpointMock.Object,
             _twoFactorAuthenticatorServiceMock.Object);
         }
 
@@ -52,10 +48,14 @@ namespace CRM.Business.Tests
             var lead = LeadData.GetLeadDto();
             var input = LeadData.GetInputLeadDto();
             var account = AccountData.GetRubAccountDto();
+            var twoFactorAuthenticatorModel = TwoFactorAuthenticatorModelData.GeTwoFactorAuthenticatorModel();
             account.LeadId = lead.Id;
+
 
             _leadRepoMock.Setup(x => x.AddLeadAsync(input)).ReturnsAsync(lead.Id);
             _leadRepoMock.Setup(x => x.GetLeadByIdAsync(lead.Id)).ReturnsAsync(lead);
+            _twoFactorAuthenticatorServiceMock.Setup(x => x.GetTwoFactorAuthenticatorKey())
+                .Returns(twoFactorAuthenticatorModel);
 
             //When
             var actualLeadDto = await _sut.AddLeadAsync(input);
@@ -179,15 +179,16 @@ namespace CRM.Business.Tests
             var leadRegular = LeadIdentityInfoData.GetRegularAnotherLeadIdentityInfo();
             var expected = string.Format(ServiceMessages.LeadHasNoAccessMessageToLead, leadRegular.LeadId);
 
+
             _leadRepoMock.Setup(x => x.GetLeadByIdAsync(lead.Id)).ReturnsAsync(lead);
 
             //When
-            var ex = Assert.ThrowsAsync<EntityNotFoundException>(
+            var ex = Assert.ThrowsAsync<AuthorizationException>(
                 () => _sut.GetLeadByIdAsync(lead.Id, leadRegular));
 
             //Then
             Assert.AreEqual(expected, ex.Message);
-            _leadRepoMock.Verify(x => x.GetLeadByIdAsync(lead.Id), Times.Once);
+            _leadRepoMock.Verify(x => x.GetLeadByIdAsync(lead.Id), Times.Never);
         }
 
         [Test]
